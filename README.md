@@ -1,0 +1,2 @@
+#### SPARKINSIGHTS SERVER IN SCALA
+AKA the RedRock server
