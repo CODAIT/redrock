@@ -9,12 +9,19 @@ import scala.concurrent.duration._
 
 object Boot extends App {
 	
+	// Change to a more reasonable default number of partitions (from 200)
+	SparkContVal.sqlContext.setConf("spark.sql.shuffle.partitions", s"${Config.numberOfPartitions}")
+	SparkContVal.sqlContext.setConf("spark.sql.codegen", "true")
+
 	println("Loading location info")
 	val (cities, country) = LoadLocationData.loadLocation()
 	println("Loading profession info")
 	val professions = ProfessionInfo.loadProfessionsTable()
 	println("Registering analysis function")
 	AnalysisFunction.registerAnalysisFunctions(cities, country, professions)
+	//println("Caching words2vec")
+	//LoadWords2Vec.words2vec.cache()
+	//println(s"Words2Vec ===> ${LoadWords2Vec.words2vec.count()}")
 	println("Preparing tweets")
 	PrepareTweets.registerPreparedTweetsTempTable()
 	

@@ -28,13 +28,14 @@ object AnalysisFunction
 		//SparkContVal.sqlContext.udf.register("hasProfessionAssociated", (description: String, isCaseSensitive:String, subProfession: String) => findProfession(description,isCaseSensitive,subProfession))	
 		SparkContVal.sqlContext.udf.register("getLocation", (text: String) => extractLocation(text))
 		SparkContVal.sqlContext.udf.register("getProfession", (description: String) => extractProfession(description))	
+		SparkContVal.sqlContext.udf.register("stringTokenizer", (text: String) => stringTokenizer(text))
 	}
 	
 	//Check if the text contain all the include terms and do not contain any of the exclude term
 	def validateTweetText(text: String, includeTerms: String, excludeTerms: String): Boolean =
 	{
-		val include:Array[String] = includeTerms.toLowerCase().split(",")
-		val exclude:Array[String] = excludeTerms.toLowerCase().split(",")
+		val include:Array[String] = includeTerms.split(",")
+		val exclude:Array[String] = excludeTerms.split(",")
 
 		val textToken = text.toLowerCase().split(" ")
 		
@@ -159,6 +160,11 @@ object AnalysisFunction
 			}
 		}
 	}*/
+
+	def stringTokenizer(text: String): Array[String] = 
+	{
+		text.toLowerCase().trim().split(" ")
+	}
 
 	def extractLocation(text: String): String = 
 	{	

@@ -13,6 +13,4 @@ object SparkContVal
 
     val sc = new SparkContext(conf)
     val sqlContext = new SQLContext(sc)
-    // Change to a more reasonable default number of partitions (from 200)
-	sqlContext.setConf("spark.sql.shuffle.partitions", s"${Config.numberOfPartitions}")
 }

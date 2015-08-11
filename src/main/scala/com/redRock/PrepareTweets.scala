@@ -45,11 +45,13 @@ object PrepareTweets
 						user.id,
 						getSentiment(text) AS sentiment,
 						getLocation(tweets.text) AS location,
-						getProfession(tweets.user.description) AS profession
+						getProfession(tweets.user.description) AS profession,
+						stringTokenizer(text) as tokens
 
 						FROM tweets
-						ORDER BY getTimeStamp(created_at)
+						ORDER BY created_at
 					"""
+					//stringTokenizer(text) as tokens
 					/* Be careful with the profession extraction. As much as professions it finds a match for each tweet,
 	as much as duplication you will have. That means if it matches 2 professions for the same tweets,
 	the left join is gonna to return 2 lines with all the same data but the profession fields
