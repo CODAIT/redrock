@@ -120,53 +120,16 @@ object ExecuteSearchRequest
 		//mapLocation.foreach(println)
 	}
 
-	def formatSentiment(filteredTweets: DataFrame): (Array[JsValue],Boolean) = 
+	def formatSentiment(filteredTweets: DataFrame): (Array[JsArray],Boolean) = 
 	{
-		var jsonSent = Array[JsValue]()
 		try { 
+			//(1,-1,0)
 			// timestamp, sentiment, count
 			val resultSentimentDF = extractSentiment(filteredTweets)
-			var mapSentiment = Map[String, (String,Int,Int,Int)]()
-			
-			// ._1 positive, ._2 negative, ._3 neutral
-			for (sentiment <- resultSentimentDF)
-			{
-				val sent = sentiment.getInt(1)
-				val timestamp = sentiment.getString(0)
-				val count = sentiment.getLong(2).toInt
-				if (!mapSentiment.contains(timestamp))
-				{
-					mapSentiment = mapSentiment + (timestamp -> (timestamp,0,0,0))
-				}
-
-				var sentTuple = mapSentiment(timestamp)
-				if (sent == 1)
-				{
-					sentTuple = sentTuple.copy(_2 = count)
-				}
-				else if (sent == -1)
-				{
-					sentTuple = sentTuple.copy(_3 = count)
-				}
-				else
-				{
-					sentTuple = sentTuple.copy(_4 = count)
-				}
-
-				mapSentiment = mapSentiment + (timestamp -> sentTuple)
-			}
-
-			for (sent <- mapSentiment.values)
-			{
-				jsonSent = jsonSent :+ Json.arr(sent._1, sent._2, sent._3, sent._4)
-			}
-			
-			return (jsonSent,false)
+			return (resultSentimentDF,false)
 		} catch {
-		  case e: Exception => (jsonSent,true)
+		  case e: Exception => (Array[JsArray](),true)
 		}
-
-		//mapSentiment.foreach(println)
 	}
 
 	def extractTopTweets(top: Int, filteredTweets: DataFrame): Array[org.apache.spark.sql.Row] = 
@@ -185,15 +148,17 @@ object ExecuteSearchRequest
 		filteredTweets.filter(s"${ColNames.location} != ''").groupBy(ColNames.timestamp, ColNames.location).count().collect()
 	}
 
-	def extractSentiment(filteredTweets: DataFrame): Array[org.apache.spark.sql.Row]=
+	def extractSentiment(filteredTweets: DataFrame): Array[JsArray]=
 	{
-		filteredTweets.groupBy(ColNames.timestamp, ColNames.sentiment).count().collect()
+		filteredTweets.groupBy(ColNames.timestamp, ColNames.sentiment).count().
+								map(sentiment => (sentiment.getString(0), (sentiment.getInt(1), sentiment.getLong(2).toInt))).
+								groupByKey().
+								sortByKey().
+								map(sentTime => Json.arr(sentTime._1, sentTime._2.find{case (sent:Int,count:Int) => (sent,count) == (1,count)}.getOrElse((0,0))._2, 
+																	sentTime._2.find{case (sent:Int,count:Int) => (sent,count) == (-1,count)}.getOrElse((0,0))._2,
+																	sentTime._2.find{case (sent:Int,count:Int) => (sent,count) == (0,count)}.getOrElse((0,0))._2)).
+								collect()
 	}
-
-	/*def extractProfession(): Array[org.apache.spark.sql.Row] = 
-	{
-		filteredTweets.filter(s"${ColNames.professionGroup} IS NOT NULL").groupBy(ColNames.professionGroup).count().collect()
-	}*/
 
 	def extractProfession(filteredTweets: DataFrame): Map[String, Long]={
 		filteredTweets.filter(s"${ColNames.profession} != ''").
