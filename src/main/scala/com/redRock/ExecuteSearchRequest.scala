@@ -181,6 +181,7 @@ object ExecuteSearchRequest
 
 	def extractLocation(filteredTweets: DataFrame): Array[org.apache.spark.sql.Row] =
 	{
+		import SparkContVal.sqlContext.implicits._
 		filteredTweets.filter(s"${ColNames.location} != ''").groupBy(ColNames.timestamp, ColNames.location).count().collect()
 	}
 
@@ -195,7 +196,7 @@ object ExecuteSearchRequest
 	}*/
 
 	def extractProfession(filteredTweets: DataFrame): Map[String, Long]={
-		filteredTweets.//select(s"${ColNames.profession}").filter(s"${ColNames.profession} != ''").
+		filteredTweets.filter(s"${ColNames.profession} != ''").
 					flatMap(prof => prof.getString(11).split(",")).
 					map(prof => (prof, 1)).countByKey().toMap	
 	}
@@ -205,7 +206,7 @@ object ExecuteSearchRequest
 		val query = s"""
 						SELECT * 
 						FROM realTweets 
-						WHERE validTweet(text, \"$includeTerms\", \"$excludeTerms\")
+						WHERE validTweet(tokens, \"$includeTerms\", \"$excludeTerms\")
 					"""
 					
 		SparkContVal.sqlContext.sql(query)

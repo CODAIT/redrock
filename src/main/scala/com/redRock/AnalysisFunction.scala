@@ -22,7 +22,7 @@ object AnalysisFunction
 		countries_global = countries
 		professions_global = professions
 
-		SparkContVal.sqlContext.udf.register("validTweet", (text: String, includeTerms: String, excludeTerms: String) => validateTweetText(text, includeTerms, excludeTerms))
+		SparkContVal.sqlContext.udf.register("validTweet", (text: scala.collection.mutable.WrappedArray[String], includeTerms: String, excludeTerms: String) => validateTweetText(text, includeTerms, excludeTerms))
 		SparkContVal.sqlContext.udf.register("getSentiment", (text: String) => extractSentimentFromText(text))
 		SparkContVal.sqlContext.udf.register("getTimeStamp", (text: String) => getTimeStamp(text))
 		//SparkContVal.sqlContext.udf.register("hasProfessionAssociated", (description: String, isCaseSensitive:String, subProfession: String) => findProfession(description,isCaseSensitive,subProfession))	
@@ -32,27 +32,21 @@ object AnalysisFunction
 	}
 	
 	//Check if the text contain all the include terms and do not contain any of the exclude term
-	def validateTweetText(text: String, includeTerms: String, excludeTerms: String): Boolean =
+	def validateTweetText(text: scala.collection.mutable.WrappedArray[String], includeTerms: String, excludeTerms: String): Boolean =
 	{
 		val include:Array[String] = includeTerms.split(",")
 		val exclude:Array[String] = excludeTerms.split(",")
 
-		val textToken = text.toLowerCase().split(" ")
-		
-		for (excludeTerm <- exclude)
+		//val textToken = Twokenize.tokenize(text.toLowerCase())//.split(" ")
+
+		if(excludeTerms != "" && exclude.exists(exc => text.contains(exc)))
 		{
-			if (textToken.contains(excludeTerm))
-			{
-				return false
-			}
+			return false
 		}
 
-		for (includeTerm <- include)
+		if(include.exists(inc => !text.contains(inc)))
 		{
-			if (!textToken.contains(includeTerm))
-			{
-				return false
-			}
+			return false
 		}
 
 		return true
@@ -62,19 +56,8 @@ object AnalysisFunction
 	{
 		val textToken = text.toLowerCase().split(" ")
 
-		var positive = 0
-		var negative = 0
-		for (token <- textToken)
-		{
-			if (SentimentInfo.positiveWords.contains(token))
-			{
-				positive = positive + 1
-			}
-			else if (SentimentInfo.negativeWords.contains(token))
-			{
-				negative = negative + 1
-			}
-		}
+		val positive = SentimentInfo.positiveWords.intersect(textToken).length
+		val negative = SentimentInfo.negativeWords.intersect(textToken).length
 
 		//positive
 		if (positive > negative)
@@ -125,76 +108,40 @@ object AnalysisFunction
 		return profStr
 	}
 
-	// When using dataFrame
-	/*def findProfession(description: String, isCaseSensitive:String, subProfession: String): Boolean = 
-	{
-		val desc = if (description == null) "" else description
-		if (isCaseSensitive == "1")
-		{
-			//creates regular expression
-			val str = s"$subProfession"
-			val pattern = str.r
-			val ocurrence = pattern.findFirstIn(desc)
-			if (ocurrence.getOrElse("None") == "None")
-			{
-				return false
-			}
-			else
-			{
-				return true
-			}
-		}
-		else
-		{
-			//creates regular expression
-			val str = s"$subProfession"
-			val pattern = str.r
-			val ocurrence = pattern.findFirstIn(desc)
-			if (ocurrence.getOrElse("None") == "None")
-			{
-				return false
-			}
-			else
-			{
-				return true
-			}
-		}
-	}*/
-
 	def stringTokenizer(text: String): Array[String] = 
 	{
-		text.toLowerCase().trim().split(" ")
+		Twokenize.tokenize(text.toLowerCase().trim()).toArray
 	}
 
 	def extractLocation(text: String): String = 
 	{	
-		val tokens = text.toLowerCase().trim().split(" ")
+		val tokens = text.toLowerCase().trim()
 
-		for (country <- countries_global.keys)
+		val location_country = countries_global.keys.find(x => tokens.contains(x))
+		if(location_country == None)
 		{
-			if(tokens.contains(country))
+			val location_city = cities_global.keys.find(x => tokens.contains(x))
+			if(location_city == None)
 			{
-				return countries_global(country)
+				val location_states = states.find(x => tokens.contains(x))
+				if(location_states == None)
+				{
+					return ""
+				}
+				else
+				{
+					return "United States"	
+				}
+			}
+			else
+			{
+				return cities_global(location_city.get)._1
 			}
 		}
-
-		for (city <- cities_global.keys)
+		else
 		{
-			if(tokens.contains(city))
-			{
-				return cities_global(city)._1
-			}
+			return countries_global(location_country.get)
 		}
-
-		for (state <- states)
-		{
-			if (tokens.contains(state.toLowerCase()))
-			{
-				return "United States"
-			}
-		}
-
-		return ""
 	}
 
 	def getTimeStamp(text: String):String = 

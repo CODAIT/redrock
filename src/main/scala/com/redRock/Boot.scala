@@ -11,7 +11,7 @@ object Boot extends App {
 	
 	// Change to a more reasonable default number of partitions (from 200)
 	SparkContVal.sqlContext.setConf("spark.sql.shuffle.partitions", s"${Config.numberOfPartitions}")
-	SparkContVal.sqlContext.setConf("spark.sql.codegen", "true")
+	SparkContVal.sqlContext.setConf("spark.sql.codegen", "false")
 
 	println("Loading location info")
 	val (cities, country) = LoadLocationData.loadLocation()

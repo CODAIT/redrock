@@ -15,7 +15,7 @@ object LoadLocationData
 				("bv","Bouvet Island"),("br","Brazil"),("io","British Indian Ocean Territory"),("bn","Brunei"),("bg","Bulgaria"),("bf","Burkina Faso"),("bi","Burundi"),
 				("cv","Cape Verde"),("kh","Cambodia"),("cm","Cameroon"),("ca","Canada"),("ky","Cayman Islands"),("cf","Central African Republic"),("td","Chad"),("cl","Chile"),
 				("cn","China"),("cx","Christmas Island"),("cc","Cocos [Keeling] Islands"),("co","Colombia"),("km","Comoros"),("cg","Congo"),("cd","Congo"),("ck","Cook Islands"),
-				("cr","Costa Rica"),("ci","Côte d\"Ivoire"),("hr","Croatia"),("c","Cuba"),("cw","Curaçao"),("cy","Cyprus"),("cz","Czech Republic"),("dk","Denmark"),("dj","Djibouti"),
+				("cr","Costa Rica"),("ci","Côte d'Ivoire"),("hr","Croatia"),("c","Cuba"),("cw","Curaçao"),("cy","Cyprus"),("cz","Czech Republic"),("dk","Denmark"),("dj","Djibouti"),
 				("dm","Dominica"),("do","Dominican Republic"),("ec","Ecuador"),("eg","Egypt"),("sv","El Salvador"),("gq","Equatorial Guinea"),("er","Eritrea"),("ee","Estonia"),("et","Ethiopia"),
 				("fk","Falkland Islands"),("fo","Faroe Islands"),("fj","Fiji"),("fi","Finland"),("fr","France"),("gf","French Guiana"),("pf","French Polynesia"),("tf","French Southern Territories"),
 				("ga","Gabon"),("gm","Gambia"),("ge","Georgia"),("de","Germany"),("gh","Ghana"),("gi","Gibraltar"),("gr","Greece"),("gl","Greenland"),("gd","Grenada"),("gp","Guadeloupe"),("g","Guam"),
@@ -57,7 +57,7 @@ object LoadLocationData
 					{
 						if (fields(4).toDouble > 100000)
 						{
-							val country = countryCode.getOrElse(fields(0), fields(0))
+							val country = countryCode.getOrElse(fields(0), fields(0))//.toLowerCase()
 							val city = (country, fields(1))
 							citiesMap = citiesMap + (fields(1) -> city)
 						}
@@ -78,8 +78,8 @@ object LoadLocationData
 			val auxLine = line.trim()
 			if (auxLine.length != 0)
 			{
-				val fields = auxLine.toLowerCase().split(",")
-				countryMap = countryMap + (fields(0) -> fields(1).trim())
+				val fields = auxLine.split(",")
+				countryMap = countryMap + (fields(0).trim().toLowerCase() -> fields(1).trim())
 			}
 		}
 
