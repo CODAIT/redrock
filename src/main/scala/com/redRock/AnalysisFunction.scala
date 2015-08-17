@@ -9,23 +9,22 @@ import scala.util.matching.Regex
 
 object AnalysisFunction
 {
+	//Location Data
 	val states:Array[String] = Array("AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS",
 								"KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND",
 								"OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY")
-  	var cities_global = Map[String,(String,String)]()
-  	var countries_global =  Map[String,String]()
-  	var professions_global = Array[(String,String,String,String)]()
+  	val cities_global = LoadLocationData.cities
+  	val countries_global =  LoadLocationData.countries
+  	val cities_keys_sorted = LoadLocationData.cities_keys
 
-	def registerAnalysisFunctions(cities: Map[String,(String,String)],  countries: Map[String,String], professions: Array[(String,String,String,String)]) = 
+  	//Profession data
+  	val professions_global = ProfessionInfo.professions
+
+	def registerAnalysisFunctions() = 
 	{
-		cities_global = cities
-		countries_global = countries
-		professions_global = professions
-
 		SparkContVal.sqlContext.udf.register("validTweet", (text: scala.collection.mutable.WrappedArray[String], includeTerms: String, excludeTerms: String) => validateTweetText(text, includeTerms, excludeTerms))
 		SparkContVal.sqlContext.udf.register("getSentiment", (text: String) => extractSentimentFromText(text))
 		SparkContVal.sqlContext.udf.register("getTimeStamp", (text: String) => getTimeStamp(text))
-		//SparkContVal.sqlContext.udf.register("hasProfessionAssociated", (description: String, isCaseSensitive:String, subProfession: String) => findProfession(description,isCaseSensitive,subProfession))	
 		SparkContVal.sqlContext.udf.register("getLocation", (text: String) => extractLocation(text))
 		SparkContVal.sqlContext.udf.register("getProfession", (description: String) => extractProfession(description))	
 		SparkContVal.sqlContext.udf.register("stringTokenizer", (text: String) => stringTokenizer(text))
@@ -62,55 +61,33 @@ object AnalysisFunction
 		//positive
 		if (positive > negative)
 		{
-			1
+			return 1
 		}
 		// negative
 		else if (positive < negative)
 		{
-			-1
+			return -1
 		}
 		//neutral
 		else
 		{
-			0
+			return 0
 		}
 	}
 
-	def extractProfession(description: String): String =
+	def extractProfession(description: String): Array[String] =
 	{
-		var profStr = ""
 		if (description != null && description.trim() != "")
 		{
-			for (profession <- professions_global)
-			{
-				val isCaseSensitive = profession._4
-				if (isCaseSensitive == "1")
-				{
-					val profRE = ("" + profession._1 + "").r
-					val ocurrence = profRE.findFirstIn(description)
-					if (ocurrence.getOrElse("None") != "None")
-					{
-						profStr = profStr + profession._2 + ","
-					}
-				}
-				else
-				{
-					val desc = description.toLowerCase()
-					val profRE = ("" + profession._1.toLowerCase() + "").r
-					val ocurrence = profRE.findFirstIn(desc)
-					if (ocurrence.getOrElse("None") != "None")
-					{
-						profStr = profStr + profession._2 + ","
-					}
-				}
-			}	
+			return professions_global.filter(profession => {profession._1.findFirstIn(description) != None}).
+								map(profession => profession._2).toArray 
 		}
-		return profStr
+		return Array[String]()
 	}
 
 	def stringTokenizer(text: String): Array[String] = 
 	{
-		Twokenize.tokenize(text.toLowerCase().trim()).toArray
+		return Twokenize.tokenize(text.toLowerCase().trim()).toArray
 	}
 
 	def extractLocation(text: String): String = 
@@ -120,10 +97,10 @@ object AnalysisFunction
 		val location_country = countries_global.keys.find(x => tokens.contains(x))
 		if(location_country == None)
 		{
-			val location_city = cities_global.keys.find(x => tokens.contains(x))
+			val location_city = cities_keys_sorted.find(x => tokens.contains(x))
 			if(location_city == None)
 			{
-				val location_states = states.find(x => tokens.contains(x))
+				val location_states = states.find(x => text.contains(x))
 				if(location_states == None)
 				{
 					return ""

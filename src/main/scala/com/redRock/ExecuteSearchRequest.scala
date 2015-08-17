@@ -11,6 +11,10 @@ object ExecuteSearchRequest
 {
 	def runSearchAnalysis(includeTerms: String, excludeTerms: String, top: Int): String = 
 	{	
+		println("Processing search:")
+		println("Include: " + includeTerms)
+		println("Exclude: " + excludeTerms)
+
 		val filteredTweets = selectTweetsAndInformation(includeTerms.toLowerCase(),excludeTerms.toLowerCase())
 		filteredTweets.cache()
 		//Json.stringify(extracTopWordDistance(includeTerms))
@@ -51,7 +55,7 @@ object ExecuteSearchRequest
 		try { 
 		  filteredTweets.dropDuplicates(Array(ColNames.id)).count()
 		} catch {
-		  case e: Exception => -1
+		  case e: Exception => println(e); return  -1
 		}
 	}
 
@@ -80,7 +84,7 @@ object ExecuteSearchRequest
 			return (mapTopTweets,false)
 		}
 		catch {
-		  case e: Exception => (mapTopTweets,true)
+		  case e: Exception => println(e); return (mapTopTweets,true)
 		}
 	}
 
@@ -92,32 +96,20 @@ object ExecuteSearchRequest
 			(Json.obj("profession" -> resultProfessionMap),false)
 		}
 		catch {
-		  case e: Exception => (Json.obj(), true)
+		  case e: Exception => println(e); return (Json.obj(), true)
 		}
 	}
 
-	def formatLocation(filteredTweets: DataFrame): (Array[JsValue],Boolean) =
+	def formatLocation(filteredTweets: DataFrame): (Array[JsArray],Boolean) =
 	{
-		var mapLocation = Array[JsValue]()
 		try { 
 			// timestamp, Country, count
 			val resultLocationDF = extractLocation(filteredTweets)
-			
-			// ._1 timestamp, ._2 country, ._3 count
-			for (location <- resultLocationDF)
-			{
-				val country = location.getString(1)
-				val timestamp = location.getString(0)
-				val count = location.getLong(2).toInt
-				
-				mapLocation = mapLocation :+ Json.arr(timestamp,country,count)
-			}
-			return (mapLocation,false)
+			return (resultLocationDF,false)
 		}
 		catch {
-		  case e: Exception => (mapLocation,true)
+		  case e: Exception => println(e); return (Array[JsArray](),true)
 		}
-		//mapLocation.foreach(println)
 	}
 
 	def formatSentiment(filteredTweets: DataFrame): (Array[JsArray],Boolean) = 
@@ -128,7 +120,7 @@ object ExecuteSearchRequest
 			val resultSentimentDF = extractSentiment(filteredTweets)
 			return (resultSentimentDF,false)
 		} catch {
-		  case e: Exception => (Array[JsArray](),true)
+		  case e: Exception => println(e); return (Array[JsArray](),true)
 		}
 	}
 
@@ -142,10 +134,12 @@ object ExecuteSearchRequest
 						orderBy($"followers_count".desc).limit(top).collect()
 	}
 
-	def extractLocation(filteredTweets: DataFrame): Array[org.apache.spark.sql.Row] =
+	def extractLocation(filteredTweets: DataFrame): Array[JsArray] =
 	{
 		import SparkContVal.sqlContext.implicits._
-		filteredTweets.filter(s"${ColNames.location} != ''").groupBy(ColNames.timestamp, ColNames.location).count().collect()
+		filteredTweets.filter(s"${ColNames.location} != ''").groupBy(ColNames.timestamp, ColNames.location).count().
+															orderBy($"timestamp").
+															map(locaTime => Json.arr(locaTime.getString(0),locaTime.getString(1),locaTime.getLong(2).toInt)).collect()
 	}
 
 	def extractSentiment(filteredTweets: DataFrame): Array[JsArray]=
@@ -160,10 +154,10 @@ object ExecuteSearchRequest
 								collect()
 	}
 
-	def extractProfession(filteredTweets: DataFrame): Map[String, Long]={
-		filteredTweets.filter(s"${ColNames.profession} != ''").
-					flatMap(prof => prof.getString(11).split(",")).
-					map(prof => (prof, 1)).countByKey().toMap	
+	def extractProfession(filteredTweets: DataFrame): Map[String, Long]=
+	{
+		
+		filteredTweets.flatMap(row => row.getSeq[String](11)).map(prof => (prof, 1)).countByKey().toMap	
 	}
 
 	def selectTweetsAndInformation(includeTerms: String, excludeTerms: String): DataFrame = 

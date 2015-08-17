@@ -15,13 +15,8 @@ object PrepareTweets
 		val tweets = SparkContVal.sqlContext.read.json(Config.dataPath)
 		tweets.registerTempTable("tweets")
 
-		val preparedTweets = getTweetsAndNecessaryFields()/*.dropDuplicates(Array(ColNames.text, ColNames.created_at, 
-											ColNames.timestamp, ColNames.retweets,
-											ColNames.favorites, ColNames.description,
-											ColNames.profileImgURL, ColNames.followers,
-											ColNames.name, ColNames.handle,
-											ColNames.id, ColNames.sentiment,
-											ColNames.location, ColNames.lang))*/
+		val preparedTweets = getTweetsAndNecessaryFields()
+
 		preparedTweets.registerTempTable("realTweets")
 		SparkContVal.sqlContext.cacheTable("realTweets")
 		preparedTweets.printSchema()

@@ -29,11 +29,11 @@ class MyServiceActor extends Actor with MyService {
 trait MyService extends HttpService {
 
   val home = pathPrefix("ss")
-  val search = path("search") & parameters('termsInclude, 'termsExclude, 'top.as[Int] ?)
+  val search = path("search") & parameters('termsInclude, 'termsExclude, 'top.as[Int] ?, 'user )
 
   val myRoute =
     home {
-      search { (includeTerms, excludeTerms, top) =>
+      search { (includeTerms, excludeTerms, top, user) =>
         get{
           respondWithMediaType(`application/json`) {
             complete {

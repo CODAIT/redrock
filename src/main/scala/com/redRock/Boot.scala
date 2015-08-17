@@ -13,12 +13,8 @@ object Boot extends App {
 	SparkContVal.sqlContext.setConf("spark.sql.shuffle.partitions", s"${Config.numberOfPartitions}")
 	SparkContVal.sqlContext.setConf("spark.sql.codegen", "false")
 
-	println("Loading location info")
-	val (cities, country) = LoadLocationData.loadLocation()
-	println("Loading profession info")
-	val professions = ProfessionInfo.loadProfessionsTable()
 	println("Registering analysis function")
-	AnalysisFunction.registerAnalysisFunctions(cities, country, professions)
+	AnalysisFunction.registerAnalysisFunctions()
 	//println("Caching words2vec")
 	//LoadWords2Vec.words2vec.cache()
 	//println(s"Words2Vec ===> ${LoadWords2Vec.words2vec.count()}")
