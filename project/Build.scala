@@ -29,7 +29,7 @@ object Resolvers {
 
 object Dependency {
   object Version {
-    val Spark        = "1.4.0"
+    val Spark        = "1.4.1"
     val ScalaTest    = "2.2.4"
     val ScalaCheck   = "1.12.2"
     val akkaV = "2.3.9"
@@ -47,8 +47,8 @@ object Dependency {
   val sprayCan       = "io.spray"          %%  "spray-can"      % Version.sprayV
   val sprayRouting   = "io.spray"          %%  "spray-routing"  % Version.sprayV
   val sprayTestKit   = "io.spray"          %%  "spray-testkit"  % Version.sprayV  % "test"
-  val akkaActor      = "com.typesafe.akka" %%  "akka-actor"     % Version.akkaV
-  val akkaTestKit    = "com.typesafe.akka" %%  "akka-testkit"   % Version.akkaV   % "test"
+  val akkaActor      = "com.typesafe.akka" %%  "akka-actor"     % Version.akkaV   % "provided"
+  //val akkaTestKit    = "com.typesafe.akka" %%  "akka-testkit"   % Version.akkaV   % "test"
   val specs2Core     = "org.specs2"        %%  "specs2-core"    % "2.3.7" % "test"
 
   // For testing.
@@ -69,7 +69,7 @@ object Dependencies {
     Seq(sparkCore,sparkSQL,sparkRepl,
       scalaTest, scalaCheck, playJson, 
       sprayCan, sprayRouting, sprayTestKit,
-      akkaActor,akkaTestKit,specs2Core,
+      akkaActor,specs2Core,
       readCSV)
 }
 

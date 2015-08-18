@@ -4,8 +4,8 @@ import akka.actor.{ActorSystem, Props}
 import akka.io.IO
 import spray.can.Http
 import akka.pattern.ask
-import akka.util.Timeout
 import scala.concurrent.duration._
+import akka.util.Timeout
 
 object Boot extends App {
 	
@@ -22,13 +22,13 @@ object Boot extends App {
 	PrepareTweets.registerPreparedTweetsTempTable()
 	
 	// we need an ActorSystem to host our application in
-	implicit val system = ActorSystem("on-spray-can")
+	implicit val system = ActorSystem("redRock")
 
 	// create and start our service actor
 	val service = system.actorOf(Props[MyServiceActor], Config.restName)
 
 	implicit val timeout = Timeout(500.seconds)
-	// start a new HTTP server on port 8080 with our service actor as the handler
+	
 	IO(Http) ? Http.Bind(service, interface = "localhost", port = Config.port)
 
 	println(s"Application: ${Config.appName} running version: ${Config.appVersion}")

@@ -17,14 +17,14 @@ object ExecuteSearchRequest
 
 		val filteredTweets = selectTweetsAndInformation(includeTerms.toLowerCase(),excludeTerms.toLowerCase())
 		filteredTweets.cache()
-		//Json.stringify(extracTopWordDistance(includeTerms))
+		//extracTopWordDistance(includeTerms)
 		//println(Json.prettyPrint(buildJSONResponse(top)))
 		Json.stringify(buildJSONResponse(top, filteredTweets))
 		//s"{include: ${includeTerms}, exclude: ${excludeTerms} }"
 	}
 
 	def buildJSONResponse(top: Int, filteredTweets: DataFrame):JsValue =
-	{
+	{	
 		val numberOfTweets = filteredTweets.count()
 		val totalUsers = getTotalUsers(filteredTweets)
 		val professions = formatProfession(filteredTweets)
@@ -126,19 +126,18 @@ object ExecuteSearchRequest
 
 	def extractTopTweets(top: Int, filteredTweets: DataFrame): Array[org.apache.spark.sql.Row] = 
 	{
-		import SparkContVal.sqlContext.implicits._
+		//import SparkContVal.sqlContext.implicits._
 		filteredTweets.select(ColNames.created_at, ColNames.text, ColNames.id, 
 							ColNames.name, ColNames.handle, ColNames.followers, 
 							ColNames.profileImgURL, ColNames.lang).
 						filter(s"${ColNames.lang} = '${Config.language}'").
-						orderBy($"followers_count".desc).limit(top).collect()
+						orderBy(desc("followers_count")).limit(top).collect()
 	}
 
 	def extractLocation(filteredTweets: DataFrame): Array[JsArray] =
 	{
-		import SparkContVal.sqlContext.implicits._
 		filteredTweets.filter(s"${ColNames.location} != ''").groupBy(ColNames.timestamp, ColNames.location).count().
-															orderBy($"timestamp").
+															orderBy("timestamp").
 															map(locaTime => Json.arr(locaTime.getString(0),locaTime.getString(1),locaTime.getLong(2).toInt)).collect()
 	}
 
@@ -154,10 +153,12 @@ object ExecuteSearchRequest
 								collect()
 	}
 
-	def extractProfession(filteredTweets: DataFrame): Map[String, Long]=
+	def extractProfession(filteredTweets: DataFrame): Array[JsObject]=
 	{
 		
-		filteredTweets.flatMap(row => row.getSeq[String](11)).map(prof => (prof, 1)).countByKey().toMap	
+		filteredTweets.flatMap(row => row.getSeq[org.apache.spark.sql.Row](11)).map(prof => ((prof.getString(0), prof.getString(1)), 1)).
+						reduceByKey(_ + _).map(prof => (prof._1._1, Json.obj("name" -> prof._1._2, "size" -> prof._2))).
+						groupByKey().map(prof => Json.obj("name" -> prof._1, "children" -> prof._2)).collect()
 	}
 
 	def selectTweetsAndInformation(includeTerms: String, excludeTerms: String): DataFrame = 
@@ -237,4 +238,13 @@ object ExecuteSearchRequest
 																	 sum($"C81") as "C81",sum($"C82") as "C82",sum($"C83") as "C83",sum($"C84") as "C84",sum($"C85") as "C85",sum($"C86") as "C86",sum($"C87") as "C87",sum($"C88") as "C88",sum($"C89") as "C89",sum($"C90") as "C90",
 																	 sum($"C91") as "C91",sum($"C92") as "C92",sum($"C93") as "C93",sum($"C94") as "C94",sum($"C95") as "C95",sum($"C96") as "C96",sum($"C97") as "C97",sum($"C98") as "C98",sum($"C99") as "C99",sum($"C100") as "C100")
 	}
+
+	/*def time[R](block: => R, blockName: String): R = {
+    	val t0 = System.nanoTime()
+    	val result = block    // call-by-name
+    	val t1 = System.nanoTime()
+    	println(blockName + ": " + (t1 - t0) + "ns")
+    	result
+	}*/
+
 }
