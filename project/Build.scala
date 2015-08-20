@@ -46,7 +46,7 @@ object Dependency {
   
   val sprayCan       = "io.spray"          %%  "spray-can"      % Version.sprayV
   val sprayRouting   = "io.spray"          %%  "spray-routing"  % Version.sprayV
-  val sprayTestKit   = "io.spray"          %%  "spray-testkit"  % Version.sprayV  % "test"
+  //val sprayTestKit   = "io.spray"          %%  "spray-testkit"  % Version.sprayV  % "test"
   val akkaActor      = "com.typesafe.akka" %%  "akka-actor"     % Version.akkaV   % "provided"
   //val akkaTestKit    = "com.typesafe.akka" %%  "akka-testkit"   % Version.akkaV   % "test"
   val specs2Core     = "org.specs2"        %%  "specs2-core"    % "2.3.7" % "test"
@@ -68,7 +68,7 @@ object Dependencies {
   val redRockDependecies =
     Seq(sparkCore,sparkSQL,sparkRepl,
       scalaTest, scalaCheck, playJson, 
-      sprayCan, sprayRouting, sprayTestKit,
+      sprayCan, sprayRouting,
       akkaActor,specs2Core,
       readCSV)
 }

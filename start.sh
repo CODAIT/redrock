@@ -13,4 +13,4 @@ sbt compile package assembly
 
 echo "============ running spark =============="
 #run program
-$SPARK_HOME/bin/spark-submit --master local[3] --driver-memory=1g --class com.redRock.Boot target/scala-2.10/redRock.jar
+$SPARK_HOME/bin/spark-submit --master local[*] --driver-memory=8g --executor-memory=8g --class com.redRock.Boot target/scala-2.10/redRock.jar

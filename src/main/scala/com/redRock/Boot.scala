@@ -15,9 +15,6 @@ object Boot extends App {
 
 	println("Registering analysis function")
 	AnalysisFunction.registerAnalysisFunctions()
-	//println("Caching words2vec")
-	//LoadWords2Vec.words2vec.cache()
-	//println(s"Words2Vec ===> ${LoadWords2Vec.words2vec.count()}")
 	println("Preparing tweets")
 	PrepareTweets.registerPreparedTweetsTempTable()
 	
@@ -32,4 +29,5 @@ object Boot extends App {
 	IO(Http) ? Http.Bind(service, interface = "localhost", port = Config.port)
 
 	println(s"Application: ${Config.appName} running version: ${Config.appVersion}")
+
 }
