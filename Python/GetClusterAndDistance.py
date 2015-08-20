@@ -9,24 +9,23 @@ from math import sqrt
 def getWordDistanceAndCluster(include, exclude):
   ## define some functions
   def w2v(word):
-      idx = np.where(str(word)==resources.words)
-      #print 'word=', word, ' idx=', idx, len(idx), type(idx)
-      if len(idx) > 0:
-        return resources.Feat[idx,:][0][0]
-      else:
-        return None
-  
+    idx = resources.Feat[np.where(str(word)==resources.words),:]
+    if idx.size != 0:
+      return idx[0][0]
+    else:
+      return None
+
   def dist(v1,v2):
-      return np.dot(v1,v2)/sqrt(np.dot(v1,v1)*np.dot(v2,v2))
+    return np.dot(v1,v2)/sqrt(np.dot(v1,v1)*np.dot(v2,v2))
   
   def findsynonyms(v,n): #take a vector and an integer
-      distance = np.zeros(Nw)
-      i = 0
-      for vec in resources.Feat:
-          distance[i] = dist(vec,v)
-          i = i + 1
-      indexes = np.argpartition(distance,-(n+1))[-(n+1):]
-      return {'indexes':indexes,'distances':distance[indexes]}
+    distance = np.zeros(Nw)
+    i = 0
+    for vec in resources.Feat:
+        distance[i] = dist(vec,v)
+        i = i + 1
+    indexes = np.argpartition(distance,-(n+1))[-(n+1):]
+    return {'indexes':indexes,'distances':distance[indexes]}
 
   ## read model data
   Nw = resources.words.shape[0]
@@ -39,8 +38,7 @@ def getWordDistanceAndCluster(include, exclude):
       vector = vector + v
   
   if np.dot(vector,vector) <= 0.0000001:
-    print 'empty vector'
-    return []
+    return [[],[]]
 
   D = findsynonyms(vector,20)
   out_word = resources.words[D['indexes']]
@@ -50,10 +48,10 @@ def getWordDistanceAndCluster(include, exclude):
   dist_filt_words = []
   cluster_filt_words = []
   for i in range(out_word.shape[0]):
-      if (out_word[i] in (include+exclude)):
-          1
-      else:
-          dist_filt_words.append([out_word[i], out_dist[i], resources.freqs[resources.freqs[:,0] == out_word[i]][0][1]])
-          cluster_filt_words.append([out_word[i], out_dist[i], resources.clusters[ind[i]], resources.freqs[resources.freqs[:,0] == out_word[i]][0][1]])
+    if (out_word[i] in (include+exclude)):
+        1
+    else:
+        dist_filt_words.append([out_word[i], out_dist[i], resources.freqs[resources.freqs[:,0] == out_word[i]][0][1]])
+        cluster_filt_words.append([out_word[i], out_dist[i], resources.clusters[ind[i]], resources.freqs[resources.freqs[:,0] == out_word[i]][0][1]])
   return [dist_filt_words,cluster_filt_words]
   

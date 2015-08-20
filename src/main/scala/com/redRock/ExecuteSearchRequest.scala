@@ -174,30 +174,30 @@ object ExecuteSearchRequest
 	{
 		try{
 			 
-			val pythonScriptPath = "./Python/main.py";
-			val cmd = Array[String]("python2.7",pythonScriptPath,includeTerms,excludeTerms)
+			val cmd = Array[String](Config.pythonVersion,Config.pythonScriptPath,includeTerms,excludeTerms)
 			
 			// create runtime to execute external command
 			val rt: Runtime = Runtime.getRuntime()
 			val pr: Process = rt.exec(cmd)
 	 
 			// retrieve output from python script
-			val bfr: BufferedReader = new BufferedReader(new InputStreamReader(pr.getInputStream()))
+			val stdOutput: BufferedReader = new BufferedReader(new InputStreamReader(pr.getInputStream()))
 			val stdError: BufferedReader = new BufferedReader(new InputStreamReader(pr.getErrorStream()))
 			val error = stdError.readLine()
 			if(error != null)
 			{
 				println(error)
-				var ite = stdError.readLine()
-				while(ite != null)
+				var error_ite = stdError.readLine()
+				while(error_ite != null)
 				{
-					println(ite)
-					ite = stdError.readLine()
+					println(error_ite)
+					error_ite = stdError.readLine()
 				}
 			}
 			else
 			{
-				return Json.parse(bfr.readLine())
+				// If no errors occurs, Json will be printed in the first line of th program 
+				return Json.parse(stdOutput.readLine())
 			}
 
 		}catch {

@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#Exceptions being handle by scala
 
 import sys, json, time
 import resources, GetClusterAndDistance
