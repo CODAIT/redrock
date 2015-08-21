@@ -7,6 +7,9 @@ import org.apache.spark.sql.{SQLContext, DataFrame}
 import org.apache.spark.sql.functions._
 import play.api.libs.json._
 import java.io._
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{Future,future, Await}
 
 object ExecuteSearchRequest 
 {
@@ -15,10 +18,35 @@ object ExecuteSearchRequest
 		println("Processing search:")
 		println("Include: " + includeTerms)
 		println("Exclude: " + excludeTerms)
-
-		val filteredTweets = selectTweetsAndInformation(includeTerms.toLowerCase(),excludeTerms.toLowerCase())
+		
+		val include = includeTerms.toLowerCase()
+		val exclude = excludeTerms.toLowerCase()
+		
+		val filteredTweets = selectTweetsAndInformation(include,exclude)
 		filteredTweets.cache()
-		Json.stringify(buildJSONResponse(top, filteredTweets,includeTerms,excludeTerms))
+		Json.stringify(executeAsynchronous(top, filteredTweets,include,exclude))
+	}
+	
+	def executeAsynchronous(top: Int, filteredTweets: DataFrame, includeTerms: String, excludeTerms: String): JsValue =
+	{
+		val cluster_distance: Future[JsValue] = future { extracTopWordDistance(includeTerms, excludeTerms) }
+		val spark_dataAnalisys: Future[JsValue] = future { buildJSONResponse(top, filteredTweets,includeTerms,excludeTerms) }
+		
+		val tasks: Seq[Future[JsValue]] = Seq(spark_dataAnalisys, cluster_distance)
+		val aggregated: Future[Seq[JsValue]] = Future.sequence(tasks)
+		
+		try 
+		{
+			val jsonResults: Seq[JsValue] = Await.result(aggregated, 500.seconds)
+			return (jsonResults(0).as[JsObject] ++ jsonResults(1).as[JsObject])
+		}
+		catch {
+		  case e: Exception => println(e); return Json.obj("status" -> JsNull, "totaltweets" -> JsNull, 
+		  													"totalfilteredtweets" -> JsNull, "totalusers" -> JsNull,
+															"profession" -> JsNull, "location" -> JsNull, 
+															"sentiment" -> JsNull, "toptweets" -> JsNull,
+															"cluster" -> JsNull, "distance" -> JsNull)
+		}
 	}
 
 	def buildJSONResponse(top: Int, filteredTweets: DataFrame, includeTerms: String, excludeTerms: String):JsValue =
@@ -29,7 +57,6 @@ object ExecuteSearchRequest
 		val location = formatLocation(filteredTweets)
 		val sentiment = formatSentiment(filteredTweets)
 		val topTweets = formatTopTweets(top, filteredTweets)
-		val clusterDistance = extracTopWordDistance(includeTerms, excludeTerms)
 
 		val json: JsValue = Json.obj(
   			"status" -> 0,
@@ -39,8 +66,7 @@ object ExecuteSearchRequest
 			"profession" -> (if (professions._2) JsNull else professions._1),
 			"location" ->  Json.obj("fields" -> Json.arr("Date", "Country", "Count"), "location" -> (if (location._2) JsNull else location._1)),
 			"sentiment" -> Json.obj("fields" -> Json.arr("Date", "Positive", "Negative", "Neutral"), "sentiment" -> (if (sentiment._2) JsNull else sentiment._1)),
-			"toptweets" -> Json.obj("tweets" -> (if (topTweets._2) JsNull else topTweets._1)),
-			"cluster-distance" -> clusterDistance
+			"toptweets" -> Json.obj("tweets" -> (if (topTweets._2) JsNull else topTweets._1))
 		)
 
 		filteredTweets.unpersist()
