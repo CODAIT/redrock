@@ -19,10 +19,7 @@ object ExecuteSearchRequest
 		println("Include: " + includeTerms)
 		println("Exclude: " + excludeTerms)
 		
-		val include = includeTerms.toLowerCase()
-		val exclude = excludeTerms.toLowerCase()
-		
-		Json.stringify(executeAsynchronous(top,include,exclude))
+		Json.stringify(executeAsynchronous(top,includeTerms.toLowerCase(),excludeTerms.toLowerCase()))
 	}
 	
 	def executeAsynchronous(top: Int, includeTerms: String, excludeTerms: String): JsValue =
