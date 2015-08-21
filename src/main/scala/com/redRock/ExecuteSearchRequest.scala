@@ -22,15 +22,13 @@ object ExecuteSearchRequest
 		val include = includeTerms.toLowerCase()
 		val exclude = excludeTerms.toLowerCase()
 		
-		val filteredTweets = selectTweetsAndInformation(include,exclude)
-		filteredTweets.cache()
-		Json.stringify(executeAsynchronous(top, filteredTweets,include,exclude))
+		Json.stringify(executeAsynchronous(top,include,exclude))
 	}
 	
-	def executeAsynchronous(top: Int, filteredTweets: DataFrame, includeTerms: String, excludeTerms: String): JsValue =
+	def executeAsynchronous(top: Int, includeTerms: String, excludeTerms: String): JsValue =
 	{
-		val cluster_distance: Future[JsValue] = future { extracTopWordDistance(includeTerms, excludeTerms) }
-		val spark_dataAnalisys: Future[JsValue] = future { buildJSONResponse(top, filteredTweets,includeTerms,excludeTerms) }
+		val cluster_distance: Future[JsValue] = future { extracTopWordDistance(includeTerms,excludeTerms) }
+		val spark_dataAnalisys: Future[JsValue] = future { extractSparkAnalysis(top,includeTerms,excludeTerms) }
 		
 		val tasks: Seq[Future[JsValue]] = Seq(spark_dataAnalisys, cluster_distance)
 		val aggregated: Future[Seq[JsValue]] = Future.sequence(tasks)
@@ -41,16 +39,20 @@ object ExecuteSearchRequest
 			return (jsonResults(0).as[JsObject] ++ jsonResults(1).as[JsObject])
 		}
 		catch {
-		  case e: Exception => println(e); return Json.obj("status" -> JsNull, "totaltweets" -> JsNull, 
-		  													"totalfilteredtweets" -> JsNull, "totalusers" -> JsNull,
-															"profession" -> JsNull, "location" -> JsNull, 
-															"sentiment" -> JsNull, "toptweets" -> JsNull,
-															"cluster" -> JsNull, "distance" -> JsNull)
+		  case e: Exception => println(e); return emptyJSONResponse()
 		}
 	}
 
-	def buildJSONResponse(top: Int, filteredTweets: DataFrame, includeTerms: String, excludeTerms: String):JsValue =
+	def extractSparkAnalysis(top: Int, includeTerms: String, excludeTerms: String):JsValue =
 	{	
+		//Filtering tweets
+		val (filteredTweets,exception) = filterTweets(includeTerms, excludeTerms)
+		if (exception)
+		{	
+			return emptyJSONResponse()
+		}
+		filteredTweets.cache()
+
 		val numberOfTweets = filteredTweets.count()
 		val totalUsers = getTotalUsers(filteredTweets)
 		val professions = formatProfession(filteredTweets)
@@ -72,6 +74,15 @@ object ExecuteSearchRequest
 		filteredTweets.unpersist()
 
 		return json
+	}
+
+	def emptyJSONResponse(): JsValue = 
+	{
+		Json.obj("status" -> JsNull, "totaltweets" -> JsNull, 
+		  		"totalfilteredtweets" -> JsNull, "totalusers" -> JsNull,
+				"profession" -> JsNull, "location" -> JsNull, 
+				"sentiment" -> JsNull, "toptweets" -> JsNull,
+				"cluster" -> JsNull, "distance" -> JsNull)
 	}
 
 	def getTotalUsers(filteredTweets: DataFrame): Long =
@@ -183,6 +194,15 @@ object ExecuteSearchRequest
 		filteredTweets.flatMap(row => row.getSeq[org.apache.spark.sql.Row](11)).map(prof => ((prof.getString(0), prof.getString(1)), 1)).
 						reduceByKey(_ + _).map(prof => (prof._1._1, Json.obj("name" -> prof._1._2, "value" -> prof._2))).
 						groupByKey().map(prof => Json.obj("name" -> prof._1, "children" -> prof._2)).collect()
+	}
+
+	def filterTweets(includeTerms: String, excludeTerms: String): (DataFrame, Boolean) =
+	{
+		try { 
+		 	return (selectTweetsAndInformation(includeTerms, excludeTerms), false)
+		} catch {
+		  case e: Exception => println(e); return (null, true)
+		}
 	}
 
 	def selectTweetsAndInformation(includeTerms: String, excludeTerms: String): DataFrame = 

@@ -11,7 +11,7 @@ object Config
 	//Change it when running on cluster
 	val numberOfPartitions = 10
 	val port = 16666
-	val dataPath = "/Users/barbaragomes/Projects/RedRockInsights-Demo/Data/decahose_BG20150501001246-0700_EN20150501002746-0700-1-400k"
+	val dataPath = "/Users/barbaragomes/Projects/RedRockInsights-Demo/Data/decahose_BG20150501001246-0700_EN20150501002746-0700-1-40"
 
 	//Cluster and Distance execution
 	val pythonScriptPath = "./Python/main.py"
