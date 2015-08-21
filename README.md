@@ -1,5 +1,8 @@
-Run start.sh
+- Download Scala 2.10.4
+- Install sbt and sbt assembly
+=============================================================
 
+Run start.sh
 ===========================================================
 run project with spark
 
@@ -14,4 +17,4 @@ run with java
 java -jar target/scala-2.10/redRock.jar com.redRock.Boot
 =============================================================
 
-Sample URL = http://localhost:16666/ss/search?termsInclude=RT&termsExclude=&top=100
+Sample URL = http://localhost:16666/ss/search?user=Barbara&termsInclude=RT&termsExclude=&top=100
