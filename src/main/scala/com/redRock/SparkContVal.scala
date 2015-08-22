@@ -10,6 +10,7 @@ object SparkContVal
 	val conf = new SparkConf()
     //conf.setMaster(masterNode)
     conf.setAppName(Config.appName)
+    conf.set("spark.scheduler.mode", "FAIR")
 
     val sc = new SparkContext(conf)
     val sqlContext = new SQLContext(sc)

@@ -24,14 +24,15 @@ object ExecuteSearchRequest
 	
 	def executeAsynchronous(top: Int, includeTerms: String, excludeTerms: String): JsValue =
 	{
-		val cluster_distance: Future[JsValue] = future { extracTopWordDistance(includeTerms,excludeTerms) }
-		val spark_dataAnalisys: Future[JsValue] = future { extractSparkAnalysis(top,includeTerms,excludeTerms) }
-		
-		val tasks: Seq[Future[JsValue]] = Seq(spark_dataAnalisys, cluster_distance)
-		val aggregated: Future[Seq[JsValue]] = Future.sequence(tasks)
-		
 		try 
 		{
+			val cluster_distance: Future[JsValue] = future { extracTopWordDistance(includeTerms,excludeTerms) }
+			val spark_dataAnalisys: Future[JsValue] = future { extractSparkAnalysis(top,includeTerms,excludeTerms) }
+		
+			val tasks: Seq[Future[JsValue]] = Seq(spark_dataAnalisys, cluster_distance)
+			val aggregated: Future[Seq[JsValue]] = Future.sequence(tasks)
+		
+
 			val jsonResults: Seq[JsValue] = Await.result(aggregated, 500.seconds)
 			return (jsonResults(0).as[JsObject] ++ jsonResults(1).as[JsObject])
 		}
@@ -50,27 +51,43 @@ object ExecuteSearchRequest
 		}
 		filteredTweets.cache()
 
-		val numberOfTweets = filteredTweets.count()
-		val totalUsers = getTotalUsers(filteredTweets)
-		val professions = formatProfession(filteredTweets)
-		val location = formatLocation(filteredTweets)
-		val sentiment = formatSentiment(filteredTweets)
-		val topTweets = formatTopTweets(top, filteredTweets)
-
-		val json: JsValue = Json.obj(
-  			"status" -> 0,
-			"totaltweets" -> PrepareTweets.totalTweets,
-			"totalfilteredtweets" -> numberOfTweets,
-			"totalusers" -> (if (totalUsers == -1) JsNull else totalUsers),
-			"profession" -> (if (professions._2) JsNull else professions._1),
-			"location" ->  Json.obj("fields" -> Json.arr("Date", "Country", "Count"), "location" -> (if (location._2) JsNull else location._1)),
-			"sentiment" -> Json.obj("fields" -> Json.arr("Date", "Positive", "Negative", "Neutral"), "sentiment" -> (if (sentiment._2) JsNull else sentiment._1)),
-			"toptweets" -> Json.obj("tweets" -> (if (topTweets._2) JsNull else topTweets._1))
-		)
+		val json = executeSparkAsynchronous(filteredTweets, top)
 
 		filteredTweets.unpersist()
 
 		return json
+	}
+
+	def executeSparkAsynchronous(filteredTweets: DataFrame, top: Int): JsValue =
+	{
+		try {
+			val totalUsers: Future[JsObject] = future { getTotalUsers(filteredTweets) }
+			val numberOfTweets: Future[JsObject] = future { getTotalFilteredTweets(filteredTweets) }
+			val professions: Future[JsObject] = future { formatProfession(filteredTweets) }
+			val location: Future[JsObject] = future { formatLocation(filteredTweets) }
+			val sentiment: Future[JsObject] = future { formatSentiment(filteredTweets) }
+			val topTweets: Future[JsObject] = future { formatTopTweets(top, filteredTweets) }
+
+			val tasks: Seq[Future[JsObject]] = Seq(numberOfTweets, totalUsers, professions, location, sentiment, topTweets)
+			val aggregated: Future[Seq[JsObject]] = Future.sequence(tasks)
+
+			val initialJson: JsObject = Json.obj("status" -> 0, "totaltweets" -> PrepareTweets.totalTweets) 
+			
+			val jsonResults: Seq[JsObject] = Await.result(aggregated, 500.seconds)
+			return (initialJson ++ jsonResults(0) ++ jsonResults(1) ++ jsonResults(2) ++ jsonResults(3) ++ jsonResults(4) ++ jsonResults(5))
+			
+			/*val totalUsers = getTotalUsers(filteredTweets) 
+			val numberOfTweets = getTotalFilteredTweets(filteredTweets) 
+			val professions = formatProfession(filteredTweets) 
+			val location = formatLocation(filteredTweets) 
+			val sentiment = formatSentiment(filteredTweets) 
+			val topTweets = formatTopTweets(top, filteredTweets)
+			val initialJson: JsObject = Json.obj("status" -> 0, "totaltweets" -> PrepareTweets.totalTweets) 
+			return (initialJson ++ totalUsers ++ numberOfTweets ++ professions ++ location ++ sentiment ++ topTweets)*/
+		}
+		catch {
+		  case e: Exception => println(e); return emptyJSONResponse()
+		}
 	}
 
 	def emptyJSONResponse(): JsValue = 
@@ -82,88 +99,99 @@ object ExecuteSearchRequest
 				"cluster" -> JsNull, "distance" -> JsNull)
 	}
 
-	def getTotalUsers(filteredTweets: DataFrame): Long =
-	{
+	def getTotalFilteredTweets(filteredTweets: DataFrame): JsObject = 
+	{	
 		try { 
-		  filteredTweets.dropDuplicates(Array(ColNames.id)).count()
+		  return Json.obj( "totalfilteredtweets" -> filteredTweets.count())
 		} catch {
-		  case e: Exception => println(e); return  -1
+		  case e: Exception => println(e); 
 		}
+
+		return Json.obj( "totalfilteredtweets" -> JsNull)
 	}
 
-	def formatTopTweets(top: Int, filteredTweets: DataFrame): (Array[JsObject],Boolean) =
+	def getTotalUsers(filteredTweets: DataFrame): JsObject =
 	{
-		var mapTopTweets = Array[JsObject]()
+		try { 
+		  
+		  val total = filteredTweets.dropDuplicates(Array(ColNames.id)).count()
+		  return Json.obj("totalusers" -> total)
+		
+		} catch {
+		  case e: Exception => println(e); 
+		}
+
+		return Json.obj("totalusers" -> JsNull)
+	}
+
+	def formatTopTweets(top: Int, filteredTweets: DataFrame): JsObject =
+	{
 		try { 
 			//0 - created_at, 1 - text, 2 - id
 			//3 - name, 4 - handle, 5 - followers, 6 - profileURL
 			val topTweetsByLang = extractTopTweets(top, filteredTweets)
-			for (tweet <- topTweetsByLang)
-			{
-				mapTopTweets = mapTopTweets :+ Json.obj(
-					"created_at"	-> 	tweet.getString(0),
-					"text" 			-> 	tweet.getString(1),
-					"user" 			-> 	Json.obj(
-											"name" -> tweet.getString(3),
-											"screen_name" -> tweet.getString(4),
-											"followers_count" -> tweet.getLong(5),
-											"id" -> tweet.getLong(2),
-											"profile_image_url" -> tweet.getString(6)
-										)
-				)
-			}
-
-			return (mapTopTweets,false)
+			return Json.obj("toptweets" -> Json.obj("tweets" -> topTweetsByLang))
 		}
 		catch {
-		  case e: Exception => println(e); return (mapTopTweets,true)
+		  case e: Exception => println("" + e.getStackTrace.mkString("\n")); 
 		}
+
+		return Json.obj("toptweets" -> Json.obj("tweets" -> JsNull))
 	}
 
-	def formatProfession(filteredTweets: DataFrame): (JsObject,Boolean) =
+	def formatProfession(filteredTweets: DataFrame): JsObject =
 	{
 		try
 		{
 			val resultProfessionMap = extractProfession(filteredTweets)
-			(Json.obj("profession" -> resultProfessionMap),false)
+			return Json.obj("profession" -> Json.obj("profession" -> resultProfessionMap))
 		}
 		catch {
-		  case e: Exception => println(e); return (Json.obj(), true)
+		  case e: Exception => println(e); 
 		}
+
+		return Json.obj("profession" -> JsNull)
 	}
 
-	def formatLocation(filteredTweets: DataFrame): (Array[JsArray],Boolean) =
+	def formatLocation(filteredTweets: DataFrame): JsObject =
 	{
 		try { 
 			// timestamp, Country, count
 			val resultLocationDF = extractLocation(filteredTweets)
-			return (resultLocationDF,false)
+			return Json.obj("location" ->  Json.obj("fields" -> Json.arr("Date", "Country", "Count"), "location" -> resultLocationDF))
 		}
 		catch {
-		  case e: Exception => println(e); return (Array[JsArray](),true)
+		  case e: Exception => println(e);
 		}
+
+		return Json.obj("location" ->  Json.obj("fields" -> Json.arr("Date", "Country", "Count"), "location" -> JsNull))
 	}
 
-	def formatSentiment(filteredTweets: DataFrame): (Array[JsArray],Boolean) = 
+	def formatSentiment(filteredTweets: DataFrame): JsObject = 
 	{
 		try { 
 			//(1,-1,0)
 			// timestamp, sentiment, count
 			val resultSentimentDF = extractSentiment(filteredTweets)
-			return (resultSentimentDF,false)
+			return Json.obj("sentiment" -> Json.obj("fields" -> Json.arr("Date", "Positive", "Negative", "Neutral"), "sentiment" -> resultSentimentDF))
 		} catch {
-		  case e: Exception => println(e); return (Array[JsArray](),true)
+		  case e: Exception => println(e);
 		}
+
+		return Json.obj("sentiment" -> Json.obj("fields" -> Json.arr("Date", "Positive", "Negative", "Neutral"), "sentiment" -> JsNull))
 	}
 
-	def extractTopTweets(top: Int, filteredTweets: DataFrame): Array[org.apache.spark.sql.Row] = 
+	def extractTopTweets(top: Int, filteredTweets: DataFrame): Array[JsObject] = 
 	{
-		//import SparkContVal.sqlContext.implicits._
 		filteredTweets.select(ColNames.created_at, ColNames.text, ColNames.id, 
 							ColNames.name, ColNames.handle, ColNames.followers, 
 							ColNames.profileImgURL, ColNames.lang).
 						filter(s"${ColNames.lang} = '${Config.language}'").
-						orderBy(desc("followers_count")).limit(top).collect()
+						orderBy(desc("followers_count")).limit(top).
+						map(tweet => Json.obj("created_at" -> tweet.getString(0), "text" -> tweet.getString(1),
+											"user" -> Json.obj("name" -> tweet.getString(3),"screen_name" -> tweet.getString(4),
+																"followers_count" -> tweet.getLong(5),"id" -> tweet.getLong(2),
+																"profile_image_url" -> tweet.getString(6)))).collect()
 	}
 
 	def extractLocation(filteredTweets: DataFrame): Array[JsArray] =
