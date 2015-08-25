@@ -28,7 +28,7 @@ object ExecuteSearchRequest
 		{
 			val cluster_distance: Future[JsValue] = future { extracTopWordDistance(includeTerms,excludeTerms) }
 			val spark_dataAnalisys: Future[JsValue] = future { extractSparkAnalysis(top,includeTerms,excludeTerms) }
-		
+			
 			val tasks: Seq[Future[JsValue]] = Seq(spark_dataAnalisys, cluster_distance)
 			val aggregated: Future[Seq[JsValue]] = Future.sequence(tasks)
 		

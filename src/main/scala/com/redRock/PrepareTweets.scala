@@ -46,14 +46,6 @@ object PrepareTweets
 						FROM tweets
 						ORDER BY created_at
 					"""
-					//stringTokenizer(text) as tokens
-					/* Be careful with the profession extraction. As much as professions it finds a match for each tweet,
-	as much as duplication you will have. That means if it matches 2 professions for the same tweets,
-	the left join is gonna to return 2 lines with all the same data but the profession fields
-	*/
-					//professionsDF.Profession
-					//professionsDF.Keyword
-					//LEFT JOIN professionsDF ON hasProfessionAssociated(user.description, professionsDF.CaseSensitive, professionsDF.Keyword)
 		SparkContVal.sqlContext.sql(query)
 	}	
 }
