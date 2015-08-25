@@ -37,7 +37,10 @@ object ExecuteSearchRequest
 			return (jsonResults(0).as[JsObject] ++ jsonResults(1).as[JsObject])
 		}
 		catch {
-		  case e: Exception => println(e); return emptyJSONResponse()
+			case e: Exception => {
+		  		printException(e, "Execute Python and Spark Asynchronous"); 
+		  		return emptyJSONResponse()
+		  	}
 		}
 	}
 
@@ -86,17 +89,12 @@ object ExecuteSearchRequest
 			return (initialJson ++ totalUsers ++ numberOfTweets ++ professions ++ location ++ sentiment ++ topTweets)
 		}
 		catch {
-		  case e: Exception => println(e); return emptyJSONResponse()
+		  case e: Exception => 
+		  {
+		  	printException(e, "Execute Spark Asynchronous")
+		  	return emptyJSONResponseSpark()
+		  }
 		}
-	}
-
-	def emptyJSONResponse(): JsValue = 
-	{
-		Json.obj("status" -> JsNull, "totaltweets" -> JsNull, 
-		  		"totalfilteredtweets" -> JsNull, "totalusers" -> JsNull,
-				"profession" -> JsNull, "location" -> JsNull, 
-				"sentiment" -> JsNull, "toptweets" -> JsNull,
-				"cluster" -> JsNull, "distance" -> JsNull)
 	}
 
 	def getTotalFilteredTweets(filteredTweets: DataFrame): JsObject = 
@@ -104,7 +102,7 @@ object ExecuteSearchRequest
 		try { 
 		  return Json.obj( "totalfilteredtweets" -> filteredTweets.count())
 		} catch {
-		  case e: Exception => println(e); 
+		  case e: Exception => printException(e, "Get Total Filtered Tweets")
 		}
 
 		return Json.obj( "totalfilteredtweets" -> JsNull)
@@ -118,7 +116,7 @@ object ExecuteSearchRequest
 		  return Json.obj("totalusers" -> total)
 		
 		} catch {
-		  case e: Exception => println(e); 
+		  case e: Exception => printException(e, "Get Total Users")
 		}
 
 		return Json.obj("totalusers" -> JsNull)
@@ -133,7 +131,7 @@ object ExecuteSearchRequest
 			return Json.obj("toptweets" -> Json.obj("tweets" -> topTweetsByLang))
 		}
 		catch {
-		  case e: Exception => println("" + e.getStackTrace.mkString("\n")); 
+		  case e: Exception => printException(e, "Get Top Tweets")
 		}
 
 		return Json.obj("toptweets" -> Json.obj("tweets" -> JsNull))
@@ -147,7 +145,7 @@ object ExecuteSearchRequest
 			return Json.obj("profession" -> Json.obj("profession" -> resultProfessionMap))
 		}
 		catch {
-		  case e: Exception => println(e); 
+		  case e: Exception =>printException(e, "Format Professions")
 		}
 
 		return Json.obj("profession" -> JsNull)
@@ -161,7 +159,7 @@ object ExecuteSearchRequest
 			return Json.obj("location" ->  Json.obj("fields" -> Json.arr("Date", "Country", "Count"), "location" -> resultLocationDF))
 		}
 		catch {
-		  case e: Exception => println(e);
+		  case e: Exception => printException(e, "Format Location")
 		}
 
 		return Json.obj("location" ->  Json.obj("fields" -> Json.arr("Date", "Country", "Count"), "location" -> JsNull))
@@ -175,7 +173,7 @@ object ExecuteSearchRequest
 			val resultSentimentDF = extractSentiment(filteredTweets)
 			return Json.obj("sentiment" -> Json.obj("fields" -> Json.arr("Date", "Positive", "Negative", "Neutral"), "sentiment" -> resultSentimentDF))
 		} catch {
-		  case e: Exception => println(e);
+		  case e: Exception => printException(e, "Format Sentiment")
 		}
 
 		return Json.obj("sentiment" -> Json.obj("fields" -> Json.arr("Date", "Positive", "Negative", "Neutral"), "sentiment" -> JsNull))
@@ -221,26 +219,6 @@ object ExecuteSearchRequest
 						groupByKey().map(prof => Json.obj("name" -> prof._1, "children" -> prof._2)).collect()
 	}
 
-	def filterTweets(includeTerms: String, excludeTerms: String): (DataFrame, Boolean) =
-	{
-		try { 
-		 	return (selectTweetsAndInformation(includeTerms, excludeTerms), false)
-		} catch {
-		  case e: Exception => println(e); return (null, true)
-		}
-	}
-
-	def selectTweetsAndInformation(includeTerms: String, excludeTerms: String): DataFrame = 
-	{
-		val query = s"""
-						SELECT * 
-						FROM realTweets 
-						WHERE validTweet(tokens, \"$includeTerms\", \"$excludeTerms\")
-					"""
-					
-		SparkContVal.sqlContext.sql(query)
-	}
-
 	def extracTopWordDistance(includeTerms: String, excludeTerms: String): JsValue =
 	{
 		try{
@@ -272,8 +250,58 @@ object ExecuteSearchRequest
 			}
 
 		}catch {
-			  case e: Exception => println(e);
+			  case e: Exception => printException(e, "Execute Python: Cluster and Distance")
 		}
 		return Json.obj("cluster" -> JsNull, "distance" -> JsNull)
 	}
+
+	/* ########################### Filter ###############################*/
+	def filterTweets(includeTerms: String, excludeTerms: String): (DataFrame, Boolean) =
+	{
+		try { 
+		 	return (selectTweetsAndInformation(includeTerms, excludeTerms), false)
+		} catch {
+		  case e: Exception => printException(e, "Filtering Tweets") 
+		}
+
+		return (null, true)
+	}
+
+	def selectTweetsAndInformation(includeTerms: String, excludeTerms: String): DataFrame = 
+	{
+		val query = s"""
+						SELECT * 
+						FROM realTweets 
+						WHERE validTweet(tokens, \"$includeTerms\", \"$excludeTerms\")
+					"""
+					
+		SparkContVal.sqlContext.sql(query)
+	}
+
+	/* ########################### Util ###############################*/
+	def emptyJSONResponse(): JsValue = 
+	{
+		Json.obj("status" -> JsNull, "totaltweets" -> JsNull, 
+		  		"totalfilteredtweets" -> JsNull, "totalusers" -> JsNull,
+				"profession" -> JsNull, "location" -> JsNull, 
+				"sentiment" -> JsNull, "toptweets" -> JsNull,
+				"cluster" -> JsNull, "distance" -> JsNull)
+	}
+
+	def emptyJSONResponseSpark(): JsValue = 
+	{
+		Json.obj("status" -> JsNull, "totaltweets" -> JsNull, 
+		  		"totalfilteredtweets" -> JsNull, "totalusers" -> JsNull,
+				"profession" -> JsNull, "location" -> JsNull, 
+				"sentiment" -> JsNull, "toptweets" -> JsNull)
+	}
+
+	def printException(thr: Throwable, module: String) =
+	{
+		println("Exception on: " + module)
+    	val sw = new StringWriter
+    	thr.printStackTrace(new PrintWriter(sw))
+    	println(sw.toString)
+	}
+
 }
