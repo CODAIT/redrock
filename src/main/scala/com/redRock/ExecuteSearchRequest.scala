@@ -269,13 +269,7 @@ object ExecuteSearchRequest
 
 	def selectTweetsAndInformation(includeTerms: String, excludeTerms: String): DataFrame = 
 	{
-		val query = s"""
-						SELECT * 
-						FROM realTweets 
-						WHERE validTweet(tokens, \"$includeTerms\", \"$excludeTerms\")
-					"""
-					
-		SparkContVal.sqlContext.sql(query)
+		return Boot.tweetsTable.filter(s"validTweet(tokens, '$includeTerms', '$excludeTerms')")
 	}
 
 	/* ########################### Util ###############################*/

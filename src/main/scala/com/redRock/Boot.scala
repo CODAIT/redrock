@@ -16,7 +16,7 @@ object Boot extends App {
 	println("Registering analysis function")
 	AnalysisFunction.registerAnalysisFunctions()
 	println("Preparing tweets")
-	PrepareTweets.registerPreparedTweetsTempTable()
+	val tweetsTable = PrepareTweets.registerPreparedTweetsTempTable()
 	
 	// we need an ActorSystem to host our application in
 	implicit val system = ActorSystem("redRock")

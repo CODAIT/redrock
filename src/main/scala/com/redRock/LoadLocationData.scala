@@ -40,7 +40,7 @@ object LoadLocationData
 	
 	def loadCities(): Map[String,(String,Double)] = 
 	{
-		val citiesPath = "./src/main/resources/Location/worldcitiespop.txt"
+		val citiesPath = Config.homePath + "src/main/resources/Location/worldcitiespop.txt"
 		val citiesMap = fromFile(citiesPath)("ISO-8859-1").getLines.drop(1).filter(line => filterCityLine(line)).
 											map(line => mapCity(line)).toArray.sortBy(city => city._2._2).toMap
  
@@ -71,7 +71,7 @@ object LoadLocationData
 
 	def loadCountryMapping(): Map[String,String] =
 	{
-		val countryPath = "./src/main/resources/Location/country_mapping.csv"
+		val countryPath = Config.homePath + "src/main/resources/Location/country_mapping.csv"
 		val countryMap = fromFile(countryPath)("utf-8").getLines.map(line => proccessCountryLine(line)).
 														filter(country => country != ("" -> "")).toMap 
 			

@@ -1,3 +1,10 @@
+========= Configuration =========
+
+1- Set configurations in Config.scala
+2- Set spark configurations in start.sh
+3- Set python home path in resources.py
+
+=============================================================
 - Download Scala 2.10.4
 - Install sbt and sbt assembly
 =============================================================

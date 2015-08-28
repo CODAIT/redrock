@@ -11,6 +11,9 @@ object SparkContVal
     //conf.setMaster(masterNode)
     conf.setAppName(Config.appName)
     conf.set("spark.scheduler.mode", "FAIR")
+    //conf.set("spark.executor.instances", "3")
+    //conf.set("spark.executor.cores", "1")
+
 
     val sc = new SparkContext(conf)
     val sqlContext = new SQLContext(sc)
