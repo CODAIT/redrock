@@ -3,7 +3,7 @@ CURDIR="$(cd "`dirname "$0"`"; pwd)"
 
 # Export this as SPARK_HOME
 #commit spark 1.5 69930310115501f0de094fe6f5c6c60dade342bd
-export SPARK_HOME="/Users/barbaragomes/opt/spark_RR_1.5_Aug25"
+export SPARK_HOME="/Users/barbaragomes/opt/spark-1.5-hadoop2.6"
 
 # generates the new .jar considering new configurations. 
 # Run this command separated on cluster, before push code to all nodes. Comment it out on cluster

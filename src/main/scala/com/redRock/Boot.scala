@@ -8,26 +8,26 @@ import scala.concurrent.duration._
 import akka.util.Timeout
 
 object Boot extends App {
-	
-	// Change to a more reasonable default number of partitions (from 200)
-	SparkContVal.sqlContext.setConf("spark.sql.shuffle.partitions", s"${Config.numberOfPartitions}")
-	SparkContVal.sqlContext.setConf("spark.sql.codegen", "false")
 
-	println("Registering analysis function")
-	AnalysisFunction.registerAnalysisFunctions()
-	println("Preparing tweets")
-	val tweetsTable = PrepareTweets.registerPreparedTweetsTempTable()
-	
-	// we need an ActorSystem to host our application in
-	implicit val system = ActorSystem("redRock")
+    // Change to a more reasonable default number of partitions (from 200)
+    SparkContVal.sqlContext.setConf("spark.sql.shuffle.partitions", s"${Config.numberOfPartitions}")
+    SparkContVal.sqlContext.setConf("spark.sql.codegen", "true")
 
-	// create and start our service actor
-	val service = system.actorOf(Props[MyServiceActor], Config.restName)
+    println("Registering analysis function")
+    AnalysisFunction.registerAnalysisFunctions()
+    println("Preparing tweets")
+    val tweetsTable = PrepareTweets.registerPreparedTweetsTempTable()
 
-	implicit val timeout = Timeout(500.seconds)
-	
-	IO(Http) ? Http.Bind(service, interface = "localhost", port = Config.port)
+    // we need an ActorSystem to host our application in
+    implicit val system = ActorSystem("redRock")
 
-	println(s"Application: ${Config.appName} running version: ${Config.appVersion}")
+    // create and start our service actor
+    val service = system.actorOf(Props[MyServiceActor], Config.restName)
+
+    implicit val timeout = Timeout(500.seconds)
+
+    IO(Http) ? Http.Bind(service, interface = "localhost", port = Config.port)
+
+    println(s"Application: ${Config.appName} running version: ${Config.appVersion}")
 
 }

@@ -123,6 +123,10 @@ object AnalysisFunction
 
 	def getTimeStamp(text: String):String = 
 	{
-		text.substring(4,13)
+		if (text != null && text.trim() != "")
+		{
+			return text.substring(4,13)
+		}
+		return null
 	}
 }
