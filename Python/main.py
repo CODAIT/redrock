@@ -6,7 +6,7 @@ import resources, GetClusterAndDistance
 termsInclude = sys.argv[1].split(',')
 termsExclude = sys.argv[2].split(',')
 
-resources.loadDistanceClusterData()
+resources.loadDistanceClusterData(sys.argv[3])
 
 ################## distance and cluster ##################
 distanceCluster = GetClusterAndDistance.getWordDistanceAndCluster(termsInclude, termsExclude)

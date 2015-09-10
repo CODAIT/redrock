@@ -223,7 +223,7 @@ object ExecuteSearchRequest
 	{
 		try{
 			 
-			val cmd = Array[String](Config.pythonVersion,Config.pythonScriptPath,includeTerms,excludeTerms)
+			val cmd = Array[String](Config.pythonVersion,Config.pythonScriptPath,includeTerms,excludeTerms, Config.homePath)
 			
 			// create runtime to execute external command
 			val rt: Runtime = Runtime.getRuntime()
