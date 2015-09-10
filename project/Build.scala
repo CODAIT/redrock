@@ -29,7 +29,7 @@ object Resolvers {
 
 object Dependency {
   object Version {
-    val Spark        = "1.4.1"
+    val Spark        = "1.5.0"
     val ScalaTest    = "2.2.4"
     val ScalaCheck   = "1.12.2"
     val akkaV = "2.3.9"
