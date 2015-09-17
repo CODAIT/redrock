@@ -13,13 +13,15 @@ import scala.concurrent.{Future,future, Await}
 
 object ExecuteSearchRequest 
 {
-	def runSearchAnalysis(includeTerms: String, excludeTerms: String, top: Int): String = 
+	def runSearchAnalysis(includeTerms: String, excludeTerms: String, top: Int): Future[String]= 
 	{	
-		println("Processing search:")
-		println("Include: " + includeTerms)
-		println("Exclude: " + excludeTerms)
-		
-		Json.stringify(executeAsynchronous(top,includeTerms.toLowerCase(),excludeTerms.toLowerCase()))
+		Future {
+			println("Processing search:")
+			println("Include: " + includeTerms)
+			println("Exclude: " + excludeTerms)
+			
+			Json.stringify(executeAsynchronous(top,includeTerms.toLowerCase(),excludeTerms.toLowerCase()))
+		}	
 	}
 	
 	def executeAsynchronous(top: Int, includeTerms: String, excludeTerms: String): JsValue =
@@ -64,7 +66,7 @@ object ExecuteSearchRequest
 	def executeSparkAsynchronous(filteredTweets: DataFrame, top: Int): JsValue =
 	{
 		try {
-			/*val totalUsers: Future[JsObject] = future { getTotalUsers(filteredTweets) }
+			val totalUsers: Future[JsObject] = future { getTotalUsers(filteredTweets) }
 			val numberOfTweets: Future[JsObject] = future { getTotalFilteredTweets(filteredTweets) }
 			val professions: Future[JsObject] = future { formatProfession(filteredTweets) }
 			val location: Future[JsObject] = future { formatLocation(filteredTweets) }
@@ -77,16 +79,16 @@ object ExecuteSearchRequest
 			val initialJson: JsObject = Json.obj("status" -> 0, "totaltweets" -> PrepareTweets.totalTweets) 
 			
 			val jsonResults: Seq[JsObject] = Await.result(aggregated, 500.seconds)
-			return (initialJson ++ jsonResults(0) ++ jsonResults(1) ++ jsonResults(2) ++ jsonResults(3) ++ jsonResults(4) ++ jsonResults(5))*/
+			return (initialJson ++ jsonResults(0) ++ jsonResults(1) ++ jsonResults(2) ++ jsonResults(3) ++ jsonResults(4) ++ jsonResults(5))
 			
-			val totalUsers = getTotalUsers(filteredTweets) 
+			/*val totalUsers = getTotalUsers(filteredTweets) 
 			val numberOfTweets = getTotalFilteredTweets(filteredTweets) 
 			val professions = formatProfession(filteredTweets) 
 			val location = formatLocation(filteredTweets) 
 			val sentiment = formatSentiment(filteredTweets) 
 			val topTweets = formatTopTweets(top, filteredTweets)
 			val initialJson: JsObject = Json.obj("status" -> 0, "totaltweets" -> PrepareTweets.totalTweets) 
-			return (initialJson ++ totalUsers ++ numberOfTweets ++ professions ++ location ++ sentiment ++ topTweets)
+			return (initialJson ++ totalUsers ++ numberOfTweets ++ professions ++ location ++ sentiment ++ topTweets)*/
 		}
 		catch {
 		  case e: Exception => 
