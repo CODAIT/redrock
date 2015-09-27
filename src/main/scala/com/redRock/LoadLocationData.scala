@@ -1,13 +1,16 @@
 package com.redRock
 
+import java.io._
+import java.util.zip._
 import scala.io.Source._
+
 
 object LoadLocationData
 {
 	val states:Array[String] = Array("AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS",
 								"KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND",
 								"OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY")
-  
+
 	val countryCode = Map(("af","Afghanistan"),("ax","Aland Islands"),("al","Albania"),("dz","Algeria"),("as","American Samoa"),("ad","Andorra"),("ao","Angola"),
 				("ai","Anguilla"),("aq","Antarctica"),("ag","Antigua and Barbuda"),("ar","Argentina"),("am","Armenia"),("aw","Aruba"),("au","Australia"),
 				("at","Austria"),("az","Azerbaijan"),("bs","Bahamas"),("bh","Bahrain"),("bd","Bangladesh"),("bb","Barbados"),("by","Belarus"),("be","Belgium"),
@@ -33,21 +36,22 @@ object LoadLocationData
 				("tj","Tajikistan"),("tz","Tanzania"),("th","Thailand"),("tl","Timor-Leste"),("tg","Togo"),("tk","Tokelau"),("to","Tonga"),("tt","Trinidad and Tobago"),("tn","Tunisia"),("tr","Turkey"),("tm","Turkmenistan"),("tc","Turks and Caicos Islands"),("tv","Tuvalu"),("ug","Uganda"),
 				("ua","Ukraine"),("ae","United Arab Emirates"),("gb","United Kingdom"),("um","United States Minor Outlying Islands"),("us","United States"),("uy","Uruguay"),("uz","Uzbekistan"),("vu","Vanuatu"),("ve","Venezuela"),("vn","Vietnam"),("vg","Virgin Islands, British"),("vi","Virgin Islands, U.S."),
 				("wf","Wallis and Futuna"),("eh","Western Sahara"),("ye","Yemen"),("zm","Zambia"),("zw","Zimbabwe"))
-	
+
 	val cities = loadCities()
 	val countries = loadCountryMapping()
 	val cities_keys = cities.keys.toArray.sortBy(key => -key.length)
-	
-	def loadCities(): Map[String,(String,Double)] = 
+
+	def loadCities(): Map[String,(String,Double)] =
 	{
-		val citiesPath = Config.homePath + "src/main/resources/Location/worldcitiespop.txt"
-		val citiesMap = fromFile(citiesPath)("ISO-8859-1").getLines.drop(1).filter(line => filterCityLine(line)).
+		val citiesPath = Config.homePath + "src/main/resources/Location/worldcitiespop.txt.gz"
+		val citiesStream = new GZIPInputStream(new FileInputStream(citiesPath))
+		val citiesMap = fromInputStream(citiesStream)("ISO-8859-1").getLines.drop(1).filter(line => filterCityLine(line)).
 											map(line => mapCity(line)).toArray.sortBy(city => city._2._2).toMap
- 
+
  		println(s"Cities Loaded ==> ${citiesMap.size}")
  		return citiesMap
 	}
-	
+
 	def mapCity(line: String): (String, (String,Double)) =
 	{
 		val fields = line.trim().toLowerCase().split(",")
@@ -73,13 +77,13 @@ object LoadLocationData
 	{
 		val countryPath = Config.homePath + "src/main/resources/Location/country_mapping.csv"
 		val countryMap = fromFile(countryPath)("utf-8").getLines.map(line => proccessCountryLine(line)).
-														filter(country => country != ("" -> "")).toMap 
-			
+														filter(country => country != ("" -> "")).toMap
+
 		println(s"Countries Loaded ==> ${countryMap.size}")
  		return countryMap
 	}
 
-	def proccessCountryLine(line: String): (String,String) = 
+	def proccessCountryLine(line: String): (String,String) =
 	{
 		val auxLine = line.trim()
 		if (auxLine.length != 0)
