@@ -30,7 +30,7 @@ object Config
 	/* Spark streaming configuration */
 	//Hadoop directory where the streaming is going to read from
 	val twitterStreamingDataPath = "hdfs://localhost:9000/user/hadoop/decahose_streaming"
-	//Streaming batch time
+	//Streaming batch time in seconds
 	val streamingBatchTime = 60
 	//Hadoop check point directory for streaming data.
 	val checkPointDirForStreaming = "hdfs://localhost:9000/user/hadoop/spark_streaming_checkpoint"
