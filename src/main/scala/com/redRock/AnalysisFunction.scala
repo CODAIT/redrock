@@ -6,6 +6,10 @@ import org.apache.spark.SparkConf
 import org.apache.spark.sql.{SQLContext, DataFrame}
 import scala.io.Source._
 import scala.util.matching.Regex
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.TimeZone
+import java.util.Date
 
 object AnalysisFunction
 {
@@ -28,6 +32,7 @@ object AnalysisFunction
 		SparkContVal.sqlContext.udf.register("getLocation", (text: String) => extractLocation(text))
 		SparkContVal.sqlContext.udf.register("getProfession", (description: String) => extractProfession(description))	
 		SparkContVal.sqlContext.udf.register("stringTokenizer", (text: String) => stringTokenizer(text))
+		SparkContVal.sqlContext.udf.register("convertCreatedAtFormat", (created_at: String) => convertCreatedAtFormat(created_at))
 	}
 	
 	//Check if the text contain all the include terms and do not contain any of the exclude terms
@@ -75,19 +80,19 @@ object AnalysisFunction
 		}
 	}
 
-	def extractProfession(description: String): Array[(String,String)] =
+	def extractProfession(description: String): Map[String,String] =
 	{
 		if (description != null && description.trim() != "")
 		{
 			return professions_global.filter(profession => {profession._1.findFirstIn(description) != None}).
-								map(profession => (profession._2,profession._1.findFirstIn(description).get.toLowerCase())).toArray 
+								map(profession => (profession._1.findFirstIn(description).get.toLowerCase(), profession._2)).toMap 
 		}
-		return Array[(String,String)]()
+		return Map[String,String]()
 	}
 
-	def stringTokenizer(text: String): Array[String] = 
+	def stringTokenizer(text: String): String = 
 	{
-		return Twokenize.tokenize(text.toLowerCase().trim()).toArray
+		return Twokenize.tokenize(text.toLowerCase().trim()).mkString(" ")
 	}
 
 	def extractLocation(text: String): String = 
@@ -128,5 +133,15 @@ object AnalysisFunction
 			return text.substring(4,13)
 		}
 		return null
+	}
+
+	def convertCreatedAtFormat(created_at: String): Long =
+	{
+		val sdf:SimpleDateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy")
+		TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
+		val date = sdf.parse(created_at)
+		return date.getTime()
+		
+		//Fri May 01 07:12:43 +0000 2015
 	}
 }

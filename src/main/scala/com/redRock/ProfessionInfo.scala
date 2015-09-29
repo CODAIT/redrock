@@ -9,7 +9,7 @@ object ProfessionInfo
 
 	def loadProfessionsTable():Array[(Regex,String)] =
 	{
-		val professionsPath = Config.homePath + "src/main/resources/Profession/professions.csv"
+		val professionsPath = Config.redRockHomePath + "src/main/resources/Profession/professions.csv"
 
 		val professionsList = fromFile(professionsPath)("ISO-8859-1").getLines.drop(1).filter(line => line.trim().length > 0).
 												map(line => mapProfession(line)).toArray

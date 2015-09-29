@@ -29,14 +29,16 @@ object ExecuteSearchRequest
 		try 
 		{
 			val cluster_distance: Future[JsValue] = future { extracTopWordDistance(includeTerms,excludeTerms) }
-			val spark_dataAnalisys: Future[JsValue] = future { extractSparkAnalysis(top,includeTerms,excludeTerms) }
+			//val spark_dataAnalisys: Future[JsValue] = future { extractSparkAnalysis(top,includeTerms,excludeTerms) }
 			
-			val tasks: Seq[Future[JsValue]] = Seq(spark_dataAnalisys, cluster_distance)
+			val tasks: Seq[Future[JsValue]] = Seq(/*spark_dataAnalisys,*/ cluster_distance)
 			val aggregated: Future[Seq[JsValue]] = Future.sequence(tasks)
 		
 
 			val jsonResults: Seq[JsValue] = Await.result(aggregated, 500.seconds)
-			return (jsonResults(0).as[JsObject] ++ jsonResults(1).as[JsObject])
+			//return (jsonResults(0).as[JsObject] ++ jsonResults(1).as[JsObject])
+			return (Json.obj( "WARN" -> "SEARCH NOT CONNECTED TO ELASTICSEARCH") ++ jsonResults(0).as[JsObject])
+
 		}
 		catch {
 			case e: Exception => {
@@ -66,28 +68,15 @@ object ExecuteSearchRequest
 	def executeSparkAsynchronous(filteredTweets: DataFrame, top: Int): JsValue =
 	{
 		try {
-			/*val totalUsers: Future[JsObject] = future { getTotalUsers(filteredTweets) }
-			val numberOfTweets: Future[JsObject] = future { getTotalFilteredTweets(filteredTweets) }
-			val professions: Future[JsObject] = future { formatProfession(filteredTweets) }
-			val location: Future[JsObject] = future { formatLocation(filteredTweets) }
-			val sentiment: Future[JsObject] = future { formatSentiment(filteredTweets) }
-			val topTweets: Future[JsObject] = future { formatTopTweets(top, filteredTweets) }
-
-			val tasks: Seq[Future[JsObject]] = Seq(numberOfTweets, totalUsers, professions, location, sentiment, topTweets)
-			val aggregated: Future[Seq[JsObject]] = Future.sequence(tasks)
-
-			val initialJson: JsObject = Json.obj("status" -> 0, "totaltweets" -> PrepareTweets.totalTweets) 
-			
-			val jsonResults: Seq[JsObject] = Await.result(aggregated, 500.seconds)
-			return (initialJson ++ jsonResults(0) ++ jsonResults(1) ++ jsonResults(2) ++ jsonResults(3) ++ jsonResults(4) ++ jsonResults(5))*/
-			
 			val totalUsers = getTotalUsers(filteredTweets) 
 			val numberOfTweets = getTotalFilteredTweets(filteredTweets) 
 			val professions = formatProfession(filteredTweets) 
 			val location = formatLocation(filteredTweets) 
 			val sentiment = formatSentiment(filteredTweets) 
 			val topTweets = formatTopTweets(top, filteredTweets)
-			val initialJson: JsObject = Json.obj("status" -> 0, "totaltweets" -> PrepareTweets.totalTweets) 
+			/* Count total tweets in stored table in ES */
+			val totalTweets =  0
+			val initialJson: JsObject = Json.obj("status" -> 0, "totaltweets" -> totalTweets) 
 			return (initialJson ++ totalUsers ++ numberOfTweets ++ professions ++ location ++ sentiment ++ topTweets)
 		}
 		catch {
@@ -186,7 +175,7 @@ object ExecuteSearchRequest
 		filteredTweets.select(ColNames.created_at, ColNames.text, ColNames.id, 
 							ColNames.name, ColNames.handle, ColNames.followers, 
 							ColNames.profileImgURL, ColNames.lang).
-						filter(s"${ColNames.lang} = '${Config.language}'").
+						filter(s"${ColNames.lang} = '${Config.tweetsLanguage}'").
 						orderBy(desc("followers_count")).limit(top).
 						map(tweet => Json.obj("created_at" -> tweet.getString(0), "text" -> tweet.getString(1),
 											"user" -> Json.obj("name" -> tweet.getString(3),"screen_name" -> tweet.getString(4),
@@ -225,7 +214,7 @@ object ExecuteSearchRequest
 	{
 		try{
 			 
-			val cmd = Array[String](Config.pythonVersion,Config.pythonScriptPath,includeTerms,excludeTerms, Config.homePath)
+			val cmd = Array[String](Config.pythonVersion,Config.pythonScriptPath,includeTerms,excludeTerms, Config.redRockHomePath)
 			
 			// create runtime to execute external command
 			val rt: Runtime = Runtime.getRuntime()
@@ -271,7 +260,9 @@ object ExecuteSearchRequest
 
 	def selectTweetsAndInformation(includeTerms: String, excludeTerms: String): DataFrame = 
 	{
-		return Boot.tweetsTable.filter(s"validTweet(tokens, '$includeTerms', '$excludeTerms')")
+		//return Boot.tweetsTable.filter(s"validTweet(tokens, '$includeTerms', '$excludeTerms')")
+
+		return SparkContVal.sqlContext.sql(s"SELECT * FROM  streamingTweets WHERE validTweet(tokens, '$includeTerms', '$excludeTerms')")
 	}
 
 	/* ########################### Util ###############################*/

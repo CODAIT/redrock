@@ -43,6 +43,10 @@ object Dependency {
   val sparkStreaming = "org.apache.spark"  %% "spark-streaming" % Version.Spark  % "provided"
   val sparkSQL       = "org.apache.spark"  %% "spark-sql"       % Version.Spark  % "provided"
   val sparkRepl      = "org.apache.spark"  %% "spark-repl"      % Version.Spark  % "provided"
+  val sparkHive      = "org.apache.spark"  %% "spark-hive"      % Version.Spark  % "provided"
+
+  val cassandraConnector = "com.datastax.spark" %% "spark-cassandra-connector" % "1.4.0-M2"
+  val elasticSearchConnector = "org.elasticsearch" % "elasticsearch-spark_2.10" % "2.1.1" % "provided"
   
   val sprayCan       = "io.spray"          %%  "spray-can"      % Version.sprayV
   val sprayRouting   = "io.spray"          %%  "spray-routing"  % Version.sprayV
@@ -67,6 +71,7 @@ object Dependencies {
 
   val redRockDependecies =
     Seq(sparkCore,sparkSQL,sparkRepl,
+      sparkHive, elasticSearchConnector,
       scalaTest, scalaCheck, playJson, 
       sprayCan, sprayRouting,
       akkaActor,specs2Core,

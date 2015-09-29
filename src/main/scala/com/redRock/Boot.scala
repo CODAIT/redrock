@@ -9,25 +9,19 @@ import akka.util.Timeout
 
 object Boot extends App {
 
-    // Change to a more reasonable default number of partitions (from 200)
-    SparkContVal.sqlContext.setConf("spark.sql.shuffle.partitions", s"${Config.numberOfPartitions}")
-    SparkContVal.sqlContext.setConf("spark.sql.codegen", "true")
-
     println("Registering analysis function")
     AnalysisFunction.registerAnalysisFunctions()
-    println("Preparing tweets")
-    val tweetsTable = PrepareTweets.registerPreparedTweetsTempTable()
+    
+    /* Load historical data and start tweets streaming */
+    PrepareTweets.loadHistoricalDataAndStartStreaming()
 
+    /*Starting REST API*/
     // we need an ActorSystem to host our application in
     implicit val system = ActorSystem("redRock")
-
     // create and start our service actor
     val service = system.actorOf(Props[MyServiceActor], Config.restName)
-
-    implicit val timeout = Timeout(500.seconds)
-
+    implicit val timeout = Timeout(800.seconds)
     IO(Http) ? Http.Bind(service, interface = "localhost", port = Config.port)
-
     println(s"Application: ${Config.appName} running version: ${Config.appVersion}")
 
 }

@@ -2,25 +2,52 @@ package com.redRock
 
 object Config
 {
-	val appName = "RedRock Data Frame"
-	val appVersion = "1.0"
+	/* Spark names */
+	val appName = "RedRock Streaming ES"
+	val appVersion = "2.0"
+
+	/* REST API */
 	val restName = "RedRock"
-	val defaultTop = 100
-	val language = "en"
-	val topWordsToVec = 20
-	//Change it when running on cluster
-	val numberOfPartitions = 5
-	//Relative Paths
-	val homePath = "/Users/barbaragomes/Projects/sparkinsights-server-scala/"
 	val port = 16666
-	val dataPath = "/Users/barbaragomes/Projects/RedRockInsights-Demo/Data/decahose_BG20150501001246-0700_EN20150501002746-0700.gz"
-	//"hdfs://bdavm155.svl.ibm.com:8020/spark-summit-demo/data/decahose/decahose_BG20150823230338-0700_EN20150823231838-0700"
-	//"hdfs://bdavm155.svl.ibm.com:8020/spark-summit-demo/data/decahose/decahose_BG20150823230338-0700_EN20150823231838-0700.gz"
-	//"/Users/barbaragomes/Projects/RedRockInsights-Demo/Data/decahose_BG20150501001246-0700_EN20150501002746-0700-1-400k"
+	
+	/* Search configurations */
+	val defaultTopTweets = 100
+	val tweetsLanguage = "en"
+	val topWordsToVec = 20
+	
+	/* Spark partitions number */
+	val numberOfPartitions = 5
+	
+	/* RedRock home path */
+	val redRockHomePath = "/Users/barbaragomes/Projects/RedRock-Server/redrock/"
+	
+	/* Twitter historical data */
+	// Set to false if historical data was already processed to ES
+	val loadHistoricalData = true
+	// Historical data path
+	val twitterHistoricalDataPath = "hdfs://localhost:9000/user/hadoop/decahose_historical"
 
-	//Cluster and Distance execution
-	val pythonScriptPath = homePath + "Python/main.py"
+	/* Spark streaming configuration */
+	//Hadoop directory where the streaming is going to read from
+	val twitterStreamingDataPath = "hdfs://localhost:9000/user/hadoop/decahose_streaming"
+	//Streaming batch time
+	val streamingBatchTime = 60
+	//Hadoop check point directory for streaming data.
+	val checkPointDirForStreaming = "hdfs://localhost:9000/user/hadoop/spark_streaming_checkpoint"
+
+	/* Cluster and Distance configuration*/
+	val pythonScriptPath = redRockHomePath + "Python/main.py"
 	val pythonVersion= "python2.7"
-
-
+	
+	/* ElasticSearch configuration*/
+	// ES bind IP (localhost)
+	val elasticsearchIP = "127.0.0.1"
+	// ES bind port
+	val elasticsearchPort = "9200"
+	// ES spark configuration
+	val elasticsearchConfig = Map("pushdown" -> "true", "es.nodes" -> elasticsearchIP, "es.port" -> elasticsearchPort)
+	//database name
+	val esIndex = "redrock"
+	//table name
+	val esTable = "processed_tweets"
 }
