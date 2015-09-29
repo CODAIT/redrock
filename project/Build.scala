@@ -3,7 +3,7 @@ import sbt.Keys._
 
 object BuildSettings {
 
-  val Name = "redRockTest"
+  val Name = "redRock"
   val Version = "3.0"
   val ScalaVersion = "2.10.4"
 
@@ -11,7 +11,7 @@ object BuildSettings {
     name          := Name,
     version       := Version,
     scalaVersion  := ScalaVersion,
-    organization  := "com.ibm.barbara",
+    organization  := "com.ibm.spark.redrock",
     description   := "Red Rock Data Frame",
     scalacOptions := Seq("-deprecation", "-unchecked", "-encoding", "utf8", "-Xlint")
   )
@@ -36,7 +36,7 @@ object Dependency {
     val sprayV = "1.3.3"
   }
 
-  // Spark dependencies 
+  // Spark dependencies
   // Do not remove "provided" - We do not need to includ spark dependency on the jar because
   // the jar is gonna be executed by spark-submit
   val sparkCore      = "org.apache.spark"  %% "spark-core"      % Version.Spark  % "provided"
@@ -47,7 +47,7 @@ object Dependency {
 
   val cassandraConnector = "com.datastax.spark" %% "spark-cassandra-connector" % "1.4.0-M2"
   val elasticSearchConnector = "org.elasticsearch" % "elasticsearch-spark_2.10" % "2.1.1" % "provided"
-  
+
   val sprayCan       = "io.spray"          %%  "spray-can"      % Version.sprayV
   val sprayRouting   = "io.spray"          %%  "spray-routing"  % Version.sprayV
   //val sprayTestKit   = "io.spray"          %%  "spray-testkit"  % Version.sprayV  % "test"
@@ -72,7 +72,7 @@ object Dependencies {
   val redRockDependecies =
     Seq(sparkCore,sparkSQL,sparkRepl,
       sparkHive, elasticSearchConnector,
-      scalaTest, scalaCheck, playJson, 
+      scalaTest, scalaCheck, playJson,
       sprayCan, sprayRouting,
       akkaActor,specs2Core,
       readCSV)
@@ -109,6 +109,3 @@ object RedRockBuild extends Build {
       // use it, then we can remove the following setting:
       parallelExecution in Test := false))
 }
-
-
-
