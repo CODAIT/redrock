@@ -14,6 +14,10 @@ object Config
 	val defaultTopTweets = 100
 	val tweetsLanguage = "en"
 	val topWordsToVec = 20
+
+	/* Process Config */
+	//Format to be used to group by timestamp for Sentiment and Location
+	val timestampFormat = "MM/dd HH"
 	
 	/* Spark partitions number */
 	val numberOfPartitions = 5

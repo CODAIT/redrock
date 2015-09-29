@@ -135,13 +135,14 @@ object AnalysisFunction
 		return null
 	}
 
-	def convertCreatedAtFormat(created_at: String): Long =
+	def convertCreatedAtFormat(created_at: String): String =
 	{
 		val sdf:SimpleDateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy")
 		TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
 		val date = sdf.parse(created_at)
-		return date.getTime()
-		
+
+		val sdf_new:SimpleDateFormat = new SimpleDateFormat(Config.timestampFormat)
+		return sdf_new.format(date)
 		//Fri May 01 07:12:43 +0000 2015
 	}
 }

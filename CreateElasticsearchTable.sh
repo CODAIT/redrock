@@ -76,7 +76,7 @@ curl -XPUT 'http://localhost:9200/redrock/' -d '
           "type": "long"
         },
         "tweet_sentiment": {
-          "type": "long"
+          "type": "integer"
         },
         "tweet_location": {
           "type": "string"
@@ -87,6 +87,10 @@ curl -XPUT 'http://localhost:9200/redrock/' -d '
         "tweet_text_tokens": {
           "type": "string",
           "analyzer": "tweet_analyzer"
+        },
+        "created_at_timestamp" : {
+          "type": "date",
+          "format": "MM/dd HH"
         }
       }
     }

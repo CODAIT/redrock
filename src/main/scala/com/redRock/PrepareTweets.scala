@@ -88,7 +88,6 @@ object PrepareTweets
         {
             SparkContVal.sqlContext.read.json(rdd)
                         .selectExpr("id as tweet_id",
-                        //"convertCreatedAtFormat(created_at) AS created_at",
                         "created_at AS created_at",
                         "lang AS language",
                         "getLocation(text) AS tweet_location",
@@ -100,7 +99,8 @@ object PrepareTweets
                         "user.screen_name AS user_handle",
                         "user.id AS user_id",
                         "user.profile_image_url AS user_image_url",
-                        "user.name user_name")
+                        "user.name user_name",
+                        "convertCreatedAtFormat(created_at) AS created_at_timestamp")
                         .filter("created_at IS NOT NULL AND tweet_text IS NOT NULL")
                         .write.mode(SaveMode.Append)
                         .format("org.elasticsearch.spark.sql")
