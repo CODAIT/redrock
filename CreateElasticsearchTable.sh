@@ -1,6 +1,13 @@
 #!/bin/bash
 
-echo " ==========  Creating/Updating ES Schema ============"
+if [ "$1" = "--delete" ]
+then
+  echo " ==========  Deleting ES Schema ============"
+  curl -XDELETE 'http://localhost:9200/redrock/'
+  echo ""
+fi
+
+echo " ==========  Creating ES Schema ============"
 curl -XPUT 'http://localhost:9200/redrock/' -d '
 {
   "settings": {
