@@ -103,7 +103,7 @@ object ExecuteSearchRequest
 	{
 		try { 
 		  
-		  val total = filteredTweets.dropDuplicates(Array(ColNames.id)).count()
+		  val total = filteredTweets.dropDuplicates(Array("id")).count()
 		  return Json.obj("totalusers" -> total)
 		
 		} catch {
@@ -172,10 +172,10 @@ object ExecuteSearchRequest
 
 	def extractTopTweets(top: Int, filteredTweets: DataFrame): Array[JsObject] = 
 	{
-		filteredTweets.select(ColNames.created_at, ColNames.text, ColNames.id, 
-							ColNames.name, ColNames.handle, ColNames.followers, 
-							ColNames.profileImgURL, ColNames.lang).
-						filter(s"${ColNames.lang} = '${Config.tweetsLanguage}'").
+		filteredTweets.select("created_at", "text", "id", 
+							"name", "screen_name", "followers_count", 
+							"profile_image_url", "lang").
+						filter(s"lang = '${Config.tweetsLanguage}'").
 						orderBy(desc("followers_count")).limit(top).
 						map(tweet => Json.obj("created_at" -> tweet.getString(0), "text" -> tweet.getString(1),
 											"user" -> Json.obj("name" -> tweet.getString(3),"screen_name" -> tweet.getString(4),
@@ -185,14 +185,14 @@ object ExecuteSearchRequest
 
 	def extractLocation(filteredTweets: DataFrame): Array[JsArray] =
 	{
-		filteredTweets.filter(s"${ColNames.location} != ''").groupBy(ColNames.timestamp, ColNames.location).count().
+		filteredTweets.filter("location != ''").groupBy("timestamp", "location").count().
 															orderBy("timestamp").
 															map(locaTime => Json.arr(locaTime.getString(0),locaTime.getString(1),locaTime.getLong(2).toInt)).collect()
 	}
 
 	def extractSentiment(filteredTweets: DataFrame): Array[JsArray]=
 	{
-		filteredTweets.groupBy(ColNames.timestamp, ColNames.sentiment).count().
+		filteredTweets.groupBy("timestamp", "sentiment").count().
 								map(sentiment => (sentiment.getString(0), (sentiment.getInt(1), sentiment.getLong(2).toInt))).
 								groupByKey().
 								sortByKey().

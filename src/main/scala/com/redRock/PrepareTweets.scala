@@ -87,21 +87,21 @@ object PrepareTweets
         try
         {
             SparkContVal.sqlContext.read.json(rdd)
-                        .selectExpr("id_str as tweet_id",
-                        "created_at AS created_at",
-                        "lang AS language",
-                        "getLocation(text) AS tweet_location",
-                        "getProfession(user.description) AS tweet_professions",
-                        "getSentiment(text) AS tweet_sentiment",
-                        "text AS tweet_text",
-                        "stringTokenizer(text) as tweet_text_tokens",
-                        "user.followers_count AS user_followers_count",
-                        "user.screen_name AS user_handle",
-                        "user.id AS user_id",
-                        "user.profile_image_url AS user_image_url",
-                        "user.name user_name",
-                        "convertCreatedAtFormat(created_at) AS created_at_timestamp")
-                        .filter("created_at IS NOT NULL AND tweet_text IS NOT NULL")
+                        .selectExpr(s"${TweetField.tweet_id} as tweet_id",
+                        s"${TweetField.tweet_created_at} AS created_at",
+                        s"${TweetField.language} AS language",
+                        s"getLocation(${TweetField.tweet_text}) AS tweet_location",
+                        s"getProfession(${TweetField.user_description}) AS tweet_professions",
+                        s"getSentiment(${TweetField.tweet_text}) AS tweet_sentiment",
+                        s"${TweetField.tweet_text} AS tweet_text",
+                        s"stringTokenizer(${TweetField.tweet_text}) as tweet_text_tokens",
+                        s"${TweetField.user_followers_count} AS user_followers_count",
+                        s"${TweetField.user_handle} AS user_handle",
+                        s"${TweetField.user_id} AS user_id",
+                        s"${TweetField.user_profileImgURL} AS user_image_url",
+                        s"${TweetField.user_name} user_name",
+                        s"convertCreatedAtFormat(${TweetField.tweet_created_at}) AS created_at_timestamp")
+                        .filter(s"created_at IS NOT NULL AND tweet_text IS NOT NULL")
                         .write.mode(SaveMode.Append)
                         .format("org.elasticsearch.spark.sql")
                         .options(Config.elasticsearchConfig)
