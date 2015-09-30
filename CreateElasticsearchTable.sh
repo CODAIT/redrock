@@ -18,7 +18,7 @@ curl -XPUT 'http://localhost:9200/redrock/' -d '
     "analysis": {
       "filter": {
         "tweet_filter": {
-          "type": "word_delimiter",
+          "type": "standard",
           "type_table": [
             "# => ALPHA",
             "@ => ALPHA"
