@@ -44,7 +44,8 @@ curl -XPUT 'http://localhost:9200/redrock/' -d '
       },
       "properties": {
         "tweet_id": {
-          "type": "string"
+          "type": "string",
+          "index": "not_analyzed"
         },
         "tweet_text": {
           "type": "string",
@@ -55,14 +56,16 @@ curl -XPUT 'http://localhost:9200/redrock/' -d '
           "format": "EEE MMM dd HH:mm:ss Z yyyy"
         },
         "language": {
-          "type": "string"
+          "type": "string",
+          "index": "not_analyzed"
         },
         "user_image_url": {
           "type": "string",
           "index": "not_analyzed"
         },
         "user_followers_count": {
-          "type": "long"
+          "type": "long",
+          "index": "not_analyzed"
         },
         "user_name": {
           "type": "string",
@@ -73,13 +76,16 @@ curl -XPUT 'http://localhost:9200/redrock/' -d '
           "index": "not_analyzed"
         },
         "user_id": {
-          "type": "long"
+          "type": "long",
+          "index": "not_analyzed"
         },
         "tweet_sentiment": {
-          "type": "integer"
+          "type": "integer",
+          "index": "not_analyzed"
         },
         "tweet_location": {
-          "type": "string"
+          "type": "string",
+          "index": "not_analyzed"
         },
         "tweet_professions": {
           "type": "object"
@@ -90,7 +96,8 @@ curl -XPUT 'http://localhost:9200/redrock/' -d '
         },
         "created_at_timestamp" : {
           "type": "date",
-          "format": "MM/dd HH"
+          "format": "MM/dd HH",
+          "index": "not_analyzed"
         }
       }
     }
