@@ -87,7 +87,7 @@ object PrepareTweets
         try
         {
             SparkContVal.sqlContext.read.json(rdd)
-                        .selectExpr("id as tweet_id",
+                        .selectExpr("id_str as tweet_id",
                         "created_at AS created_at",
                         "lang AS language",
                         "getLocation(text) AS tweet_location",

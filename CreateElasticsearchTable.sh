@@ -44,7 +44,7 @@ curl -XPUT 'http://localhost:9200/redrock/' -d '
       },
       "properties": {
         "tweet_id": {
-          "type": "long"
+          "type": "string"
         },
         "tweet_text": {
           "type": "string",
