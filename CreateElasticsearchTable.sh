@@ -88,7 +88,18 @@ curl -XPUT 'http://localhost:9200/redrock/' -d '
           "index": "not_analyzed"
         },
         "tweet_professions": {
-          "type": "object"
+          "type": "nested",
+            "properties" :
+            {
+              "_1": {
+                "type" : "string",
+                "index": "not_analyzed"
+              },
+              "_2":{
+                "type" : "string",
+                "index": "not_analyzed"
+              }
+            }
         },
         "tweet_text_tokens": {
           "type": "string",

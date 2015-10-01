@@ -80,14 +80,15 @@ object AnalysisFunction
 		}
 	}
 
-	def extractProfession(description: String): Map[String,String] =
+	def extractProfession(description: String): Array[(String,String)] =
 	{
+		// (Profession, keyword)
 		if (description != null && description.trim() != "")
 		{
 			return professions_global.filter(profession => {profession._1.findFirstIn(description) != None}).
-								map(profession => (profession._1.findFirstIn(description).get.toLowerCase(), profession._2)).toMap 
+								map(profession => (profession._2, profession._1.findFirstIn(description).get.toLowerCase())).toArray 
 		}
-		return Map[String,String]()
+		return Array[(String,String)]()
 	}
 
 	def stringTokenizer(text: String): String = 
