@@ -1,10 +1,5 @@
 package com.redRock
 
-import org.apache.spark.SparkContext
-import org.apache.spark.SparkContext._
-import org.apache.spark.SparkConf
-import org.apache.spark.sql.{SQLContext, DataFrame}
-import org.apache.spark.sql.functions._
 import play.api.libs.json._
 import java.io._
 import scala.concurrent.duration._
@@ -29,15 +24,14 @@ object ExecuteSearchRequest
 		try 
 		{
 			val cluster_distance: Future[JsValue] = future { extracTopWordDistance(includeTerms,excludeTerms) }
-			//val spark_dataAnalisys: Future[JsValue] = future { extractSparkAnalysis(top,includeTerms,excludeTerms) }
+			val elasticsearch_dataAnalisys: Future[JsValue] = future { extractElasticsearchAnalysis(top,includeTerms,excludeTerms) }
 			
-			val tasks: Seq[Future[JsValue]] = Seq(/*spark_dataAnalisys,*/ cluster_distance)
+			val tasks: Seq[Future[JsValue]] = Seq(elasticsearch_dataAnalisys, cluster_distance)
 			val aggregated: Future[Seq[JsValue]] = Future.sequence(tasks)
 		
-
 			val jsonResults: Seq[JsValue] = Await.result(aggregated, 500.seconds)
-			//return (jsonResults(0).as[JsObject] ++ jsonResults(1).as[JsObject])
-			return (Json.obj( "WARN" -> "SEARCH NOT CONNECTED TO ELASTICSEARCH") ++ jsonResults(0).as[JsObject])
+			return (jsonResults(0).as[JsObject] ++ jsonResults(1).as[JsObject])
+			//return (Json.obj( "WARN" -> "SEARCH NOT CONNECTED TO ELASTICSEARCH") ++ jsonResults(0).as[JsObject])
 
 		}
 		catch {
@@ -48,78 +42,88 @@ object ExecuteSearchRequest
 		}
 	}
 
-	def extractSparkAnalysis(top: Int, includeTerms: String, excludeTerms: String):JsValue =
+	def extractElasticsearchAnalysis(top: Int, includeTerms: String, excludeTerms: String): JsValue =
 	{	
-		//Filtering tweets
-		val (filteredTweets,exception) = filterTweets(includeTerms, excludeTerms)
-		if (exception)
-		{	
-			return emptyJSONResponse()
-		}
-		filteredTweets.cache()
-
-		val json = executeSparkAsynchronous(filteredTweets, top)
-
-		filteredTweets.unpersist()
-
-		return json
-	}
-
-	def executeSparkAsynchronous(filteredTweets: DataFrame, top: Int): JsValue =
-	{
-		try {
-			val totalUsers = getTotalUsers(filteredTweets) 
-			val numberOfTweets = getTotalFilteredTweets(filteredTweets) 
-			val professions = formatProfession(filteredTweets) 
-			val location = formatLocation(filteredTweets) 
-			val sentiment = formatSentiment(filteredTweets) 
-			val topTweets = formatTopTweets(top, filteredTweets)
-			/* Count total tweets in stored table in ES */
-			val totalTweets =  0
-			val initialJson: JsObject = Json.obj("status" -> 0, "totaltweets" -> totalTweets) 
-			return (initialJson ++ totalUsers ++ numberOfTweets ++ professions ++ location ++ sentiment ++ topTweets)
+		try{
+			// Object to send the requests and get the responses
+			val elasticsearchRequests = new GetElasticsearchResponse(top, includeTerms.toLowerCase().trim().split(","), excludeTerms.toLowerCase().trim().split(","))
+			return executeElasticsearchQueries(elasticsearchRequests)
 		}
 		catch {
 		  case e: Exception => 
 		  {
-		  	printException(e, "Execute Spark Asynchronous")
-		  	return emptyJSONResponseSpark()
+		  	printException(e, "Extract Elasticsearch Analysis")
+		  	return emptyJSONResponseES()
 		  }
 		}
 	}
 
-	def getTotalFilteredTweets(filteredTweets: DataFrame): JsObject = 
+	def executeElasticsearchQueries(elasticsearchRequests: GetElasticsearchResponse): JsValue =
+	{
+		try {
+
+			val totalTweets = formatTotalTweets(elasticsearchRequests)
+			val totalUsersAndFilteresTweets = formatTotalFilteredTweetsAndTotalUsers(elasticsearchRequests) 
+			val sentiment = formatSentiment(elasticsearchRequests)
+			val professions = formatProfession(elasticsearchRequests)
+			val location = formatLocation(elasticsearchRequests)
+			val topTweets = formatTopTweets(elasticsearchRequests)
+
+			val initialJson: JsObject = Json.obj("status" -> 0) 
+			return (initialJson ++ totalTweets ++ totalUsersAndFilteresTweets ++ professions ++ location ++ sentiment ++ topTweets)
+		}
+		catch {
+		  case e: Exception => 
+		  {
+		  	printException(e, "Execute elasticsearch Asynchronous")
+		  	return emptyJSONResponseES()
+		  }
+		}
+	}
+
+	def formatTotalTweets(elasticsearchRequests: GetElasticsearchResponse): JsObject = 
+	{
+		try { 
+			val totalTweetsResponse = Json.parse(elasticsearchRequests.getTotalTweetsESResponse())
+			Json.obj("totaltweets" -> (totalTweetsResponse \ "hits" \ "total"))
+		} catch {
+		  case e: Exception => printException(e, "Format Total Tweets")
+		}
+
+		return Json.obj("totaltweets" -> JsNull)
+	}
+
+	def formatTotalFilteredTweetsAndTotalUsers(elasticsearchRequests: GetElasticsearchResponse): JsObject = 
 	{	
 		try { 
-		  return Json.obj( "totalfilteredtweets" -> filteredTweets.count())
+		  val countResponse = Json.parse(elasticsearchRequests.getTotalFilteredTweetsAndTotalUserResponse())
+       	  return ( Json.obj( "totalfilteredtweets" -> (countResponse \ "hits" \ "total")) ++
+        		   Json.obj( "totalusers" -> (countResponse \ "aggregations" \ "distinct_users_by_id" \ "value")))
 		} catch {
-		  case e: Exception => printException(e, "Get Total Filtered Tweets")
+		  case e: Exception => printException(e, "Get Total Filtered Tweets And Total Users")
 		}
 
-		return Json.obj( "totalfilteredtweets" -> JsNull)
+		return Json.obj("totalfilteredtweets" -> JsNull, "totalusers" -> JsNull)
 	}
 
-	def getTotalUsers(filteredTweets: DataFrame): JsObject =
+	def formatTopTweets(elasticsearchRequests: GetElasticsearchResponse): JsObject =
 	{
 		try { 
-		  
-		  val total = filteredTweets.dropDuplicates(Array("id")).count()
-		  return Json.obj("totalusers" -> total)
-		
-		} catch {
-		  case e: Exception => printException(e, "Get Total Users")
-		}
-
-		return Json.obj("totalusers" -> JsNull)
-	}
-
-	def formatTopTweets(top: Int, filteredTweets: DataFrame): JsObject =
-	{
-		try { 
-			//0 - created_at, 1 - text, 2 - id
-			//3 - name, 4 - handle, 5 - followers, 6 - profileURL
-			val topTweetsByLang = extractTopTweets(top, filteredTweets)
-			return Json.obj("toptweets" -> Json.obj("tweets" -> topTweetsByLang))
+			val topTweetsResponse = Json.parse(elasticsearchRequests.getTopTweetsResponse())
+			val sortedTweets = ((topTweetsResponse \ "hits" \ "hits" ).as[List[JsObject]]).map(tweet => {
+				Json.obj(
+					"created_at" -> (tweet \ "_source" \ "created_at"),
+					"text" -> (tweet \ "_source" \ "tweet_text"),
+					"user" -> Json.obj(
+						"name" -> (tweet \ "_source" \ "user_name"),
+						"screen_name" -> (tweet \ "_source" \ "user_handle"),
+						"followers_count" -> (tweet \ "_source" \ "user_followers_count"),
+						"id" -> (tweet \ "_source" \ "user_id"),
+						"profile_image_url" -> (tweet \ "_source" \ "user_image_url")
+					)
+				)
+			})
+			return Json.obj("toptweets" -> Json.obj("tweets" -> sortedTweets))
 		}
 		catch {
 		  case e: Exception => printException(e, "Get Top Tweets")
@@ -128,12 +132,23 @@ object ExecuteSearchRequest
 		return Json.obj("toptweets" -> Json.obj("tweets" -> JsNull))
 	}
 
-	def formatProfession(filteredTweets: DataFrame): JsObject =
+	def formatProfession(elasticsearchRequests: GetElasticsearchResponse): JsObject =
 	{
 		try
 		{
-			val resultProfessionMap = extractProfession(filteredTweets)
-			return Json.obj("profession" -> Json.obj("profession" -> resultProfessionMap))
+			val professionsResponse = Json.parse(elasticsearchRequests.getProfessionResponse())
+			val professionGroups = (professionsResponse \ "aggregations" \ "tweet_professions" \ "professions" \ "buckets").as[List[JsObject]]
+
+    		val mapProfessions = professionGroups.map(professionGroup => {
+	    		val profession = professionGroup \ "key"
+	    		val professionKeywords: List[JsObject] = ((professionGroup \ "keywords" \ "buckets").as[List[JsObject]]).map(keyword =>{
+	    			Json.obj("name" -> (keyword \ "key"), "value" -> (keyword \ "doc_count"))
+	    		})
+
+	    		Json.obj("name" -> profession, "children" -> professionKeywords)
+    		})
+
+    		return Json.obj("profession" -> Json.obj("profession" -> mapProfessions))
 		}
 		catch {
 		  case e: Exception =>printException(e, "Format Professions")
@@ -142,12 +157,21 @@ object ExecuteSearchRequest
 		return Json.obj("profession" -> JsNull)
 	}
 
-	def formatLocation(filteredTweets: DataFrame): JsObject =
+	def formatLocation(elasticsearchRequests: GetElasticsearchResponse): JsObject =
 	{
 		try { 
-			// timestamp, Country, count
-			val resultLocationDF = extractLocation(filteredTweets)
-			return Json.obj("location" ->  Json.obj("fields" -> Json.arr("Date", "Country", "Count"), "location" -> resultLocationDF))
+			val locationResponse = Json.parse(elasticsearchRequests.getLocationResponse())
+			val locationTimestampGroups = (locationResponse \ "aggregations" \ "tweet_cnt" \ "buckets").as[List[JsObject]]
+	    	
+	    	val mapLocations = locationTimestampGroups.map(locationGroup => {
+	    		val timestamp = locationGroup \ "key_as_string"
+	    		val locationCount = (locationGroup \ "tweet_locat" \ "buckets").as[List[JsObject]]
+	    		locationCount.map(locationData => {
+	    			Json.arr(timestamp, (locationData \ "key"), (locationData \ "doc_count"))
+	    		})
+	    	}).flatten
+
+    		return Json.obj("location" ->  Json.obj("fields" -> Json.arr("Date", "Country", "Count"), "location" -> mapLocations))
 		}
 		catch {
 		  case e: Exception => printException(e, "Format Location")
@@ -156,13 +180,23 @@ object ExecuteSearchRequest
 		return Json.obj("location" ->  Json.obj("fields" -> Json.arr("Date", "Country", "Count"), "location" -> JsNull))
 	}
 
-	def formatSentiment(filteredTweets: DataFrame): JsObject = 
+	def formatSentiment(elasticsearchRequests: GetElasticsearchResponse): JsObject = 
 	{
 		try { 
-			//(1,-1,0)
-			// timestamp, sentiment, count
-			val resultSentimentDF = extractSentiment(filteredTweets)
-			return Json.obj("sentiment" -> Json.obj("fields" -> Json.arr("Date", "Positive", "Negative", "Neutral"), "sentiment" -> resultSentimentDF))
+
+			val sentimentResponse = Json.parse(elasticsearchRequests.getSentimentResponse())
+	    	val sentTimestampGroups = (sentimentResponse \ "aggregations" \ "tweet_cnt" \ "buckets").as[List[JsObject]]
+
+	    	val transformedData = sentTimestampGroups.map(sentTimestampGroup => {
+	    		val timestamp = sentTimestampGroup \ "key_as_string"
+	    		val sentimentCount = (sentTimestampGroup \ "tweet_sent" \ "buckets").as[List[JsObject]]
+	    		// sorting sentiment in crescent order (-1, 1, 0)
+	    		val listSent = sentimentCount.map(sentimentData => ((sentimentData \ "key").as[Long],(sentimentData \ "doc_count").as[Long])).toMap
+	    		Json.arr(timestamp, listSent(1), listSent(-1), listSent(0))
+	    	})
+
+    		return Json.obj("sentiment" -> Json.obj("fields" -> Json.arr("Date", "Positive", "Negative", "Neutral"), "sentiment" -> transformedData))
+			
 		} catch {
 		  case e: Exception => printException(e, "Format Sentiment")
 		}
@@ -170,45 +204,7 @@ object ExecuteSearchRequest
 		return Json.obj("sentiment" -> Json.obj("fields" -> Json.arr("Date", "Positive", "Negative", "Neutral"), "sentiment" -> JsNull))
 	}
 
-	def extractTopTweets(top: Int, filteredTweets: DataFrame): Array[JsObject] = 
-	{
-		filteredTweets.select("created_at", "text", "id", 
-							"name", "screen_name", "followers_count", 
-							"profile_image_url", "lang").
-						filter(s"lang = '${Config.tweetsLanguage}'").
-						orderBy(desc("followers_count")).limit(top).
-						map(tweet => Json.obj("created_at" -> tweet.getString(0), "text" -> tweet.getString(1),
-											"user" -> Json.obj("name" -> tweet.getString(3),"screen_name" -> tweet.getString(4),
-																"followers_count" -> tweet.getLong(5),"id" -> tweet.getLong(2),
-																"profile_image_url" -> tweet.getString(6)))).collect()
-	}
-
-	def extractLocation(filteredTweets: DataFrame): Array[JsArray] =
-	{
-		filteredTweets.filter("location != ''").groupBy("timestamp", "location").count().
-															orderBy("timestamp").
-															map(locaTime => Json.arr(locaTime.getString(0),locaTime.getString(1),locaTime.getLong(2).toInt)).collect()
-	}
-
-	def extractSentiment(filteredTweets: DataFrame): Array[JsArray]=
-	{
-		filteredTweets.groupBy("timestamp", "sentiment").count().
-								map(sentiment => (sentiment.getString(0), (sentiment.getInt(1), sentiment.getLong(2).toInt))).
-								groupByKey().
-								sortByKey().
-								map(sentTime => Json.arr(sentTime._1, sentTime._2.find{case (sent:Int,count:Int) => (sent,count) == (1,count)}.getOrElse((0,0))._2, 
-																	sentTime._2.find{case (sent:Int,count:Int) => (sent,count) == (-1,count)}.getOrElse((0,0))._2,
-																	sentTime._2.find{case (sent:Int,count:Int) => (sent,count) == (0,count)}.getOrElse((0,0))._2)).
-								collect()
-	}
-
-	def extractProfession(filteredTweets: DataFrame): Array[JsObject]=
-	{
-		
-		filteredTweets.flatMap(row => row.getSeq[org.apache.spark.sql.Row](11)).map(prof => ((prof.getString(0), prof.getString(1)), 1)).
-						reduceByKey(_ + _).map(prof => (prof._1._1, Json.obj("name" -> prof._1._2, "value" -> prof._2))).
-						groupByKey().map(prof => Json.obj("name" -> prof._1, "children" -> prof._2)).collect()
-	}
+	/* ########################### Word Distance and Cluster Python Program ########################### */
 
 	def extracTopWordDistance(includeTerms: String, excludeTerms: String): JsValue =
 	{
@@ -246,25 +242,6 @@ object ExecuteSearchRequest
 		return Json.obj("cluster" -> JsNull, "distance" -> JsNull)
 	}
 
-	/* ########################### Filter ###############################*/
-	def filterTweets(includeTerms: String, excludeTerms: String): (DataFrame, Boolean) =
-	{
-		try { 
-		 	return (selectTweetsAndInformation(includeTerms, excludeTerms), false)
-		} catch {
-		  case e: Exception => printException(e, "Filtering Tweets") 
-		}
-
-		return (null, true)
-	}
-
-	def selectTweetsAndInformation(includeTerms: String, excludeTerms: String): DataFrame = 
-	{
-		//return Boot.tweetsTable.filter(s"validTweet(tokens, '$includeTerms', '$excludeTerms')")
-
-		return SparkContVal.sqlContext.sql(s"SELECT * FROM  streamingTweets WHERE validTweet(tokens, '$includeTerms', '$excludeTerms')")
-	}
-
 	/* ########################### Util ###############################*/
 	def emptyJSONResponse(): JsValue = 
 	{
@@ -275,7 +252,7 @@ object ExecuteSearchRequest
 				"cluster" -> JsNull, "distance" -> JsNull)
 	}
 
-	def emptyJSONResponseSpark(): JsValue = 
+	def emptyJSONResponseES(): JsValue = 
 	{
 		Json.obj("status" -> JsNull, "totaltweets" -> JsNull, 
 		  		"totalfilteredtweets" -> JsNull, "totalusers" -> JsNull,
