@@ -9,7 +9,7 @@ object Config
 	/* REST API */
 	val restName = "RedRock"
 	val port = 16666
-	
+
 	/* Search configurations */
 	val defaultTopTweets = 100
 	val tweetsLanguage = "en"
@@ -18,13 +18,13 @@ object Config
 	/* Process Config */
 	//Format to be used to group by timestamp for Sentiment and Location
 	val timestampFormat = "MM/dd HH"
-	
+
 	/* Spark partitions number */
 	val numberOfPartitions = 5
-	
+
 	/* RedRock home path */
-	val redRockHomePath = "/Users/barbaragomes/Projects/RedRock-Server/redrock/"
-	
+	val redRockHomePath = sys.env("REDROCK_HOME")
+
 	/* Twitter historical data */
 	// Set to false if historical data was already processed to ES
 	val loadHistoricalData = true
@@ -42,7 +42,7 @@ object Config
 	/* Cluster and Distance configuration*/
 	val pythonScriptPath = redRockHomePath + "Python/main.py"
 	val pythonVersion= "python2.7"
-	
+
 	/* ElasticSearch configuration*/
 	// ES bind IP (localhost)
 	val elasticsearchIP = "127.0.0.1"
