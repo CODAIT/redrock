@@ -2,7 +2,7 @@ package com.redRock
 
 object GetJSONRequest
 {
-	def getLocationJSONRequest(includeTerms:String, excludeTerms:String): String = 
+	def getLocationJSONRequest(includeTerms:String, excludeTerms:String): String =
 	{
 		s"""
 		{
@@ -11,7 +11,7 @@ object GetJSONRequest
 		      "must": [
 		        {"match": {
 		          "tweet_text_tokens": {
-		            "query": "$includeTerms", 
+		            "query": "$includeTerms",
 		            "operator": "and"
 		          }
 		        }},
@@ -21,7 +21,7 @@ object GetJSONRequest
 		      "must_not": {
 		        "match": {
 		          "tweet_text_tokens": {
-		            "query": "$excludeTerms", 
+		            "query": "$excludeTerms",
 		            "operator": "or"
 		          }
 		        }
@@ -45,9 +45,9 @@ object GetJSONRequest
 		  }
 		}
 		"""
-	}	
+	}
 
-	def getSentimentJSONRequest(includeTerms:String, excludeTerms:String): String = 
+	def getSentimentJSONRequest(includeTerms:String, excludeTerms:String): String =
 	{
 		s"""
 		{
@@ -56,7 +56,7 @@ object GetJSONRequest
 		      "must": [
 		        {"match": {
 		          "tweet_text_tokens": {
-		            "query": "$includeTerms", 
+		            "query": "$includeTerms",
 		            "operator": "and"
 		          }
 		        }},
@@ -66,7 +66,7 @@ object GetJSONRequest
 		      "must_not": {
 		        "match": {
 		          "tweet_text_tokens": {
-		            "query": "$excludeTerms", 
+		            "query": "$excludeTerms",
 		            "operator": "or"
 		          }
 		        }
@@ -91,9 +91,9 @@ object GetJSONRequest
 		  }
 		}
 		"""
-	}	
+	}
 
-	def getProfessionJSONRequest(includeTerms:String, excludeTerms:String): String = 
+	def getProfessionJSONRequest(includeTerms:String, excludeTerms:String): String =
 	{
 		s"""
 		{
@@ -102,7 +102,7 @@ object GetJSONRequest
 		        "must": [
 		          {"match": {
 		            "tweet_text_tokens": {
-		              "query": "$includeTerms", 
+		              "query": "$includeTerms",
 		              "operator": "and"
 		            }
 		          }},
@@ -121,7 +121,7 @@ object GetJSONRequest
 		    },
 		    "aggs": {
 		    "tweet_professions": {
-		      "nested": { 
+		      "nested": {
 		        "path": "tweet_professions"
 		      },
 		      "aggs": {
@@ -142,29 +142,27 @@ object GetJSONRequest
 		  }
 		}
 		"""
-	}	
+	}
 
-	def getTotalTweetsJSONRequest(): String = 
+	def getTotalTweetsJSONRequest(): String =
 	{
 		s"""
 		{
-		    "query" : {
-		        "filtered" : {
-		            "filter" : {
-		                "range" : {
-		                    "created_at": {
-		                        "gte" : "Fri Jan 01 07:12:43 +0000 2015",
-		                        "lte"  : "Fri Dec 01 07:12:43 +0000 2015"
-		                    }
-		                }
-		            }
-		        }
+        "filtered" : {
+            "filter" : {
+                "range" : {
+                    "created_at": {
+                        "gte" : "Fri Jan 01 07:12:43 +0000 2015",
+                        "lte"  : "Fri Dec 01 07:12:43 +0000 2015"
+                    }
+                }
+            }
 		    }
 		}
 		"""
 	}
 
-	def getTotalFilteredTweetsAndTotalUserJSONRequest(includeTerms:String, excludeTerms:String): String = 
+	def getTotalFilteredTweetsAndTotalUserJSONRequest(includeTerms:String, excludeTerms:String): String =
 	{
 		s"""
 		{

@@ -48,6 +48,8 @@ object Config
 	val elasticsearchIP = "127.0.0.1"
 	// ES bind port
 	val elasticsearchPort = "9200"
+	// ES API bind port
+	val elasticsearchApiPort = "9300"
 	// ES spark configuration
 	val elasticsearchConfig = Map("pushdown" -> "true", "es.nodes" -> elasticsearchIP, "es.port" -> elasticsearchPort)
 	//database name

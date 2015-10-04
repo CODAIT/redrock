@@ -34,6 +34,9 @@ object Dependency {
     val ScalaCheck   = "1.12.2"
     val akkaV = "2.3.9"
     val sprayV = "1.3.3"
+    val ElasticsearchVersion = "1.7.2"
+    val Slf4jVersion = "1.7.12"
+    val Log4jVersion = "1.2.17"
   }
 
   // Spark dependencies
@@ -64,6 +67,12 @@ object Dependency {
 
   //csv library
   val readCSV       = "com.databricks"    %% "spark-csv"  % "1.1.0"
+
+  //Elasticsearch dependencies
+  val elasticSearch  = "org.elasticsearch" % "elasticsearch" % Version.ElasticsearchVersion
+  val slf4j          = "org.slf4j" % "slf4j-api" % Version.Slf4jVersion % "provided"
+  val log4j          = "log4j" % "log4j" % Version.Log4jVersion % "provided"
+  val log4Slf4j      = "org.slf4j" % "log4j-over-slf4j" % Version.Slf4jVersion % "provided"
 }
 
 object Dependencies {
@@ -75,7 +84,8 @@ object Dependencies {
       scalaTest, scalaCheck, playJson,
       sprayCan, sprayRouting,
       akkaActor,specs2Core,
-      readCSV)
+      readCSV, elasticSearch,
+      slf4j, log4j, log4Slf4j)
 }
 
 object RedRockBuild extends Build {
