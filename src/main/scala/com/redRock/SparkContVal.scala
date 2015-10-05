@@ -8,6 +8,14 @@ import org.apache.spark.streaming._
 import org.apache.spark.streaming.StreamingContext._
 import org.apache.spark.streaming.dstream.DStream
 import org.elasticsearch.spark._ 
+import java.io.BufferedInputStream
+import java.io.File
+import java.io.FileInputStream
+import java.io.InputStream
+import org.apache.hadoop.conf._
+import org.apache.hadoop.fs._
+import java.net.URI
+
 
 object SparkContVal 
 {
@@ -25,4 +33,7 @@ object SparkContVal
     /* config sqlContext */
     sqlContext.setConf("spark.sql.shuffle.partitions", s"${Config.numberOfPartitions}")
     sqlContext.setConf("spark.sql.codegen", "true")
+
+    /* delete HDFS processed files */
+    val hadoopFS :FileSystem = FileSystem.get(sc.hadoopConfiguration)
 }

@@ -17,9 +17,17 @@ import org.apache.spark.sql.Row
 import org.elasticsearch.spark._ 
 import org.elasticsearch.spark.sql._
 
+import org.apache.hadoop.io.LongWritable
+import org.apache.hadoop.io.Text
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat
+import org.apache.hadoop.fs.{FileSystem, Path, PathFilter}
+
 
 object PrepareTweets
 {
+    //Extract file names
+    val regExp = "\\b(hdfs:|file:)[\\w|:|/|-]+".r
+    
     def loadHistoricalDataAndStartStreaming() =
     {
         loadHistoricalData()
@@ -31,10 +39,7 @@ object PrepareTweets
         println(s"Starting Streaming at: ${Config.twitterStreamingDataPath}")
         println(s"Partition number: ${Config.numberOfPartitions}")
 
-        val ssc = StreamingContext.getOrCreate(Config.checkPointDirForStreaming,
-        () => {
-            createContext()
-        })
+        val ssc = createContext()
 
         /* Must be in a Future because we need to start the REST API after */
         Future
@@ -49,13 +54,9 @@ object PrepareTweets
         println("Creating streaming new context")
         // Create the context with a 1 second batch size
         val ssc = new StreamingContext(SparkContVal.sc, Seconds(Config.streamingBatchTime))
-        ssc.checkpoint(Config.checkPointDirForStreaming)
-
-        //Extract file names
-        val regExp = "\\b(hdfs:|file:)[\\w|:|/|-]+".r
 
         val tweetsStreaming = ssc.textFileStream(Config.twitterStreamingDataPath)
-
+         
         tweetsStreaming.foreachRDD{ (rdd: RDD[String], time: Time) =>
             println(s"========= $time =========")
             if(!rdd.partitions.isEmpty)
@@ -63,6 +64,8 @@ object PrepareTweets
                 println("Processing File(s):")
                 regExp.findAllMatchIn(rdd.toDebugString).foreach(println)
                 loadJSONExtractInfoWriteToDatabase(rdd)
+                println("Deleting File(s):")
+                regExp.findAllMatchIn(rdd.toDebugString).foreach((name) => deleteFile(name.toString))
             }
         }
 
@@ -74,7 +77,10 @@ object PrepareTweets
         if (Config.loadHistoricalData)
         {
             println(s"Loading historical data from: ${Config.twitterHistoricalDataPath}")
-            loadJSONExtractInfoWriteToDatabase(SparkContVal.sc.textFile(Config.twitterHistoricalDataPath,Config.numberOfPartitions))
+            val jsonRDDs = SparkContVal.sc.textFile(Config.twitterHistoricalDataPath,Config.numberOfPartitions)
+            loadJSONExtractInfoWriteToDatabase(jsonRDDs)
+            println("Deleting File(s):")
+            regExp.findAllMatchIn(jsonRDDs.toDebugString).foreach((name) => deleteFile(name.toString))
         }
         else
         {
@@ -106,9 +112,6 @@ object PrepareTweets
                         .format("org.elasticsearch.spark.sql")
                         .options(Config.elasticsearchConfig)
                         .save(s"${Config.esIndex}/${Config.esTable}")
-                        /*.format("org.apache.spark.sql.cassandra")
-                        .options(Map("keyspace" -> "tweets", "table" -> "processed_tweets"))
-                        .save()*/
         }
         catch {
           case e: Exception => 
@@ -116,6 +119,12 @@ object PrepareTweets
             printException(e, "Processing Tweets")
           }
         }
+    }
+
+    def deleteFile(fileName: String) =
+    {
+        println(fileName)
+        SparkContVal.hadoopFS.delete(new Path(fileName), true)
     }
 
     def printException(thr: Throwable, module: String) =
