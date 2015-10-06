@@ -123,8 +123,19 @@ object PrepareTweets
 
     def deleteFile(fileName: String) =
     {
-        println(fileName)
-        SparkContVal.hadoopFS.delete(new Path(fileName), true)
+        val filePath = new Path(fileName)
+        if (SparkContVal.hadoopFS.isDirectory(filePath))
+        {
+            SparkContVal.hadoopFS.listStatus(filePath).foreach((status) => {
+                                                        println(status.getPath())
+                                                        SparkContVal.hadoopFS.delete(status.getPath(), true)
+                                                    })
+        }
+        else
+        {
+            println(fileName)
+            SparkContVal.hadoopFS.delete(filePath, true)
+        }
     }
 
     def printException(thr: Throwable, module: String) =
