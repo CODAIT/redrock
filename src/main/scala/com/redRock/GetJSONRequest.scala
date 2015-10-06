@@ -11,21 +11,24 @@ object GetJSONRequest
 		      "must": [
 		        {"match": {
 		          "tweet_text_tokens": {
-		            "query": "$includeTerms",
+		            "query": "$includeTerms", 
 		            "operator": "and"
 		          }
 		        }},
 		        {"range" : {"created_at" : {"gte" : "Fri Jan 01 07:12:43 +0000 2015"}}},
 		        {"range" : {"created_at" : {"lte" : "Fri Dec 01 07:12:43 +0000 2015"}}}
 		      ],
-		      "must_not": {
-		        "match": {
+		      "must_not": [
+		        {"match": {
 		          "tweet_text_tokens": {
-		            "query": "$excludeTerms",
+		            "query": "$excludeTerms", 
 		            "operator": "or"
 		          }
-		        }
-		      }
+		        }},
+		        {"match": {
+		          "tweet_location": ""
+		        }}
+		      ]
 		    }
 		  },
 		  "aggs": {
@@ -56,7 +59,7 @@ object GetJSONRequest
 		      "must": [
 		        {"match": {
 		          "tweet_text_tokens": {
-		            "query": "$includeTerms",
+		            "query": "$includeTerms", 
 		            "operator": "and"
 		          }
 		        }},
@@ -66,7 +69,7 @@ object GetJSONRequest
 		      "must_not": {
 		        "match": {
 		          "tweet_text_tokens": {
-		            "query": "$excludeTerms",
+		            "query": "$excludeTerms", 
 		            "operator": "or"
 		          }
 		        }
@@ -97,19 +100,22 @@ object GetJSONRequest
 	{
 		s"""
 		{
-		    "query": {
-		      "bool": {
-		        "must": [
-		          {"match": {
+		  "query": {
+		    "bool": {
+		      "must": [
+		        {
+		          "match": {
 		            "tweet_text_tokens": {
 		              "query": "$includeTerms",
 		              "operator": "and"
 		            }
-		          }},
-		          {"range" : {"created_at" : {"gte" : "Fri Jan 01 07:12:43 +0000 2015"}}},
-		          {"range" : {"created_at" : {"lte" : "Fri Dec 01 07:12:43 +0000 2015"}}}
-		        ],
-		        "must_not": {
+		          }
+		        },
+		        {"range": {"created_at": {"gte": "Fri Jan 01 07:12:43 +0000 2015"}}},
+		        {"range": {"created_at": {"lte": "Fri Dec 01 07:12:43 +0000 2015"}}}
+		      ],
+		      "must_not": [
+		        {
 		          "match": {
 		            "tweet_text_tokens": {
 		              "query": "$excludeTerms",
@@ -117,20 +123,21 @@ object GetJSONRequest
 		            }
 		          }
 		        }
-		      }
-		    },
-		    "aggs": {
+		      ]
+		    }
+		  },
+		  "aggs": {
 		    "tweet_professions": {
 		      "nested": {
 		        "path": "tweet_professions"
 		      },
 		      "aggs": {
-		        "professions" : {
+		        "professions": {
 		          "terms": {
 		            "field": "tweet_professions._1"
 		          },
-		          "aggs" : {
-		            "keywords" : {
+		          "aggs": {
+		            "keywords": {
 		              "terms": {
 		                "field": "tweet_professions._2"
 		              }
@@ -148,15 +155,17 @@ object GetJSONRequest
 	{
 		s"""
 		{
-        "filtered" : {
-            "filter" : {
-                "range" : {
-                    "created_at": {
-                        "gte" : "Fri Jan 01 07:12:43 +0000 2015",
-                        "lte"  : "Fri Dec 01 07:12:43 +0000 2015"
-                    }
-                }
-            }
+		    "query" : {
+		        "filtered" : {
+		            "filter" : {
+		                "range" : {
+		                    "created_at": {
+		                        "gte" : "Fri Jan 01 07:12:43 +0000 2015",
+		                        "lte"  : "Fri Dec 01 07:12:43 +0000 2015"
+		                    }
+		                }
+		            }
+		        }
 		    }
 		}
 		"""
@@ -213,7 +222,7 @@ object GetJSONRequest
 		          }
 		        }},
 		        {"match": {
-		          "language": "${Config.tweetsLanguage}"
+		          "language": "en"
 		        }},
 		        {"range" : {"created_at" : {"gte" : "Fri Jan 01 07:12:43 +0000 2015"}}},
 		        {"range" : {"created_at" : {"lte" : "Fri Dec 01 07:12:43 +0000 2015"}}}
@@ -228,7 +237,7 @@ object GetJSONRequest
 		      }
 		    }
 		  },
-		  "size" : $top,
+		  "size" : 100,
 		  "sort": [
 		    {
 		      "user_followers_count": {
