@@ -3,50 +3,88 @@ package com.redRock
 import org.elasticsearch.common.settings.ImmutableSettings
 import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.transport.InetSocketTransportAddress
-import java.io._
+import java.io.StringWriter
+import java.io.PrintWriter
+import org.apache.http.HttpEntity
+import org.apache.http.entity.StringEntity
+import org.apache.http.HttpResponse
+import org.apache.http.client.ClientProtocolException
+import org.apache.http.client.HttpClient
+import org.apache.http.client.methods.HttpPost
+import org.apache.http.impl.client.DefaultHttpClient
+import scala.io.Source._
 
 class GetElasticsearchResponse(val topTweets: Int, includeTerms:Array[String], excludeTerms:Array[String])
 {
+	val baseURL = "http://" + Config.elasticsearchIP + ":" + Config.elasticsearchPort + "/" + Config.esIndex + "/" + Config.esTable
+	val searchURL = baseURL + "/_search"
+	val countURL = searchURL + "?search_type=count"
 	val includeTermsES = includeTerms.mkString(" ")
 	val excludeTermsES = excludeTerms.mkString(" ")
 
 	def getTopTweetsResponse(): String =
 	{
 		val jsonRequest = GetJSONRequest.getTopTweetsJSONRequest(includeTermsES, excludeTermsES, topTweets)
-		return performSearch(jsonRequest)
+		return performSearch(searchURL, jsonRequest)
 	}
 
 	def getLocationResponse(): String =
 	{
 		val jsonRequest = GetJSONRequest.getLocationJSONRequest(includeTermsES, excludeTermsES)
-		return performSearch(jsonRequest)
+		return performSearch(countURL, jsonRequest)
 	}
 
 	def getSentimentResponse(): String =
 	{
 		val jsonRequest = GetJSONRequest.getSentimentJSONRequest(includeTermsES, excludeTermsES)
-		return performSearch(jsonRequest)
+		return performSearch(countURL, jsonRequest)
 	}
 
 	def getProfessionResponse(): String =
 	{
 		val jsonRequest = GetJSONRequest.getProfessionJSONRequest(includeTermsES, excludeTermsES)
-		return performSearch(jsonRequest)
+		return performSearch(countURL, jsonRequest)
 	}
 
 	def getTotalTweetsESResponse(): String =
 	{
 		val jsonRequest = GetJSONRequest.getTotalTweetsJSONRequest()
-		return performSearch(jsonRequest)
+		return performSearch(countURL, jsonRequest)
 	}
 
 	def getTotalFilteredTweetsAndTotalUserResponse(): String =
 	{
 		val jsonRequest = GetJSONRequest.getTotalFilteredTweetsAndTotalUserJSONRequest(includeTermsES, excludeTermsES)
-		return performSearch(jsonRequest)
+		return performSearch(countURL, jsonRequest)
 	}
 
-	def performSearch(jsonQueryRequest:String): String = {
+	def performSearch(String url, jsonQueryRequest:String): String = {
+		try
+		{
+			val httpClient = new DefaultHttpClient()
+    	val request = new HttpPost(url)
+    	request.setEntity(new StringEntity(jsonQueryRequest) )
+
+    	val httpResponse = httpClient.execute(request)
+    	val entity = httpResponse.getEntity()
+    	var jsonResponse = ""
+    	if (entity != null) {
+      	val inputStream = entity.getContent()
+      	jsonResponse = fromInputStream(inputStream).getLines.mkString
+      	inputStream.close
+    	}
+    	httpClient.getConnectionManager().shutdown()
+
+			return jsonResponse
+		} catch {
+			case e: Exception => {
+				printException(e, "Retrieve ElasticSearch Response")
+				return ""
+			}
+		}
+	}
+
+	def performSearchWithElasticSearchAPI(jsonQueryRequest:String): String = {
 		try
 		{
 			val settings = ImmutableSettings.settingsBuilder()

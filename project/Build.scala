@@ -35,6 +35,7 @@ object Dependency {
     val akkaV = "2.3.9"
     val sprayV = "1.3.3"
     val ElasticsearchVersion = "1.7.2"
+    val HttpClientVersion = "4.2.2"
     val Slf4jVersion = "1.7.12"
     val Log4jVersion = "1.2.17"
   }
@@ -73,6 +74,9 @@ object Dependency {
   val slf4j          = "org.slf4j" % "slf4j-api" % Version.Slf4jVersion % "provided"
   val log4j          = "log4j" % "log4j" % Version.Log4jVersion % "provided"
   val log4Slf4j      = "org.slf4j" % "log4j-over-slf4j" % Version.Slf4jVersion % "provided"
+
+  //HTTP client
+  val httpClient     = "org.apache.httpcomponents" % "httpclient" % Version.HttpClientVersion
 }
 
 object Dependencies {
