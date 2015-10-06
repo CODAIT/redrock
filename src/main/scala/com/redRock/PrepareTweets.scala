@@ -42,8 +42,7 @@ import org.apache.hadoop.fs.{FileSystem, Path, PathFilter}
 object PrepareTweets
 {
     //Extract file names
-    val regExp = "\\b(hdfs:|file:)[\\w|:|/|-]+".r
-    
+    val regExp = "\\b(hdfs:|file:)\\S+".r
     def loadHistoricalDataAndStartStreaming() =
     {
         loadHistoricalData()
