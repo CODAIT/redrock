@@ -74,7 +74,7 @@ class GetElasticsearchResponse(val topTweets: Int, includeTerms:Array[String], e
 		return performSearch(countURL, jsonRequest)
 	}
 
-	def performSearch(String url, jsonQueryRequest:String): String = {
+	def performSearch(url: String, jsonQueryRequest:String): String = {
 		try
 		{
 			val httpClient = new DefaultHttpClient()
