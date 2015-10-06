@@ -78,19 +78,19 @@ class GetElasticsearchResponse(val topTweets: Int, includeTerms:Array[String], e
 		try
 		{
 			val httpClient = new DefaultHttpClient()
-    	val request = new HttpPost(url)
-    	request.setEntity(new StringEntity(jsonQueryRequest) )
+	    	val request = new HttpPost(url)
+	    	request.setEntity(new StringEntity(jsonQueryRequest) )
 
-    	val httpResponse = httpClient.execute(request)
-    	val entity = httpResponse.getEntity()
-    	var jsonResponse = ""
-    	if (entity != null) {
-      	val inputStream = entity.getContent()
-      	jsonResponse = fromInputStream(inputStream).getLines.mkString
-      	inputStream.close
-    	}
-    	httpClient.getConnectionManager().shutdown()
+	    	val httpResponse = httpClient.execute(request)
+	    	val entity = httpResponse.getEntity()
+	    	var jsonResponse = ""
+	    	if (entity != null) {
+	      		val inputStream = entity.getContent()
+	      		jsonResponse = fromInputStream(inputStream).getLines.mkString
+	      		inputStream.close
+	    	}
 
+	    	httpClient.getConnectionManager().shutdown()
 			return jsonResponse
 		} catch {
 			case e: Exception => {
@@ -107,20 +107,20 @@ class GetElasticsearchResponse(val topTweets: Int, includeTerms:Array[String], e
 			      .put("cluster.name", "elasticsearch")
 			      .build();
 
-	    val client = new TransportClient(settings).addTransportAddress(new InetSocketTransportAddress(Config.elasticsearchIP, Config.elasticsearchApiPort.toInt));
+	    	val client = new TransportClient(settings).addTransportAddress(new InetSocketTransportAddress(Config.elasticsearchIP, Config.elasticsearchApiPort.toInt));
 
-	    val response = client
-	      .prepareSearch("redrock")
-	      .setTypes("processed_tweets")
-	      .setQuery(jsonQueryRequest)
-	      .setSize(60)
-	      .setExplain(true)
-	      .execute()
-	      .actionGet()
+	    	val response = client
+		      .prepareSearch("redrock")
+		      .setTypes("processed_tweets")
+		      .setQuery(jsonQueryRequest)
+		      .setSize(60)
+		      .setExplain(true)
+		      .execute()
+		      .actionGet()
 
 			val jsonResponse = response.toString
 
-	    client.close()
+	   		client.close()
 
 			return jsonResponse
 		} catch {

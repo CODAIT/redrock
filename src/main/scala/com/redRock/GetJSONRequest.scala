@@ -66,6 +66,8 @@ object GetJSONRequest
 		"""
 	}
 
+	/* Don't need to sort the field tweet_sentiment beucase the transformation is using a map
+	since the result not always returns all fields */
 	def getSentimentJSONRequest(includeTerms:String, excludeTerms:String): String =
 	{
 		s"""
@@ -101,8 +103,7 @@ object GetJSONRequest
 		      "aggs": {
 		        "tweet_sent": {
 		          "terms": {
-		            "field": "tweet_sentiment",
-		            "order" : { "_term" : "asc" }
+		            "field": "tweet_sentiment"
 		          }
 		        }
 		      }

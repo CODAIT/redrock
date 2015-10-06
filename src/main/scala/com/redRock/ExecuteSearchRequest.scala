@@ -101,7 +101,7 @@ object ExecuteSearchRequest
 	{
 		try { 
 			val totalTweetsResponse = Json.parse(elasticsearchRequests.getTotalTweetsESResponse())
-			Json.obj("totaltweets" -> (totalTweetsResponse \ "hits" \ "total"))
+			 return Json.obj("totaltweets" -> (totalTweetsResponse \ "hits" \ "total"))
 		} catch {
 		  case e: Exception => printException(e, "Format Total Tweets")
 		}
@@ -206,9 +206,10 @@ object ExecuteSearchRequest
 	    	val transformedData = sentTimestampGroups.map(sentTimestampGroup => {
 	    		val timestamp = sentTimestampGroup \ "key_as_string"
 	    		val sentimentCount = (sentTimestampGroup \ "tweet_sent" \ "buckets").as[List[JsObject]]
-	    		// sorting sentiment in crescent order (-1, 1, 0)
+	    		// Not all search is going to return result for all sentiments (1,-1,0)
 	    		val listSent = sentimentCount.map(sentimentData => ((sentimentData \ "key").as[Long],(sentimentData \ "doc_count").as[Long])).toMap
-	    		Json.arr(timestamp, listSent(1), listSent(-1), listSent(0))
+	    		val values: (Long, Long, Long) = (listSent.getOrElse(1,0), listSent.getOrElse(-1,0), listSent.getOrElse(0,0))
+	    		Json.arr(timestamp, values._1, values._2, values._3)
 	    	})
 
     		return Json.obj("sentiment" -> Json.obj("fields" -> Json.arr("Date", "Positive", "Negative", "Neutral"), "sentiment" -> transformedData))
