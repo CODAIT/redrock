@@ -1,6 +1,15 @@
 #!/bin/bash
 
-rm -rf log.txt
+if [ "$#" -ne 7 ]; then
+	echo "Illegal number of parameters"
+	echo "Usage:"
+	echo "./getDecahoseData start-date start-hh start-mm end-date end-hh end-mm \"dest-folder/\""
+	echo "Example: ./getDecahoseData 2015-07-03 00 10 2015-07-05 03 10 \"/User/mwang/\""
+	echo "Note: Don't forget last / in the folder field and start-mm and end-mm must be multiple of 10"
+	exit
+fi
+
+#rm -rf log.txt
 
 baseUrl=https://cde-archive.services.dal.bluemix.net
 user="rmurphy"
@@ -9,9 +18,15 @@ password="kjwrfndc77zDq"
 sameday=0
 currentdate=$1
 loopenddate=$(/bin/date --date "$4 1 day" +%Y-%m-%d)
+log=$1_`date +"%s"`.txt
+echo $log
 
 folder=$7
-echo $1 $2 $3 $4 $5 $6 $7 >> log.txt
+echo [`date`] $1 $2 $3 $4 $5 $6 $7 >> $log
+
+if [ ! -d "$folder" ]; then
+	mkdir $folder
+fi
 
 do_download()
 {
@@ -32,8 +47,11 @@ do_download()
 		filename=$(printf "%s_%s_%s_%s_%s_activity.json.gz" "${arr[0]}" "${arr[1]}" "${arr[2]}" "$s_hh1" "$s_mm1")
 	fi
 	fullname=$url$filename
-	echo $fullname >> log.txt
-	wget -O $folder$filename --user $user --password $password --no-check-certificate $fullname
+	echo [`date`] $fullname >> $log
+	wget_output=$(wget -q -O $folder$filename --user $user --password $password --no-check-certificate $fullname)
+	if [ $? -ne 0 ]; then
+		echo [`date`] $fullname "NOT FOUND!" >> $log
+	fi
 
 }
 
@@ -80,7 +98,7 @@ if [ "$sameday" == 1 ]; then
 else
 	until [ "$currentdate" == "$loopenddate" ]
 		do
-  			echo $currentdate >> log.txt
+  			echo [`date`] $currentdate >> $log
 			if [ "$currentdate" == "$1" ]; then
 				tmp_s_hh=$2
 				tmp_s_mm=$3
