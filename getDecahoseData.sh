@@ -1,19 +1,20 @@
 #!/bin/bash
 
-if [ "$#" -ne 7 ]; then
+if [ "$#" -ne 8 ]; then
 	echo "Illegal number of parameters"
 	echo "Usage:"
-	echo "./getDecahoseData start-date start-hh start-mm end-date end-hh end-mm \"dest-folder/\""
-	echo "Example: ./getDecahoseData 2015-07-03 00 10 2015-07-05 03 10 \"/User/mwang/\""
+	echo "./getDecahoseData start-date start-hh start-mm end-date end-hh end-mm \"dest-folder/\" \"hadoop-folder/\""
+	echo "Example: ./getDecahoseData 2015-07-03 00 10 2015-07-05 03 10 \"/User/mwang/\" \"/Home/hd/\""
 	echo "Note: Don't forget last / in the folder field and start-mm and end-mm must be multiple of 10"
 	exit
 fi
 
-#rm -rf log.txt
+read -p 'wget Username: ' user
+read -sp 'wget Password: ' password
 
 baseUrl=https://cde-archive.services.dal.bluemix.net
-user="rmurphy"
-password="kjwrfndc77zDq"
+#user="rmurphy"
+#password="kjwrfndc77zDq"
 
 sameday=0
 currentdate=$1
@@ -22,7 +23,8 @@ log=$1_`date +"%s"`.txt
 echo $log
 
 folder=$7
-echo [`date`] $1 $2 $3 $4 $5 $6 $7 >> $log
+hdfolder=$8
+echo [`date`] $1 $2 $3 $4 $5 $6 $7 $8 >> $log
 
 if [ ! -d "$folder" ]; then
 	mkdir $folder
@@ -51,6 +53,9 @@ do_download()
 	wget_output=$(wget -q -O $folder$filename --user $user --password $password --no-check-certificate $fullname)
 	if [ $? -ne 0 ]; then
 		echo [`date`] $fullname "NOT FOUND!" >> $log
+	else
+		hadoop fs -put $folder$filename $hdfolder
+		rm $folder$filename 
 	fi
 
 }
