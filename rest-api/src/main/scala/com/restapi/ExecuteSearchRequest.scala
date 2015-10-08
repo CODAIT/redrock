@@ -26,36 +26,30 @@ object ExecuteSearchRequest
 {
 	def runSearchAnalysis(includeTerms: String, excludeTerms: String, top: Int): Future[String]= 
 	{	
-		Future {
-			println("Processing search:")
-			println("Include: " + includeTerms)
-			println("Exclude: " + excludeTerms)
+		println("Processing search:")
+		println("Include: " + includeTerms)
+		println("Exclude: " + excludeTerms)
 			
-			Json.stringify(executeAsynchronous(top,includeTerms.toLowerCase(),excludeTerms.toLowerCase()))
+		executeAsynchronous(top,includeTerms.toLowerCase(),excludeTerms.toLowerCase()) map { js =>
+			Json.stringify(js)
 		}	
 	}
 	
-	def executeAsynchronous(top: Int, includeTerms: String, excludeTerms: String): JsValue =
+	def executeAsynchronous(top: Int, includeTerms: String, excludeTerms: String): Future[JsValue] =
 	{
-		try 
-		{
-			val cluster_distance: Future[JsValue] = future { extracTopWordDistance(includeTerms,excludeTerms) }
-			val elasticsearch_dataAnalisys: Future[JsValue] = future { extractElasticsearchAnalysis(top,includeTerms,excludeTerms) }
+		val cluster_distance: Future[JsValue] = future { extracTopWordDistance(includeTerms,excludeTerms) }
+		val elasticsearch_dataAnalisys: Future[JsValue] = future { extractElasticsearchAnalysis(top,includeTerms,excludeTerms) }
 			
-			val tasks: Seq[Future[JsValue]] = Seq(elasticsearch_dataAnalisys, cluster_distance)
-			val aggregated: Future[Seq[JsValue]] = Future.sequence(tasks)
-		
-			val jsonResults: Seq[JsValue] = Await.result(aggregated, 500.seconds)
-			return (jsonResults(0).as[JsObject] ++ jsonResults(1).as[JsObject])
-			//return (Json.obj( "WARN" -> "SEARCH NOT CONNECTED TO ELASTICSEARCH") ++ jsonResults(0).as[JsObject])
+		val tasks: Seq[Future[JsValue]] = Seq(elasticsearch_dataAnalisys, cluster_distance)
+		val aggregated: Future[Seq[JsValue]] = Future.sequence(tasks)
+		val result = aggregated.map(jsonResults => jsonResults(0).as[JsObject] ++ jsonResults(1).as[JsObject])
 
+		result.recover{
+			case e: Exception => 
+				printException(e, "Execute Python and Spark Asynchronous"); 
+		  		emptyJSONResponse()
 		}
-		catch {
-			case e: Exception => {
-		  		printException(e, "Execute Python and Spark Asynchronous"); 
-		  		return emptyJSONResponse()
-		  	}
-		}
+
 	}
 
 	def extractElasticsearchAnalysis(top: Int, includeTerms: String, excludeTerms: String): JsValue =
