@@ -24,5 +24,7 @@ sbt compile
 sbt 'project redrock-restapi' compile package assembly
 
 echo "============ Starting REST API =============="
-java -classpath $REDROCK_HOME/rest-api/target/scala-2.10/redrock-rest-api.jar com.restapi.Boot
+nohup java -classpath $REDROCK_HOME/rest-api/target/scala-2.10/redrock-rest-api.jar com.restapi.Boot > $REDROCK_HOME/rest-api/nohup_restapi.out&
+
+echo "========== REST API Started - Check nodup_restapi.out ================="
 

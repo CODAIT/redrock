@@ -14,5 +14,5 @@
 # limitations under the License.
 #
 
-ps aux |grep "com.decahose.Boot"      | tr -s " " |  cut -d " " -f 2 | xargs kill >/dev/null 2>&1
+ps aux |grep "redrock-twitter-decahose"      | tr -s " " |  cut -d " " -f 2 | xargs kill >/dev/null 2>&1
 

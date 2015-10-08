@@ -32,4 +32,6 @@ cd $REDROCK_HOME/twitter-decahose
 echo "============ Running Decahose Spark Streaming =============="
 #run program on cluster
 HOSTNAME="$(/bin/hostname -f)"
-$SPARK_HOME/bin/spark-submit --master spark://$HOSTNAME:7077 --packages org.elasticsearch:elasticsearch-spark_2.10:2.1.1 --class com.decahose.Boot $REDROCK_HOME/twitter-decahose/target/scala-2.10/redrock-twitter-decahose.jar
+nohup $SPARK_HOME/bin/spark-submit --master spark://$HOSTNAME:7077 --packages org.elasticsearch:elasticsearch-spark_2.10:2.1.1 --class com.decahose.Boot $REDROCK_HOME/twitter-decahose/target/scala-2.10/redrock-twitter-decahose.jar > $REDROCK_HOME/twitter-decahose/nohup-decahose.out&
+
+echo "======== Decahose started. Check nohup-decahose.out =============="

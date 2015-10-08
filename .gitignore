@@ -80,3 +80,6 @@ metastore_db/
 
 #ignore decompressed npy file
 freq_may1_may19_june1_june11.npy
+
+#nohup files
+nohup*.out
