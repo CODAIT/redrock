@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package com.redRock
+package com.decahose
 
 import java.io._
 import java.util.zip._
@@ -59,7 +59,7 @@ object LoadLocationData
 
 	def loadCities(): Map[String,(String,Double)] =
 	{
-		val citiesPath = Config.redRockHomePath + "src/main/resources/Location/worldcitiespop.txt.gz"
+		val citiesPath = Config.redRockHomePath + "/twitter-decahose/src/main/resources/Location/worldcitiespop.txt.gz"
 		val citiesStream = new GZIPInputStream(new FileInputStream(citiesPath))
 		val citiesMap = fromInputStream(citiesStream)("ISO-8859-1").getLines.drop(1).filter(line => filterCityLine(line)).
 											map(line => mapCity(line)).toArray.sortBy(city => city._2._2).toMap
@@ -91,7 +91,7 @@ object LoadLocationData
 
 	def loadCountryMapping(): Map[String,String] =
 	{
-		val countryPath = Config.redRockHomePath + "src/main/resources/Location/country_mapping.csv"
+		val countryPath = Config.redRockHomePath + "/twitter-decahose/src/main/resources/Location/country_mapping.csv"
 		val countryMap = fromFile(countryPath)("utf-8").getLines.map(line => proccessCountryLine(line)).
 														filter(country => country != ("" -> "")).toMap
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package com.redRock
+package com.restapi
 
 import org.elasticsearch.common.settings.ImmutableSettings
 import org.elasticsearch.client.transport.TransportClient

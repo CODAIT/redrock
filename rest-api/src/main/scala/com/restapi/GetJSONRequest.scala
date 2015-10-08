@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package com.redRock
+package com.restapi
 
 object GetJSONRequest
 {

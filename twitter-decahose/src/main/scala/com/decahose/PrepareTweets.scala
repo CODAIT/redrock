@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package com.redRock
+package com.decahose
 
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
@@ -33,9 +33,6 @@ import org.apache.spark.sql.Row
 import org.elasticsearch.spark._ 
 import org.elasticsearch.spark.sql._
 
-import org.apache.hadoop.io.LongWritable
-import org.apache.hadoop.io.Text
-import org.apache.hadoop.mapreduce.lib.input.TextInputFormat
 import org.apache.hadoop.fs.{FileSystem, Path, PathFilter}
 
 
@@ -55,13 +52,9 @@ object PrepareTweets
         println(s"Partition number: ${Config.numberOfPartitions}")
 
         val ssc = createContext()
-
-        /* Must be in a Future because we need to start the REST API after */
-        Future
-        {
-            ssc.start()
-            ssc.awaitTermination()
-        }
+        println("Starting Streaming")
+        ssc.start()
+        ssc.awaitTermination()
     }
 
     def createContext(): StreamingContext = {
@@ -93,9 +86,16 @@ object PrepareTweets
         {
             println(s"Loading historical data from: ${Config.twitterHistoricalDataPath}")
             val jsonRDDs = SparkContVal.sc.textFile(Config.twitterHistoricalDataPath,Config.numberOfPartitions)
-            loadJSONExtractInfoWriteToDatabase(jsonRDDs)
-            println("Deleting File(s):")
-            regExp.findAllMatchIn(jsonRDDs.toDebugString).foreach((name) => deleteFile(name.toString))
+            if(!jsonRDDs.partitions.isEmpty)
+            {
+                loadJSONExtractInfoWriteToDatabase(jsonRDDs)
+                println("Deleting File(s):")
+                regExp.findAllMatchIn(jsonRDDs.toDebugString).foreach((name) => deleteFile(name.toString))
+            }
+            else
+            {
+                println("No historical files to be loaded")
+            }
         }
         else
         {

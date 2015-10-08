@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package com.redRock
+package com.decahose
 
 /* Mapping tweet fields */
 object TweetField

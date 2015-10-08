@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package com.redRock
+package com.restapi
 
 import play.api.libs.json._
 import java.io._

@@ -23,7 +23,7 @@ import numpy as np
 def loadDistanceClusterData(homePath):
   global Feat, words, freqs, clusters
   ## read model data
-  Feat  = np.load(homePath + 'Python/distance/w2v_may1_may19_june1_june11.npy')
-  words = np.load(homePath + 'Python/distance/word_may1_may19_june1_june11.npy')
-  freqs = np.load(homePath + 'Python/distance/freq_may1_may19_june1_june11.npy')
-  clusters = np.load(homePath + 'Python/cluster/clusterK5_may1_may19_june1_june11.npy')
+  Feat  = np.load(homePath + '/rest-api/python/distance/w2v_may1_may19_june1_june11.npy')
+  words = np.load(homePath + '/rest-api/python/distance/word_may1_may19_june1_june11.npy')
+  freqs = np.load(homePath + '/rest-api/python/distance/freq_may1_may19_june1_june11.npy')
+  clusters = np.load(homePath + '/rest-api/python/cluster/clusterK5_may1_may19_june1_june11.npy')

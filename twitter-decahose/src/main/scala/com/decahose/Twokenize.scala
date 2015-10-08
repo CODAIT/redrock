@@ -51,7 +51,8 @@
    June 2011
 */
 
-package com.redRock
+package com.decahose
+
 import scala.util.matching.Regex
 
 object Twokenize {

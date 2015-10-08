@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package com.redRock
+package com.decahose
 
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
