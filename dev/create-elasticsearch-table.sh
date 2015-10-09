@@ -27,6 +27,7 @@ fi
 echo " ==========  Creating ES Schema ============"
 curl -XPUT 'http://localhost:9200/redrock/' -d '
 {
+  "settings": {
     "analysis": {
       "filter": {
         "tweet_filter": {
