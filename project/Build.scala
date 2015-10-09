@@ -19,17 +19,16 @@ import sbt.Keys._
 
 object BuildSettings {
 
+  val ParentProject = "redrock-parent"
   val RestAPIName = "redrock-restapi"
   val DecahoseName = "redrock-decahose"
   val PowertrackName = "redrock-powertrack"
-  val MainProject = "redrock-main"
 
   val Version = "3.0"
   val ScalaVersion = "2.10.4"
 
-
-  lazy val externalbuildSettings = Defaults.coreDefaultSettings ++ Seq (
-    name          := MainProject,
+  lazy val rootbuildSettings = Defaults.coreDefaultSettings ++ Seq (
+    name          := ParentProject,
     version       := Version,
     scalaVersion  := ScalaVersion,
     organization  := "com.ibm.spark.redrock",
@@ -134,15 +133,18 @@ object RedRockBuild extends Build {
   import Dependencies._
   import BuildSettings._
 
-  lazy val RRexternal = Project(
-    id = "redrock-external",
+  lazy val parent = Project(
+    id = "redrock-parent",
     base = file("."),
-    settings = externalbuildSettings
+    aggregate = Seq(restapi, decahose),
+    settings = rootbuildSettings ++ Seq(
+      aggregate in update := false
+    )
   )
 
   lazy val restapi = Project(
     id = "redrock-restapi",
-    base = file("rest-api"),
+    base = file("./rest-api"),
     settings = restAPIbuildSettings ++ Seq(
       maxErrors := 5,
       ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) },
@@ -157,7 +159,7 @@ object RedRockBuild extends Build {
 
   lazy val decahose = Project(
     id = "redrock-decahose",
-    base = file("twitter-decahose"),
+    base = file("./twitter-decahose"),
     settings = decahosebuildSettings ++ Seq(
       maxErrors := 5,
       ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) },
