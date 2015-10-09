@@ -26,10 +26,10 @@ import akka.util.Timeout
 object Boot extends App {
     /*Starting REST API*/
     // we need an ActorSystem to host our application in
-    implicit val system = ActorSystem(Config.restActor)
+    implicit val system = ActorSystem(LoadConf.restConf.getString("actor"))
     // create and start our service actor
-    val service = system.actorOf(Props[MyServiceActor], Config.restName)
+    val service = system.actorOf(Props[MyServiceActor], LoadConf.restConf.getString("name"))
     implicit val timeout = Timeout(800.seconds)
-    IO(Http) ? Http.Bind(service, interface = "localhost", port = Config.port)
-    println(s"Application: ${Config.appName} running version: ${Config.appVersion}")
+    IO(Http) ? Http.Bind(service, interface = "localhost", port = LoadConf.restConf.getInt("port"))
+    println(s"""Application: ${LoadConf.globalConf.getString("appName")} running version: ${LoadConf.globalConf.getString("appVersion")}""")
 }

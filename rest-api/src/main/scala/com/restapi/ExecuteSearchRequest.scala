@@ -221,7 +221,7 @@ object ExecuteSearchRequest
 	{
 		try{
 			 
-			val cmd = Array[String](Config.pythonVersion,Config.pythonScriptPath,includeTerms,excludeTerms, Config.redRockHomePath)
+			val cmd = Array[String](LoadConf.restConf.getString("python-code.pythonVersion"),LoadConf.restConf.getString("python-code.classPath"),includeTerms,excludeTerms, LoadConf.globalConf.getString("homePath"))
 			
 			// create runtime to execute external command
 			val rt: Runtime = Runtime.getRuntime()

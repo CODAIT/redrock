@@ -158,7 +158,7 @@ object AnalysisFunction
 		TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
 		val date = sdf.parse(created_at)
 
-		val sdf_new:SimpleDateFormat = new SimpleDateFormat(Config.timestampFormat)
+		val sdf_new:SimpleDateFormat = new SimpleDateFormat(LoadConf.sparkConf.getString("decahose.timestampFormat"))
 		return sdf_new.format(date)
 		//Fri May 01 07:12:43 +0000 2015
 	}

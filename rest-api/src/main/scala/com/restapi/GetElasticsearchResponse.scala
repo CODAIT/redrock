@@ -32,7 +32,7 @@ import scala.io.Source._
 
 class GetElasticsearchResponse(val topTweets: Int, includeTerms:Array[String], excludeTerms:Array[String])
 {
-	val baseURL = "http://" + Config.elasticsearchIP + ":" + Config.elasticsearchPort + "/" + Config.esIndex + "/" + Config.esTable
+	val baseURL = "http://" + LoadConf.esConf.getString("bindIP") + ":" + LoadConf.esConf.getString("bindPort") + "/" + LoadConf.esConf.getString("indexName") + "/" + LoadConf.esConf.getString("decahoseType")
 	val searchURL = baseURL + "/_search"
 	val countURL = searchURL + "?search_type=count"
 	val includeTermsES = includeTerms.mkString(" ")
@@ -107,7 +107,7 @@ class GetElasticsearchResponse(val topTweets: Int, includeTerms:Array[String], e
 			      .put("cluster.name", "elasticsearch")
 			      .build();
 
-	    	val client = new TransportClient(settings).addTransportAddress(new InetSocketTransportAddress(Config.elasticsearchIP, Config.elasticsearchApiPort.toInt));
+	    	val client = new TransportClient(settings).addTransportAddress(new InetSocketTransportAddress(LoadConf.esConf.getString("bindIP"), LoadConf.esConf.getString("bindAPIPort").toInt));
 
 	    	val response = client
 		      .prepareSearch("redrock")

@@ -48,8 +48,8 @@ object PrepareTweets
 
     def startTweetsStreaming() =
     {
-        println(s"Starting Streaming at: ${Config.twitterStreamingDataPath}")
-        println(s"Partition number: ${Config.numberOfPartitions}")
+        println(s"""Starting Streaming at: ${LoadConf.sparkConf.getString("decahose.twitterStreamingDataPath")}""")
+        println(s"""Partition number: ${LoadConf.sparkConf.getInt("partitionNumber")}""")
 
         val ssc = createContext()
         println("Starting Streaming")
@@ -61,9 +61,9 @@ object PrepareTweets
         
         println("Creating streaming new context")
         // Create the context with a 1 second batch size
-        val ssc = new StreamingContext(SparkContVal.sc, Seconds(Config.streamingBatchTime))
+        val ssc = new StreamingContext(SparkContVal.sc, Seconds(LoadConf.sparkConf.getInt("decahose.streamingBatchTime")))
 
-        val tweetsStreaming = ssc.textFileStream(Config.twitterStreamingDataPath)
+        val tweetsStreaming = ssc.textFileStream(LoadConf.sparkConf.getString("decahose.twitterStreamingDataPath"))
          
         tweetsStreaming.foreachRDD{ (rdd: RDD[String], time: Time) =>
             println(s"========= $time =========")
@@ -82,10 +82,10 @@ object PrepareTweets
 
     def loadHistoricalData() =
     {
-        if (Config.loadHistoricalData)
+        if (LoadConf.sparkConf.getBoolean("decahose.loadHistoricalData"))
         {
-            println(s"Loading historical data from: ${Config.twitterHistoricalDataPath}")
-            val jsonRDDs = SparkContVal.sc.textFile(Config.twitterHistoricalDataPath,Config.numberOfPartitions)
+            println(s"""Loading historical data from: ${LoadConf.sparkConf.getString("decahose.twitterHistoricalDataPath")}""")
+            val jsonRDDs = SparkContVal.sc.textFile(LoadConf.sparkConf.getString("decahose.twitterHistoricalDataPath"),LoadConf.sparkConf.getInt("partitionNumber"))
             if(!jsonRDDs.partitions.isEmpty)
             {
                 loadJSONExtractInfoWriteToDatabase(jsonRDDs)
@@ -125,8 +125,8 @@ object PrepareTweets
                         .filter(s"created_at IS NOT NULL AND tweet_text IS NOT NULL")
                         .write.mode(SaveMode.Append)
                         .format("org.elasticsearch.spark.sql")
-                        .options(Config.elasticsearchConfig)
-                        .save(s"${Config.esIndex}/${Config.esTable}")
+                        .options(Map("pushdown" -> "true", "es.nodes" -> LoadConf.esConf.getString("bindIP"), "es.port" -> LoadConf.esConf.getString("bindPort")))
+                        .save(s"""${LoadConf.esConf.getString("indexName")}/${LoadConf.esConf.getString("decahoseType")}""")
         }
         catch {
           case e: Exception => 

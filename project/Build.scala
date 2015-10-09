@@ -101,6 +101,9 @@ object Dependency {
   val akkaActor      = "com.typesafe.akka" %%  "akka-actor"     % Version.akkaV 
   val specs2Core     = "org.specs2"        %%  "specs2-core"    % "2.3.7" % "test"
 
+  //Config library
+  val configLib      = "com.typesafe" % "config" % "1.2.1"
+
   // Json library
   val playJson       = "com.typesafe.play" %% "play-json"       % "2.3.0"
 
@@ -122,10 +125,10 @@ object Dependencies {
   import Dependency._
 
   val decahoseAndPowertrackDependencies = Seq(sparkCore,sparkSQL,sparkRepl,
-                                              sparkHive, elasticSearchConnector, readCSV)
+                                              sparkHive, elasticSearchConnector, readCSV, configLib)
 
   val restAPIDependecies = Seq(playJson, sprayCan, sprayRouting, akkaActor, 
-                               specs2Core, elasticSearch, httpClient, slf4j, log4j, log4Slf4j)
+                               specs2Core, elasticSearch, httpClient, slf4j, log4j, log4Slf4j, configLib)
 }
 
 object RedRockBuild extends Build {
@@ -151,7 +154,7 @@ object RedRockBuild extends Build {
       triggeredMessage := Watched.clearWhenTriggered,
       resolvers := allResolvers,
       libraryDependencies ++= Dependencies.restAPIDependecies,
-      unmanagedResourceDirectories in Compile += baseDirectory.value / "conf",
+      unmanagedResourceDirectories in Compile += file(".") / "conf",
       mainClass := Some("com.restapi.Boot"),
       fork := true,
       connectInput in run := true
@@ -166,7 +169,7 @@ object RedRockBuild extends Build {
       triggeredMessage := Watched.clearWhenTriggered,
       resolvers := allResolvers,
       libraryDependencies ++= Dependencies.decahoseAndPowertrackDependencies,
-      unmanagedResourceDirectories in Compile += baseDirectory.value / "conf",
+      unmanagedResourceDirectories in Compile += file(".") / "conf",
       mainClass := Some("com.decahose.Boot"),
       fork := true,
       connectInput in run := true

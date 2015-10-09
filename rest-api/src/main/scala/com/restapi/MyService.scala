@@ -39,7 +39,7 @@ trait MyService extends HttpService {
         get{
           respondWithMediaType(`application/json`) {
             complete {
-                ExecuteSearchRequest.runSearchAnalysis(includeTerms, excludeTerms, top.getOrElse(Config.defaultTopTweets))
+                ExecuteSearchRequest.runSearchAnalysis(includeTerms, excludeTerms, top.getOrElse(LoadConf.restConf.getInt("searchParam.defaultTopTweets")))
             }
           }
         }
