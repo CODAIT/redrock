@@ -122,6 +122,10 @@ curl -XPUT 'http://localhost:9200/redrock/' -d '
           "type": "date",
           "format": "MM/dd HH",
           "index": "not_analyzed"
+        },
+        "tweet_text_array_tokens" : {
+          "type": "string",
+          "analyzer": "tweet_analyzer"
         }
       }
     }

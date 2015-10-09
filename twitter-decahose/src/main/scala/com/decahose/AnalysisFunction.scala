@@ -48,6 +48,7 @@ object AnalysisFunction
 		SparkContVal.sqlContext.udf.register("getLocation", (text: String) => extractLocation(text))
 		SparkContVal.sqlContext.udf.register("getProfession", (description: String) => extractProfession(description))	
 		SparkContVal.sqlContext.udf.register("stringTokenizer", (text: String) => stringTokenizer(text))
+		SparkContVal.sqlContext.udf.register("stringTokenizerArray", (text: String) => stringTokenizerArray(text))
 		SparkContVal.sqlContext.udf.register("convertCreatedAtFormat", (created_at: String) => convertCreatedAtFormat(created_at))
 	}
 	
@@ -110,6 +111,11 @@ object AnalysisFunction
 	def stringTokenizer(text: String): String = 
 	{
 		return Twokenize.tokenize(text.toLowerCase().trim()).mkString(" ")
+	}
+
+	def stringTokenizerArray(text: String): Array[String] = 
+	{
+		return Twokenize.tokenize(text.toLowerCase().trim()).toArray
 	}
 
 	def extractLocation(text: String): String = 
