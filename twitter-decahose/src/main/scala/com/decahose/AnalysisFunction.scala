@@ -160,7 +160,7 @@ object AnalysisFunction
 
 	def convertCreatedAtFormat(created_at: String): String =
 	{
-		val sdf:SimpleDateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy")
+		val sdf:SimpleDateFormat = new SimpleDateFormat("YYYY-MM-HH'T'HH:mm:ss.SSS'Z'")   //2014-01-16T01:49:50.000Z
 		TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
 		val date = sdf.parse(created_at)
 

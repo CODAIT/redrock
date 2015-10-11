@@ -20,23 +20,23 @@ package com.decahose
 object TweetField
 {
 	// unique id of the tweet as string format
-	val tweet_id = "id_str"
+	val tweet_id = "id"
 	// tweet text as string format
-	val tweet_text = "text"
+	val tweet_text = "body"
 	// tweet created date as string format
-	val tweet_created_at = "created_at"
+	val tweet_created_at = "postedTime"
 	// user description as string format
-	val user_description = "user.description"
+	val user_description = "actor.summary"
 	//user profile image URL as string format
-	val user_profileImgURL = "user.profile_image_url"
+	val user_profileImgURL = "actor.image"
 	//user followers count as long format
-	val user_followers_count = "user.followers_count"
+	val user_followers_count = "actor.followersCount"
 	// user name as string format
-	val user_name = "user.name"
+	val user_name = "actor.displayName"
 	// user handle as string format
-	val user_handle =  "user.screen_name"
+	val user_handle =  "actor.preferredUsername"
 	//user id as long format
-	val user_id = "user.id"
+	val user_id = "actor.id"
 	//user language as string format
-	val language = "lang"
+	val language = "actor.languages" //array, get first ?
 }

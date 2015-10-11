@@ -66,7 +66,7 @@ curl -XPUT 'http://localhost:9200/redrock/' -d '
         },
         "created_at": {
           "type": "date",
-          "format": "EEE MMM dd HH:mm:ss Z yyyy"
+          "format": "date_hour_minute_second_fraction"
         },
         "language": {
           "type": "string",
