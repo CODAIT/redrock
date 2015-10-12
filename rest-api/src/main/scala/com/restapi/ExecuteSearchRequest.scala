@@ -24,21 +24,21 @@ import scala.concurrent.{Future,future, Await}
 
 object ExecuteSearchRequest 
 {
-	def runSearchAnalysis(includeTerms: String, excludeTerms: String, top: Int): Future[String]= 
+	def runSearchAnalysis(includeTerms: String, excludeTerms: String, top: Int, startDate: String, endDate: String): Future[String]= 
 	{	
 		println("Processing search:")
 		println("Include: " + includeTerms)
 		println("Exclude: " + excludeTerms)
 			
-		executeAsynchronous(top,includeTerms.toLowerCase(),excludeTerms.toLowerCase()) map { js =>
+		executeAsynchronous(top,includeTerms.toLowerCase(),excludeTerms.toLowerCase(), startDate, endDate) map { js =>
 			Json.stringify(js)
 		}	
 	}
 	
-	def executeAsynchronous(top: Int, includeTerms: String, excludeTerms: String): Future[JsValue] =
+	def executeAsynchronous(top: Int, includeTerms: String, excludeTerms: String, startDate: String, endDate: String): Future[JsValue] =
 	{
 		val cluster_distance: Future[JsValue] = future { extracTopWordDistance(includeTerms,excludeTerms) }
-		val elasticsearch_dataAnalisys: Future[JsValue] = future { extractElasticsearchAnalysis(top,includeTerms,excludeTerms) }
+		val elasticsearch_dataAnalisys: Future[JsValue] = future { extractElasticsearchAnalysis(top,includeTerms,excludeTerms,startDate,endDate) }
 			
 		val tasks: Seq[Future[JsValue]] = Seq(elasticsearch_dataAnalisys, cluster_distance)
 		val aggregated: Future[Seq[JsValue]] = Future.sequence(tasks)
@@ -52,11 +52,11 @@ object ExecuteSearchRequest
 
 	}
 
-	def extractElasticsearchAnalysis(top: Int, includeTerms: String, excludeTerms: String): JsValue =
+	def extractElasticsearchAnalysis(top: Int, includeTerms: String, excludeTerms: String, startDate: String, endDate: String): JsValue =
 	{	
 		try{
 			// Object to send the requests and get the responses
-			val elasticsearchRequests = new GetElasticsearchResponse(top, includeTerms.toLowerCase().trim().split(","), excludeTerms.toLowerCase().trim().split(","))
+			val elasticsearchRequests = new GetElasticsearchResponse(top, includeTerms.toLowerCase().trim().split(","), excludeTerms.toLowerCase().trim().split(","), startDate, endDate)
 			return executeElasticsearchQueries(elasticsearchRequests)
 		}
 		catch {

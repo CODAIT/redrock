@@ -18,7 +18,7 @@ package com.restapi
 
 object GetJSONRequest
 {
-	def getLocationJSONRequest(includeTerms:String, excludeTerms:String): String =
+	def getLocationJSONRequest(includeTerms:String, excludeTerms:String, startDatetime: String, endDatetime: String): String =
 	{
 		s"""
 		{
@@ -31,8 +31,8 @@ object GetJSONRequest
 		            "operator": "and"
 		          }
 		        }},
-		        {"range" : {"created_at" : {"gte" : "Fri Jan 01 07:12:43 +0000 2015"}}},
-		        {"range" : {"created_at" : {"lte" : "Fri Dec 01 07:12:43 +0000 2015"}}}
+		        {"range" : {"created_at" : {"gte" : "$startDatetime"}}},
+		        {"range" : {"created_at" : {"lte" : "$endDatetime"}}}
 		      ],
 		      "must_not": [
 		        {"match": {
@@ -68,7 +68,7 @@ object GetJSONRequest
 
 	/* Don't need to sort the field tweet_sentiment beucase the transformation is using a map
 	since the result not always returns all fields */
-	def getSentimentJSONRequest(includeTerms:String, excludeTerms:String): String =
+	def getSentimentJSONRequest(includeTerms:String, excludeTerms:String, startDatetime: String, endDatetime: String): String =
 	{
 		s"""
 		{
@@ -81,8 +81,8 @@ object GetJSONRequest
 		            "operator": "and"
 		          }
 		        }},
-		        {"range" : {"created_at" : {"gte" : "Fri Jan 01 07:12:43 +0000 2015"}}},
-		        {"range" : {"created_at" : {"lte" : "Fri Dec 01 07:12:43 +0000 2015"}}}
+		        {"range" : {"created_at" : {"gte" : "$startDatetime"}}},
+		        {"range" : {"created_at" : {"lte" : "$endDatetime"}}}
 		      ],
 		      "must_not": {
 		        "match": {
@@ -113,7 +113,7 @@ object GetJSONRequest
 		"""
 	}
 
-	def getProfessionJSONRequest(includeTerms:String, excludeTerms:String): String =
+	def getProfessionJSONRequest(includeTerms:String, excludeTerms:String, startDatetime: String, endDatetime: String): String =
 	{
 		s"""
 		{
@@ -128,8 +128,8 @@ object GetJSONRequest
 		            }
 		          }
 		        },
-		        {"range": {"created_at": {"gte": "Fri Jan 01 07:12:43 +0000 2015"}}},
-		        {"range": {"created_at": {"lte": "Fri Dec 01 07:12:43 +0000 2015"}}}
+		        {"range": {"created_at": {"gte": "$startDatetime"}}},
+		        {"range": {"created_at": {"lte": "$endDatetime"}}}
 		      ],
 		      "must_not": [
 		        {
@@ -168,7 +168,7 @@ object GetJSONRequest
 		"""
 	}
 
-	def getTotalTweetsJSONRequest(): String =
+	def getTotalTweetsJSONRequest(startDatetime: String, endDatetime: String): String =
 	{
 		s"""
 		{
@@ -177,8 +177,8 @@ object GetJSONRequest
 		            "filter" : {
 		                "range" : {
 		                    "created_at": {
-		                        "gte" : "Fri Jan 01 07:12:43 +0000 2015",
-		                        "lte"  : "Fri Dec 01 07:12:43 +0000 2015"
+		                        "gte" : "$startDatetime",
+		                        "lte"  : "$endDatetime"
 		                    }
 		                }
 		            }
@@ -188,7 +188,7 @@ object GetJSONRequest
 		"""
 	}
 
-	def getTotalFilteredTweetsAndTotalUserJSONRequest(includeTerms:String, excludeTerms:String): String =
+	def getTotalFilteredTweetsAndTotalUserJSONRequest(includeTerms:String, excludeTerms:String, startDatetime: String, endDatetime: String): String =
 	{
 		s"""
 		{
@@ -201,8 +201,8 @@ object GetJSONRequest
 		            "operator": "and"
 		          }
 		        }},
-		        {"range" : {"created_at" : {"gte" : "Fri Jan 01 07:12:43 +0000 2015"}}},
-		        {"range" : {"created_at" : {"lte" : "Fri Dec 01 07:12:43 +0000 2015"}}}
+		        {"range" : {"created_at" : {"gte" : "$startDatetime"}}},
+		        {"range" : {"created_at" : {"lte" : "$endDatetime"}}}
 		      ],
 		      "must_not": {
 		        "match": {
@@ -225,7 +225,7 @@ object GetJSONRequest
 		"""
 	}
 
-	def getTopTweetsJSONRequest(includeTerms:String, excludeTerms:String, top: Int): String =
+	def getTopTweetsJSONRequest(includeTerms:String, excludeTerms:String, top: Int, startDatetime: String, endDatetime: String): String =
 	{
 		s"""
 		{
@@ -241,8 +241,8 @@ object GetJSONRequest
 		        {"match": {
 		          "language": "en"
 		        }},
-		        {"range" : {"created_at" : {"gte" : "Fri Jan 01 07:12:43 +0000 2015"}}},
-		        {"range" : {"created_at" : {"lte" : "Fri Dec 01 07:12:43 +0000 2015"}}}
+		        {"range" : {"created_at" : {"gte" : "$startDatetime"}}},
+		        {"range" : {"created_at" : {"lte" : "$endDatetime"}}}
 		      ],
 		      "must_not": {
 		        "match": {

@@ -31,15 +31,18 @@ class MyServiceActor extends Actor with MyService {
 trait MyService extends HttpService {
 
   val home = pathPrefix("ss")
-  val search = path("search") & parameters('termsInclude, 'termsExclude, 'top.as[Int] ?, 'user )
+  val search = path("search") & parameters('termsInclude, 'termsExclude, 'top.as[Int] ?, 'user, 'startDate ?, 'endDate ?)
 
   val myRoute =
     home {
-      search { (includeTerms, excludeTerms, top, user) =>
+      search { (includeTerms, excludeTerms, top, user, startDate, endDate) =>
         get{
           respondWithMediaType(`application/json`) {
             complete {
-                ExecuteSearchRequest.runSearchAnalysis(includeTerms, excludeTerms, top.getOrElse(LoadConf.restConf.getInt("searchParam.defaultTopTweets")))
+                ExecuteSearchRequest.runSearchAnalysis(includeTerms, excludeTerms, 
+                  top.getOrElse(LoadConf.restConf.getInt("searchParam.defaultTopTweets")), 
+                  startDate.getOrElse(LoadConf.restConf.getString("searchParam.defaulStartDate")), 
+                  endDate.getOrElse(LoadConf.restConf.getString("searchParam.defaultEndDate")))
             }
           }
         }

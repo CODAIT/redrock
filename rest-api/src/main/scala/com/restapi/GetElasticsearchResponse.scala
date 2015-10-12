@@ -29,48 +29,53 @@ import org.apache.http.client.HttpClient
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.impl.client.DefaultHttpClient
 import scala.io.Source._
+import java.text.SimpleDateFormat
+import java.util.TimeZone
+import java.util.Date
 
-class GetElasticsearchResponse(val topTweets: Int, includeTerms:Array[String], excludeTerms:Array[String])
+class GetElasticsearchResponse(val topTweets: Int, includeTerms:Array[String], excludeTerms:Array[String], startDate: String, endDate: String)
 {
 	val baseURL = "http://" + LoadConf.esConf.getString("bindIP") + ":" + LoadConf.esConf.getString("bindPort") + "/" + LoadConf.esConf.getString("indexName") + "/" + LoadConf.esConf.getString("decahoseType")
 	val searchURL = baseURL + "/_search"
 	val countURL = searchURL + "?search_type=count"
 	val includeTermsES = includeTerms.mkString(" ")
 	val excludeTermsES = excludeTerms.mkString(" ")
+	val startDateTime = transformDateToTweetFormat(startDate + " 00:00:00")
+	val endDateTime = transformDateToTweetFormat(endDate + " 23:59:59")
 
 	def getTopTweetsResponse(): String =
 	{
-		val jsonRequest = GetJSONRequest.getTopTweetsJSONRequest(includeTermsES, excludeTermsES, topTweets)
+		val jsonRequest = GetJSONRequest.getTopTweetsJSONRequest(includeTermsES, excludeTermsES, topTweets, startDateTime, endDateTime)
 		return performSearch(searchURL, jsonRequest)
 	}
 
 	def getLocationResponse(): String =
 	{
-		val jsonRequest = GetJSONRequest.getLocationJSONRequest(includeTermsES, excludeTermsES)
+		val jsonRequest = GetJSONRequest.getLocationJSONRequest(includeTermsES, excludeTermsES, startDateTime, endDateTime)
 		return performSearch(countURL, jsonRequest)
 	}
 
 	def getSentimentResponse(): String =
 	{
-		val jsonRequest = GetJSONRequest.getSentimentJSONRequest(includeTermsES, excludeTermsES)
+		val jsonRequest = GetJSONRequest.getSentimentJSONRequest(includeTermsES, excludeTermsES, startDateTime, endDateTime)
 		return performSearch(countURL, jsonRequest)
 	}
 
 	def getProfessionResponse(): String =
 	{
-		val jsonRequest = GetJSONRequest.getProfessionJSONRequest(includeTermsES, excludeTermsES)
+		val jsonRequest = GetJSONRequest.getProfessionJSONRequest(includeTermsES, excludeTermsES, startDateTime, endDateTime)
 		return performSearch(countURL, jsonRequest)
 	}
 
 	def getTotalTweetsESResponse(): String =
 	{
-		val jsonRequest = GetJSONRequest.getTotalTweetsJSONRequest()
+		val jsonRequest = GetJSONRequest.getTotalTweetsJSONRequest(startDateTime, endDateTime)
 		return performSearch(countURL, jsonRequest)
 	}
 
 	def getTotalFilteredTweetsAndTotalUserResponse(): String =
 	{
-		val jsonRequest = GetJSONRequest.getTotalFilteredTweetsAndTotalUserJSONRequest(includeTermsES, excludeTermsES)
+		val jsonRequest = GetJSONRequest.getTotalFilteredTweetsAndTotalUserJSONRequest(includeTermsES, excludeTermsES, startDateTime, endDateTime)
 		return performSearch(countURL, jsonRequest)
 	}
 
@@ -129,6 +134,16 @@ class GetElasticsearchResponse(val topTweets: Int, includeTerms:Array[String], e
 				return ""
 		  }
 		}
+	}
+
+	def transformDateToTweetFormat(strdate: String): String =
+	{
+		val sdf:SimpleDateFormat = new SimpleDateFormat(LoadConf.restConf.getString("dateFormat"))   //2014-01-16T01:49:50.000Z
+		TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
+		val date = sdf.parse(strdate)
+
+		val sdf_new:SimpleDateFormat = new SimpleDateFormat(LoadConf.globalConf.getString("spark.decahose.tweetTimestampFormat"))
+		return sdf_new.format(date)
 	}
 
 	def printException(thr: Throwable, module: String) =
