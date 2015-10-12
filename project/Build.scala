@@ -174,4 +174,19 @@ object RedRockBuild extends Build {
       fork := true,
       connectInput in run := true
     ))
+
+  lazy val powertrack = Project(
+    id = "redrock-powertrack",
+    base = file("./twitter-powertrack"),
+    settings = decahosebuildSettings ++ Seq(
+      maxErrors := 5,
+      ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) },
+      triggeredMessage := Watched.clearWhenTriggered,
+      resolvers := allResolvers,
+      libraryDependencies ++= Dependencies.decahoseAndPowertrackDependencies,
+      unmanagedResourceDirectories in Compile += file(".") / "conf",
+      mainClass := Some("com.powertrack.Boot"),
+      fork := true,
+      connectInput in run := true
+    ))
 }
