@@ -30,6 +30,6 @@ object Boot extends App {
     // create and start our service actor
     val service = system.actorOf(Props[MyServiceActor], LoadConf.restConf.getString("name"))
     implicit val timeout = Timeout(800.seconds)
-    IO(Http) ? Http.Bind(service, interface = "localhost", port = LoadConf.restConf.getInt("port"))
+    IO(Http) ? Http.Bind(service, interface = "0.0.0.0", port = LoadConf.restConf.getInt("port"))
     println(s"""Application: ${LoadConf.globalConf.getString("appName")} running version: ${LoadConf.globalConf.getString("appVersion")}""")
 }
