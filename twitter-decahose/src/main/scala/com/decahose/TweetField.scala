@@ -39,4 +39,6 @@ object TweetField
 	val user_id = "actor.id"
 	//user language as string format
 	val language = "actor.languages" //array, get first ?
+	// defines the type of the tweet obj
+	val verb = "verb"
 }

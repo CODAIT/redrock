@@ -108,6 +108,7 @@ object PrepareTweets
         try
         {
             SparkContVal.sqlContext.read.json(rdd)
+                        .filter(s"${TweetField.verb} = 'post' OR ${TweetField.verb} = 'share'")
                         .selectExpr(s"${TweetField.tweet_id} as tweet_id",
                         s"${TweetField.tweet_created_at} AS created_at",
                         s"${TweetField.language} AS language",
@@ -123,7 +124,7 @@ object PrepareTweets
                         s"${TweetField.user_name} user_name",
                         s"convertCreatedAtFormat(${TweetField.tweet_created_at}) AS created_at_timestamp",
                         s"stringTokenizerArray(${TweetField.tweet_text}) as tweet_text_array_tokens")
-                        .filter(s"created_at IS NOT NULL AND tweet_text IS NOT NULL")
+                        //.filter(s"created_at IS NOT NULL AND tweet_text IS NOT NULL")
                         .write.mode(SaveMode.Append)
                         .format("org.elasticsearch.spark.sql")
                         .options(Map("pushdown" -> "true", "es.nodes" -> LoadConf.esConf.getString("bindIP"), "es.port" -> LoadConf.esConf.getString("bindPort")))
