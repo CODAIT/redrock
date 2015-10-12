@@ -37,7 +37,7 @@ object SparkContVal
 {
 	val conf = new SparkConf()
     //conf.setMaster(masterNode)
-    conf.setAppName(LoadConf.globalConf.getString("appName"))
+    conf.setAppName(LoadConf.globalConf.getString("appName") + " - Decahose")
     conf.set("spark.scheduler.mode", "FAIR")
     //conf.set("spark.cassandra.connection.host", "127.0.0.1")
     //Do not allow infer schema. Schema must be defined at ES before start the app
