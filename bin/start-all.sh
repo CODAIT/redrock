@@ -21,6 +21,10 @@ echo "========= Starting Decahose =========="
 
 $REDROCK_HOME/bin/start-decahose.sh
 
+echo "========= Starting Powertrack =========="
+
+$REDROCK_HOME/bin/start-powertrack.sh
+
 echo "========= Starting REST API =========="
 
 $REDROCK_HOME/bin/start-restapi.sh
