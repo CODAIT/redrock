@@ -15,8 +15,6 @@
 # limitations under the License.
 #
 
-
-
 if [ "$1" = "--delete" ]
 then
   echo " ==========  Deleting ES Schema ============"
@@ -66,7 +64,7 @@ curl -XPUT 'http://localhost:9200/redrock/' -d '
         },
         "created_at": {
           "type": "date",
-          "format": "date_hour_minute_second_fraction"
+          "format": "dateOptionalTime"
         },
         "language": {
           "type": "string",
@@ -89,7 +87,7 @@ curl -XPUT 'http://localhost:9200/redrock/' -d '
           "index": "not_analyzed"
         },
         "user_id": {
-          "type": "long",
+          "type": "string",
           "index": "not_analyzed"
         },
         "tweet_sentiment": {
