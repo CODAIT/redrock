@@ -42,6 +42,14 @@ object SparkContVal
     //conf.set("spark.cassandra.connection.host", "127.0.0.1")
     //Do not allow infer schema. Schema must be defined at ES before start the app
    	conf.set("es.index.auto.create", "true")
+    conf.set("es.batch.size.bytes", "300000000")
+    conf.set("es.batch.size.entries", "10000")
+    conf.set("es.batch.write.refresh", "false")
+    conf.set("es.batch.write.retry.count", "50")
+    conf.set("es.batch.write.retry.wait", "500")
+    conf.set("es.http.timeout", "5m")
+    conf.set("es.http.retries", "50")
+    conf.set("es.action.heart.beat.lead", "50")
 
     val sc = new SparkContext(conf)
     val sqlContext = new HiveContext(sc)
