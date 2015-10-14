@@ -32,6 +32,8 @@ trait MyService extends HttpService {
 
   val home = pathPrefix("ss")
   val search = path("search") & parameters('termsInclude, 'termsExclude, 'top.as[Int] ?, 'user, 'startDate ?, 'endDate ?)
+  val sentiment = pathPrefix("sentiment")
+  val sentimentAnalysis = path("analysis") & parameters('termsInclude, 'termsExclude, 'sentiment.as[Int] , 'user, 'startDatetime, 'endDatetime, 'top.as[Int])
 
   val myRoute =
     home {
@@ -43,6 +45,17 @@ trait MyService extends HttpService {
                   top.getOrElse(LoadConf.restConf.getInt("searchParam.defaultTopTweets")), 
                   startDate.getOrElse(LoadConf.restConf.getString("searchParam.defaulStartDate")), 
                   endDate.getOrElse(LoadConf.restConf.getString("searchParam.defaultEndDate")))
+            }
+          }
+        }
+      } ~
+      sentiment {
+        sentimentAnalysis { (termsInclude, termsExclude, sentiment, user, startDatetime, endDatetime, top) =>
+          get{
+            respondWithMediaType(`application/json`) {
+              complete {
+                ExecuteSentimentAnalysis.runSentimentAnalysis(termsInclude, termsExclude, top, startDatetime, endDatetime, sentiment)
+              }
             }
           }
         }
