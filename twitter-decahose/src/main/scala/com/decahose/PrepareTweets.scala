@@ -133,7 +133,7 @@ object PrepareTweets
         catch {
           case e: Exception => 
           {
-            printException(e, "Processing Tweets")
+            Utils.printException(e, "Processing Tweets")
           }
         }
     }
@@ -155,12 +155,5 @@ object PrepareTweets
         }
     }
 
-    def printException(thr: Throwable, module: String) =
-    {
-        println("Exception on: " + module)
-        val sw = new StringWriter
-        thr.printStackTrace(new PrintWriter(sw))
-        println(sw.toString)
-    }
 
 }
