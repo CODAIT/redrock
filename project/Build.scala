@@ -95,6 +95,7 @@ object Dependency {
   val sparkSQL       = "org.apache.spark"  %% "spark-sql"       % Version.Spark  % "provided"
   val sparkRepl      = "org.apache.spark"  %% "spark-repl"      % Version.Spark  % "provided"
   val sparkHive      = "org.apache.spark"  %% "spark-hive"      % Version.Spark  % "provided"
+  val sparkMlLib     = "org.apache.spark"  %% "spark-mllib"     % Version.Spark  % "provided"
 
   val sprayCan       = "io.spray"          %%  "spray-can"      % Version.sprayV
   val sprayRouting   = "io.spray"          %%  "spray-routing"  % Version.sprayV
@@ -128,7 +129,8 @@ object Dependencies {
                                               sparkHive, elasticSearchConnector, readCSV, configLib)
 
   val restAPIDependecies = Seq(playJson, sprayCan, sprayRouting, akkaActor, 
-                               specs2Core, elasticSearch, httpClient, slf4j, log4j, log4Slf4j, configLib)
+                               specs2Core, elasticSearch, httpClient, slf4j, log4j, log4Slf4j, configLib,
+                               sparkMlLib, sparkCore, sparkSQL)
 }
 
 object RedRockBuild extends Build {

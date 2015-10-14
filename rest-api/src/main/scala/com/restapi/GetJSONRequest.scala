@@ -265,4 +265,46 @@ object GetJSONRequest
 		}
 		"""
 	}
+
+	def getTweetsTextBySentimentAndDate(includeTerms:String, excludeTerms:String, startDatetime: String, endDatetime: String, sentiment: Int) =
+	{
+		s"""{
+		    "query": {
+		        "filtered": {
+		            "filter": {
+		                "bool": {
+		                    "must": [
+		                        {
+		                            "range": {
+		                                "created_at": {
+		                                    "from": "$startDatetime",
+		                                    "to": "$endDatetime"
+		                                }
+		                            }
+		                        },
+		                        {
+		                            "term": {
+		                                "tweet_sentiment": "$sentiment"
+		                            }
+		                        },
+		                        {
+		                            "term": {
+		                                "language": "en"
+		                            }
+		                        }
+		                        $includeTerms
+		                    ],
+		                    "must_not": [
+		                    	$excludeTerms
+		                    ]
+		                }
+		            }
+		        }
+		    },
+		    "fields": [
+		        "tweet_text"
+		    ],
+		    "size": 2000000
+		}"""
+	}
 }

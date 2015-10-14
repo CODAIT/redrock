@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 
+# using environment variable to find Spark home directory
+if [ -z "$SPARK_HOME" ]; then echo "SPARK_HOME is NOT set"; else echo "SPARK_HOME defined as '$SPARK_HOME'"; fi
 # using environment variable to find RedRock home directory
 if [ -z "$REDROCK_HOME" ]; then echo "REDROCK_HOME is NOT set"; else echo "REDROCK_HOME defined as '$REDROCK_HOME'"; fi
 
@@ -23,8 +25,12 @@ echo " ==========  Compiling code and generating .jar ============"
 sbt compile
 sbt 'project redrock-restapi' compile package assembly
 
+# Changes the location where spark is being launched so it creates its own metastore_db
+cd $REDROCK_HOME/rest-api
+
 echo "============ Starting REST API =============="
-nohup java -classpath $REDROCK_HOME/rest-api/target/scala-2.10/redrock-rest-api.jar com.restapi.Boot > $REDROCK_HOME/rest-api/nohup_restapi.out&
+HOSTNAME="$(/bin/hostname -f)"
+nohup $SPARK_HOME/bin/spark-submit --master spark://$HOSTNAME:7077 --class com.restapi.Boot $REDROCK_HOME/rest-api/target/scala-2.10/redrock-rest-api.jar > $REDROCK_HOME/rest-api/nohup_restapi.out&
 
 echo "========== REST API Started - Check nodup_restapi.out ================="
 
