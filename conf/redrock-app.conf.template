@@ -7,8 +7,7 @@ redrock {
 		name = "redrock-restapi"
 		actor = "redrock-actor"
 		port = 16666
-		dateFormat = "yyyy-MM-dd HH:mm:ss"
-
+		
 		python-code {
 			classPath = ${redrock.homePath}"/rest-api/python/main.py"
 			pythonVersion = "python2.7"
@@ -22,9 +21,14 @@ redrock {
 			//Total related words to be returned
 			topWordsToVec = 20
 			//default start date
-			defaulStartDate = "1900-01-01"
+			defaulStartDatetime = "1900-01-01T00:00:00.000Z"
 			//default end date
-			defaultEndDate = "2050-12-31"
+			defaultEndDatetime =  "2050-12-31T23:59:59.999Z"
+		}
+
+		sentimentAnalysis {
+			numTopics = 3
+			termsPerTopic = 5
 		}
 	}
 
@@ -43,6 +47,10 @@ redrock {
 			twitterStreamingDataPath = "hdfs://localhost:9000/user/hadoop/powertrack_streaming" 
 			streamingBatchTime = 60
 		}
+		restapi {
+			totalCores = 3
+			driverMemory = "2g"
+		}
 	}
 
 	elasticsearch {
@@ -54,4 +62,3 @@ redrock {
 		powertrackType = "powertrack_tweets"
 	}
 }
-
