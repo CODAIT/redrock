@@ -33,15 +33,13 @@ import java.text.SimpleDateFormat
 import java.util.TimeZone
 import java.util.Date
 
-class GetElasticsearchResponse(val topTweets: Int, includeTerms:Array[String], excludeTerms:Array[String], startDate: String, endDate: String)
+class GetElasticsearchResponse(val topTweets: Int, val includeTerms:Array[String], val excludeTerms:Array[String], val startDateTime: String, val endDateTime: String)
 {
 	val baseURL = "http://" + LoadConf.esConf.getString("bindIP") + ":" + LoadConf.esConf.getString("bindPort") + "/" + LoadConf.esConf.getString("indexName") + "/" + LoadConf.esConf.getString("decahoseType")
 	val searchURL = baseURL + "/_search"
 	val countURL = searchURL + "?search_type=count"
 	val includeTermsES = includeTerms.mkString(" ")
 	val excludeTermsES = excludeTerms.mkString(" ")
-	val startDateTime = transformDateToTweetFormat(startDate + " 00:00:00")
-	val endDateTime = transformDateToTweetFormat(endDate + " 23:59:59")
 
 	def getTopTweetsResponse(): String =
 	{
@@ -79,6 +77,13 @@ class GetElasticsearchResponse(val topTweets: Int, includeTerms:Array[String], e
 		return performSearch(countURL, jsonRequest)
 	}
 
+	def getSentimentWordAnalysis(sentiment: Int): String =
+	{
+		val jsonRequest = GetJSONRequest.getTweetsTextBySentimentAndDate(constructESTerms(includeTerms), constructESTerms(excludeTerms), startDateTime, endDateTime, sentiment)
+		println(jsonRequest)
+		return performSearch(searchURL, jsonRequest)
+	}
+
 	def performSearch(url: String, jsonQueryRequest:String): String = {
 		try
 		{
@@ -99,7 +104,7 @@ class GetElasticsearchResponse(val topTweets: Int, includeTerms:Array[String], e
 			return jsonResponse
 		} catch {
 			case e: Exception => {
-				printException(e, "Retrieve ElasticSearch Response")
+				Utils.printException(e, "Retrieve ElasticSearch Response")
 				return ""
 			}
 		}
@@ -130,27 +135,25 @@ class GetElasticsearchResponse(val topTweets: Int, includeTerms:Array[String], e
 			return jsonResponse
 		} catch {
 			case e: Exception => {
-				printException(e, "Retrieve ElasticSearch Response")
+				Utils.printException(e, "Retrieve ElasticSearch Response")
 				return ""
 		  }
 		}
 	}
 
-	def transformDateToTweetFormat(strdate: String): String =
+	def constructESTerms(terms: Array[String]): String =
 	{
-		val sdf:SimpleDateFormat = new SimpleDateFormat(LoadConf.restConf.getString("dateFormat"))   //2014-01-16T01:49:50.000Z
-		TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
-		val date = sdf.parse(strdate)
+		val esTerms = terms.filter(term => term != "").map(term => {
+			s"""{"term":{"tweet_text_array_tokens": "$term"}}"""
+		}).mkString(",")
 
-		val sdf_new:SimpleDateFormat = new SimpleDateFormat(LoadConf.globalConf.getString("spark.decahose.tweetTimestampFormat"))
-		return sdf_new.format(date)
-	}
-
-	def printException(thr: Throwable, module: String) =
-	{
-			println("Exception on: " + module)
-			val sw = new StringWriter
-			thr.printStackTrace(new PrintWriter(sw))
-			println(sw.toString)
+		if (esTerms != "")
+		{
+			return "," + esTerms
+		}
+		else
+		{
+			return ""
+		}
 	}
 }

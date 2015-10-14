@@ -46,7 +46,7 @@ object ExecuteSearchRequest
 
 		result.recover{
 			case e: Exception => 
-				printException(e, "Execute Python and Spark Asynchronous"); 
+				Utils.printException(e, "Execute Python and Spark Asynchronous"); 
 		  		emptyJSONResponse()
 		}
 
@@ -62,7 +62,7 @@ object ExecuteSearchRequest
 		catch {
 		  case e: Exception => 
 		  {
-		  	printException(e, "Extract Elasticsearch Analysis")
+		  	Utils.printException(e, "Extract Elasticsearch Analysis")
 		  	return emptyJSONResponseES()
 		  }
 		}
@@ -85,7 +85,7 @@ object ExecuteSearchRequest
 		catch {
 		  case e: Exception => 
 		  {
-		  	printException(e, "Execute elasticsearch Asynchronous")
+		  	Utils.printException(e, "Execute elasticsearch Asynchronous")
 		  	return emptyJSONResponseES()
 		  }
 		}
@@ -97,7 +97,7 @@ object ExecuteSearchRequest
 			val totalTweetsResponse = Json.parse(elasticsearchRequests.getTotalTweetsESResponse())
 			 return Json.obj("totaltweets" -> (totalTweetsResponse \ "hits" \ "total"))
 		} catch {
-		  case e: Exception => printException(e, "Format Total Tweets")
+		  case e: Exception => Utils.printException(e, "Format Total Tweets")
 		}
 
 		return Json.obj("totaltweets" -> JsNull)
@@ -110,7 +110,7 @@ object ExecuteSearchRequest
        	  return ( Json.obj( "totalfilteredtweets" -> (countResponse \ "hits" \ "total")) ++
         		   Json.obj( "totalusers" -> (countResponse \ "aggregations" \ "distinct_users_by_id" \ "value")))
 		} catch {
-		  case e: Exception => printException(e, "Get Total Filtered Tweets And Total Users")
+		  case e: Exception => Utils.printException(e, "Get Total Filtered Tweets And Total Users")
 		}
 
 		return Json.obj("totalfilteredtweets" -> JsNull, "totalusers" -> JsNull)
@@ -136,7 +136,7 @@ object ExecuteSearchRequest
 			return Json.obj("toptweets" -> Json.obj("tweets" -> sortedTweets))
 		}
 		catch {
-		  case e: Exception => printException(e, "Get Top Tweets")
+		  case e: Exception => Utils.printException(e, "Get Top Tweets")
 		}
 
 		return Json.obj("toptweets" -> Json.obj("tweets" -> JsNull))
@@ -161,7 +161,7 @@ object ExecuteSearchRequest
     		return Json.obj("profession" -> Json.obj("profession" -> mapProfessions))
 		}
 		catch {
-		  case e: Exception =>printException(e, "Format Professions")
+		  case e: Exception =>Utils.printException(e, "Format Professions")
 		}
 
 		return Json.obj("profession" -> JsNull)
@@ -184,7 +184,7 @@ object ExecuteSearchRequest
     		return Json.obj("location" ->  Json.obj("fields" -> Json.arr("Date", "Country", "Count"), "location" -> mapLocations))
 		}
 		catch {
-		  case e: Exception => printException(e, "Format Location")
+		  case e: Exception => Utils.printException(e, "Format Location")
 		}
 
 		return Json.obj("location" ->  Json.obj("fields" -> Json.arr("Date", "Country", "Count"), "location" -> JsNull))
@@ -209,7 +209,7 @@ object ExecuteSearchRequest
     		return Json.obj("sentiment" -> Json.obj("fields" -> Json.arr("Date", "Positive", "Negative", "Neutral"), "sentiment" -> transformedData))
 			
 		} catch {
-		  case e: Exception => printException(e, "Format Sentiment")
+		  case e: Exception => Utils.printException(e, "Format Sentiment")
 		}
 
 		return Json.obj("sentiment" -> Json.obj("fields" -> Json.arr("Date", "Positive", "Negative", "Neutral"), "sentiment" -> JsNull))
@@ -248,7 +248,7 @@ object ExecuteSearchRequest
 			}
 
 		}catch {
-			  case e: Exception => printException(e, "Execute Python: Cluster and Distance")
+			  case e: Exception => Utils.printException(e, "Execute Python: Cluster and Distance")
 		}
 		return Json.obj("cluster" -> JsNull, "distance" -> JsNull)
 	}
@@ -269,14 +269,6 @@ object ExecuteSearchRequest
 		  		"totalfilteredtweets" -> JsNull, "totalusers" -> JsNull,
 				"profession" -> JsNull, "location" -> JsNull, 
 				"sentiment" -> JsNull, "toptweets" -> JsNull)
-	}
-
-	def printException(thr: Throwable, module: String) =
-	{
-		println("Exception on: " + module)
-    	val sw = new StringWriter
-    	thr.printStackTrace(new PrintWriter(sw))
-    	println(sw.toString)
 	}
 
 }
