@@ -54,10 +54,10 @@ object ExecuteSentimentAnalysis
     // ============== ML ======================
     // Tune this parameters if needed
 	val numTopics: Int = LoadConf.restConf.getInt("sentimentAnalysis.numTopics")
-	val termsPerTopic: Int = LoadConf.restConf.getInt("termsPerTopic") 
+	val termsPerTopic: Int = LoadConf.restConf.getInt("sentimentAnalysis.termsPerTopic") 
 	// large ( >= 10) -> more accurate but slower
 	// low   ( >= 1 ) -> faster but less accurate
-	val miniBatchIncreaseAcc: Int = 2*10                   
+	val miniBatchIncreaseAcc: Int = 4*1                   
 	val maxIterations: Int = 100 // iterations 
 	val vocabSize: Int = 10000  // 
 
