@@ -43,8 +43,8 @@ trait MyService extends HttpService {
             complete {
                 ExecuteSearchRequest.runSearchAnalysis(includeTerms, excludeTerms, 
                   top.getOrElse(LoadConf.restConf.getInt("searchParam.defaultTopTweets")), 
-                  startDate.getOrElse(LoadConf.restConf.getString("searchParam.defaulStartDate")), 
-                  endDate.getOrElse(LoadConf.restConf.getString("searchParam.defaultEndDate")))
+                  startDate.getOrElse(LoadConf.restConf.getString("searchParam.defaulStartDatetime")), 
+                  endDate.getOrElse(LoadConf.restConf.getString("searchParam.defaultEndDatetime")))
             }
           }
         }
