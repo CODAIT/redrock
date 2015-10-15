@@ -79,7 +79,7 @@ class GetElasticsearchResponse(val topTweets: Int, val includeTerms:Array[String
 
 	def getSentimentWordAnalysis(sentiment: Int): String =
 	{
-		val jsonRequest = GetJSONRequest.getTweetsTextBySentimentAndDate(constructESTerms(includeTerms), constructESTerms(excludeTerms), startDateTime, endDateTime, sentiment)
+		val jsonRequest = GetJSONRequest.getTweetsTextBySentimentAndDate(includeTermsES, excludeTermsES, startDateTime, endDateTime, sentiment)
 		return performSearch(searchURL, jsonRequest)
 	}
 
@@ -140,19 +140,19 @@ class GetElasticsearchResponse(val topTweets: Int, val includeTerms:Array[String
 		}
 	}
 
-	def constructESTerms(terms: Array[String]): String =
-	{
-		val esTerms = terms.filter(term => term != "").map(term => {
-			s"""{"term":{"tweet_text_array_tokens": "$term"}}"""
-		}).mkString(",")
-
-		if (esTerms != "")
-		{
-			return "," + esTerms
-		}
-		else
-		{
-			return ""
-		}
-	}
+//	def constructESTerms(terms: Array[String]): String =
+//	{
+//		val esTerms = terms.filter(term => term != "").map(term => {
+//			s"""{"term":{"tweet_text_array_tokens": "$term"}}"""
+//		}).mkString(",")
+//
+//		if (esTerms != "")
+//		{
+//			return "," + esTerms
+//		}
+//		else
+//		{
+//			return ""
+//		}
+//	}
 }

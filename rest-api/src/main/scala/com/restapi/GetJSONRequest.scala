@@ -33,10 +33,10 @@ object GetJSONRequest
                       "to" : "$endDatetime"
                     }
                 }},
-                {"terms": {"tweet_text_array_tokens" : ["$includeTerms"], "execution" : "and"}}
+                {"terms": {"tweet_text_array_tokens" : [$includeTerms], "execution" : "and"}}
               ],
               "must_not": [
-                { "terms" : {"tweet_text_array_tokens" : ["$excludeTerms"], "execution" : "or"}},
+                { "terms" : {"tweet_text_array_tokens" : [$excludeTerms], "execution" : "or"}},
                 { "term" : { "tweet_location" : ""}}
               ]
 
@@ -80,10 +80,10 @@ object GetJSONRequest
                       "to" : "$endDatetime"
                     }
                 }},
-                {"terms": {"tweet_text_array_tokens" : ["$includeTerms"], "execution" : "and"}}
+                {"terms": {"tweet_text_array_tokens" : [$includeTerms], "execution" : "and"}}
               ],
               "must_not":
-                { "terms" : {"tweet_text_array_tokens" : ["$excludeTerms"], "execution" : "or"}}
+                { "terms" : {"tweet_text_array_tokens" : [$excludeTerms], "execution" : "or"}}
             }
          }
         }
@@ -122,10 +122,10 @@ object GetJSONRequest
                       "to" : "$endDatetime"
                     }
                 }},
-                {"terms": {"tweet_text_array_tokens" : ["$includeTerms"], "execution" : "and"}}
+                {"terms": {"tweet_text_array_tokens" : [$includeTerms], "execution" : "and"}}
               ],
               "must_not":
-                { "terms" : {"tweet_text_array_tokens" : ["$excludeTerms"], "execution" : "or"}}
+                { "terms" : {"tweet_text_array_tokens" : [$excludeTerms], "execution" : "or"}}
             }
          }
         }
@@ -190,10 +190,10 @@ object GetJSONRequest
                       "to" : "$endDatetime"
                     }
                 }},
-                {"terms": {"tweet_text_array_tokens" : ["$includeTerms"], "execution" : "and"}}
+                {"terms": {"tweet_text_array_tokens" : [$includeTerms], "execution" : "and"}}
               ],
               "must_not":
-                { "terms" : {"tweet_text_array_tokens" : ["$excludeTerms"], "execution" : "or"}}
+                { "terms" : {"tweet_text_array_tokens" : [$excludeTerms], "execution" : "or"}}
             }
          }
         }
@@ -224,15 +224,15 @@ object GetJSONRequest
                       "to" : "$endDatetime"
                     }
                 }},
-                {"terms": {"tweet_text_array_tokens" : ["$includeTerms"], "execution" : "and"}}
+                {"terms": {"tweet_text_array_tokens" : [$includeTerms], "execution" : "and"}}
               ],
               "must_not":
-                { "terms" : {"tweet_text_array_tokens" : ["$excludeTerms"], "execution" : "or"}}
+                {"terms": {"tweet_text_array_tokens" : [$includeTerms], "execution" : "and"}}
             }
          }
         }
       },
-      "size" : 100,
+      "size" : $top,
       "sort": [
         {
           "user_followers_count": {
@@ -270,11 +270,10 @@ object GetJSONRequest
                                     "language": "en"
                                 }
                             }
-                            $includeTerms
+                            {"terms": {"tweet_text_array_tokens" : [$includeTerms], "execution" : "and"}}
                         ],
-                        "must_not": [
-                          $excludeTerms
-                        ]
+                        "must_not":
+       |										{"terms": {"tweet_text_array_tokens" : [$includeTerms], "execution" : "and"}}
                     }
                 }
             }
