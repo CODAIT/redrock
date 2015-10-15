@@ -27,25 +27,24 @@ fi
 echo " ==========  Creating ES Redrock Index ============"
 curl -XPUT 'http://localhost:9200/redrock/' -d '
 {
-  "settings": {
+"settings": {
     "analysis": {
+      
       "filter": {
-        "tweet_filter": {
-          "type": "standard",
-          "type_table": [
-            "# => ALPHA",
-            "@ => ALPHA"
-          ]
-        }
+       "tweet_stop_words":{
+           "type" : "stop",
+           "ignore_case" : "true",
+           "stopwords" : "_english_"
+       }
       },
+
       "analyzer": {
-        "tweet_analyzer": {
-          "type": "custom",
-          "tokenizer": "whitespace",
-          "filter": [
-            "lowercase",
-            "tweet_filter"
-          ]
+        "tweet_analyzer":{
+          "type" : "custom", 
+          "char_filter": "html_strip",
+          "tokenizer" : "whitespace",
+          "filter" : [ "lowercase", "tweet_stop_words"],
+          "analyzer" : "tweet_analyzer"
         }
       }
     }
