@@ -42,14 +42,21 @@ redrock {
 			//Format to be used to group by timestamp for Sentiment and Location
 			timestampFormat = "MM/dd HH"
 			tweetTimestampFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+			totalCores = 2
+			sparkUIPort = "4040"
+			executorMemory = "2g"
 		}
 		powertrack {
 			twitterStreamingDataPath = "hdfs://localhost:9000/user/hadoop/powertrack_streaming" 
 			streamingBatchTime = 60
+			totalCores = 2
+			sparkUIPort = "4041"
+			executorMemory = "2g"
 		}
 		restapi {
-			totalCores = 3
-			driverMemory = "2g"
+			totalCores = 1
+			sparkUIPort = "4042"
+			executorMemory = "1g"
 		}
 	}
 

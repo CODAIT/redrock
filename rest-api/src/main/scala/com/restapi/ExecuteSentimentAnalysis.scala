@@ -43,8 +43,11 @@ object ExecuteSentimentAnalysis
 	val conf = new SparkConf()
     conf.setAppName(LoadConf.globalConf.getString("appName") + " - REST API")
     conf.set("spark.scheduler.mode", "FAIR")
+
+    //Spark resources configuration
+    conf.set("spark.executor.memory",s"""${LoadConf.globalConf.getString("spark.restapi.executorMemory")}""")
+    conf.set("spark.ui.port",s"""${LoadConf.globalConf.getString("spark.restapi.sparkUIPort")}""")
     conf.set("spark.cores.max",s"""${LoadConf.globalConf.getInt("spark.restapi.totalCores")}""")
-    conf.set("spark.driver.memory", s"""${LoadConf.globalConf.getString("spark.restapi.driverMemory")}""")
     
     val sc = new SparkContext(conf)
     val sqlContext = new SQLContext(sc)

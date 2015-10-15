@@ -39,9 +39,14 @@ object SparkContVal
     //conf.setMaster(masterNode)
     conf.setAppName(LoadConf.globalConf.getString("appName") + " - Decahose")
     conf.set("spark.scheduler.mode", "FAIR")
-    //conf.set("spark.cassandra.connection.host", "127.0.0.1")
+    
+    //Spark master resources
+    conf.set("spark.executor.memory",s"""${LoadConf.sparkConf.getString("decahose.executorMemory")}""")
+    conf.set("spark.ui.port",s"""${LoadConf.sparkConf.getString("decahose.sparkUIPort")}""")
+    conf.set("spark.cores.max",s"""${LoadConf.sparkConf.getInt("decahose.totalCores")}""")
+
     //Do not allow infer schema. Schema must be defined at ES before start the app
-   	conf.set("es.index.auto.create", "true")
+   	conf.set("es.index.auto.create", "false")
     conf.set("es.batch.size.bytes", "300000000")
     conf.set("es.batch.size.entries", "10000")
     conf.set("es.batch.write.refresh", "false")

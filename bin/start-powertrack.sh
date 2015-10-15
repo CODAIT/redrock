@@ -32,6 +32,6 @@ cd $REDROCK_HOME/twitter-powertrack
 echo "============ Running Powertrack Spark Streaming =============="
 #run program on cluster
 HOSTNAME="$(/bin/hostname -f)"
-nohup $SPARK_HOME/bin/spark-submit --master spark://$HOSTNAME:7077 --packages org.elasticsearch:elasticsearch-spark_2.10:2.1.1 --class com.powertrack.Boot $REDROCK_HOME/twitter-powertrack/target/scala-2.10/redrock-twitter-powertrack.jar > $REDROCK_HOME/twitter-powertrack/nohup-powertrack.out&
+nohup $SPARK_HOME/bin/spark-submit --driver-memory 2g --master spark://$HOSTNAME:7077 --packages org.elasticsearch:elasticsearch-spark_2.10:2.1.1 --class com.powertrack.Boot $REDROCK_HOME/twitter-powertrack/target/scala-2.10/redrock-twitter-powertrack.jar > $REDROCK_HOME/twitter-powertrack/nohup-powertrack.out&
 
 echo "======== Powertrack started. Check nohup-powertrack.out =============="
