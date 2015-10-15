@@ -80,7 +80,6 @@ class GetElasticsearchResponse(val topTweets: Int, val includeTerms:Array[String
 	def getSentimentWordAnalysis(sentiment: Int): String =
 	{
 		val jsonRequest = GetJSONRequest.getTweetsTextBySentimentAndDate(constructESTerms(includeTerms), constructESTerms(excludeTerms), startDateTime, endDateTime, sentiment)
-		println(jsonRequest)
 		return performSearch(searchURL, jsonRequest)
 	}
 

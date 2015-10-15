@@ -45,10 +45,10 @@ object ExecuteSentimentAnalysis
     conf.set("spark.scheduler.mode", "FAIR")
     conf.set("spark.cores.max",s"""${LoadConf.globalConf.getInt("spark.restapi.totalCores")}""")
     conf.set("spark.driver.memory", s"""${LoadConf.globalConf.getString("spark.restapi.driverMemory")}""")
+    
     val sc = new SparkContext(conf)
     val sqlContext = new SQLContext(sc)
-
-    /* config sqlContext */
+	/* config sqlContext */
     sqlContext.setConf("spark.sql.shuffle.partitions", s"""${LoadConf.globalConf.getInt("spark.partitionNumber")}""")
     
     // ============== ML ======================
@@ -71,97 +71,98 @@ object ExecuteSentimentAnalysis
 			println(s"Date Range: $startDatetime -> $endDatetime")
 			println("Sentiment: " + sentiment)
 
-			runTopicModel(includeTerms, excludeTerms, top, startDatetime, endDatetime, sentiment)
-			
+			runTopicModel(includeTerms, excludeTerms, top, startDatetime, endDatetime, sentiment)	
 		}
 	}
 
 	def runTopicModel(includeTerms: String, excludeTerms: String, top: Int, startDatetime: String, endDatetime: String, sentiment: Int): String =
 	{	
-		/* Based on source code in: https://gist.github.com/feynmanliang/3b6555758a27adcb527d
-   			Modified by: Jorge Castanon, October 2015 
-   		*/
-		import sqlContext.implicits._ 
+		try { 
+			/* Based on source code in: https://gist.github.com/feynmanliang/3b6555758a27adcb527d
+	   			Modified by: Jorge Castanon, October 2015 
+	   		*/
+			import sqlContext.implicits._ 
 
-		// Load the raw text docs, assign docIDs, and convert to DataFrame
-		val rawTextRDD = sc.makeRDD(getTweetsText(includeTerms, excludeTerms, top, startDatetime, endDatetime, sentiment)) 
-		val docDF = rawTextRDD.zipWithIndex.toDF("text", "docId")
+			// Load the raw text docs, assign docIDs, and convert to DataFrame
+			val rawTextRDD = sc.makeRDD(getTweetsText(includeTerms, excludeTerms, top, startDatetime, endDatetime, sentiment)) 
+			val docDF = rawTextRDD.zipWithIndex.toDF("text", "docId")
 
 
-		// tweets splited into words
-		// need to keep #'s and @'s and emoticons
-		val tokens = new RegexTokenizer().
-		  setGaps(false).
-		  setMinTokenLength(2).  
-		  setPattern("([@#a-zA-Z:();=8>]\\S+)"). 
-		  // use this instead (no emotcons): 
-		  // setPattern("([@#a-zA-Z]\\S+)"). 
-		  setInputCol("text").                
-		  setOutputCol("words").
-		  transform(docDF)
+			// tweets splited into words
+			// need to keep #'s and @'s and emoticons
+			val tokens = new RegexTokenizer().
+			  setGaps(false).
+			  setMinTokenLength(2).  
+			  setPattern("([@#a-zA-Z:();=8>]\\S+)"). 
+			  // use this instead (no emotcons): 
+			  // setPattern("([@#a-zA-Z]\\S+)"). 
+			  setInputCol("text").                
+			  setOutputCol("words").
+			  transform(docDF)
 
-		val filteredTokens = new StopWordsRemover().
-		  //setStopWords(stopwords). // can get stopwords in English from StopWordsRemover.scala
-		  setCaseSensitive(false).
-		  setInputCol("words").
-		  setOutputCol("filtered").
-		  transform(tokens)
+			val filteredTokens = new StopWordsRemover().
+			  //setStopWords(stopwords). // can get stopwords in English from StopWordsRemover.scala
+			  setCaseSensitive(false).
+			  setInputCol("words").
+			  setOutputCol("filtered").
+			  transform(tokens)
 
-		// Limit to top vocabSize most common words and convert to word count vector features
-		val cvModel = new CountVectorizer().
-		  setInputCol("filtered").
-		  setOutputCol("features").
-		  setVocabSize(vocabSize).
-		  fit(filteredTokens)
+			// Limit to top vocabSize most common words and convert to word count vector features
+			val cvModel = new CountVectorizer().
+			  setInputCol("filtered").
+			  setOutputCol("features").
+			  setVocabSize(vocabSize).
+			  fit(filteredTokens)
 
-		val countVectors = cvModel.transform(filteredTokens).select("docId", "features").
-  			map { case Row(docId: Long, countVector: Vector) => (docId, countVector) }.cache()
+			val countVectors = cvModel.transform(filteredTokens).select("docId", "features").
+	  			map { case Row(docId: Long, countVector: Vector) => (docId, countVector) }.cache()
 
-  		/**
-		 * Configure and run LDA
-		 */
-		val mbf = {
-		  // add (1.0 / actualCorpusSize) to MiniBatchFraction be more robust on tiny datasets.
-		  val corpusSize = countVectors.count()
-		  2.0 / maxIterations + 1.0 / corpusSize
+	  		/**
+			 * Configure and run LDA
+			 */
+			val mbf = {
+			  // add (1.0 / actualCorpusSize) to MiniBatchFraction be more robust on tiny datasets.
+			  val corpusSize = countVectors.count()
+			  2.0 / maxIterations + 1.0 / corpusSize
+			}
+			val mbfval = math.min(1.0, miniBatchIncreaseAcc*mbf)
+
+			val lda = new LDA().
+			  setOptimizer(new OnlineLDAOptimizer().setMiniBatchFraction(mbfval)).
+			  setK(numTopics).
+			  setMaxIterations(maxIterations).
+			  setDocConcentration(-1). // use default symmetric document-topic prior
+			  setTopicConcentration(-1) // use default symmetric topic-word prior
+
+			val startTime = System.nanoTime()
+			val ldaModel = lda.run(countVectors)
+			val elapsed = (System.nanoTime() - startTime) / 1e9
+
+			// Print Results
+			println(s"Finished training LDA model. Summary: ")
+
+			// Print the topics, showing the top-weighted terms for each topic.
+			val topicIndices = ldaModel.describeTopics(maxTermsPerTopic = termsPerTopic)
+			val vocabArray = cvModel.vocabulary
+			val topics = topicIndices.map { case (terms, termWeights) =>
+			  terms.map(vocabArray(_)).zip(termWeights)
+			}
+
+			println(s"Training time (sec)\t$elapsed")
+
+			val response = topics.zipWithIndex.map { case (topic, i) =>
+			  topic.map({ case (term, weight) => Json.arr(term, i, weight)}) 
+			}flatten
+
+			return Json.stringify(Json.obj("topics" -> response))
+			// Print Time in seconds
+		} catch {
+		  	case e: Exception => {
+				Utils.printException(e, "Topics Training model")
+			} 
 		}
-		val mbfval = math.min(1.0, miniBatchIncreaseAcc*mbf)
-
-		val lda = new LDA().
-		  setOptimizer(new OnlineLDAOptimizer().setMiniBatchFraction(mbfval)).
-		  setK(numTopics).
-		  setMaxIterations(maxIterations).
-		  setDocConcentration(-1). // use default symmetric document-topic prior
-		  setTopicConcentration(-1) // use default symmetric topic-word prior
-
-		val startTime = System.nanoTime()
-		val ldaModel = lda.run(countVectors)
-		val elapsed = (System.nanoTime() - startTime) / 1e9
-
-		// Print Results
-		println(s"Finished training LDA model. Summary: ")
-
-		// Print the topics, showing the top-weighted terms for each topic.
-		val topicIndices = ldaModel.describeTopics(maxTermsPerTopic = termsPerTopic)
-		val vocabArray = cvModel.vocabulary
-		val topics = topicIndices.map { case (terms, termWeights) =>
-		  terms.map(vocabArray(_)).zip(termWeights)
-		}
-		println(s"$numTopics topics:")
-		topics.zipWithIndex.foreach { case (topic, i) =>
-		  println(s"TOPIC $i")
-		  topic.foreach { case (term, weight) => println(s"$term\t$weight") }
-		  println(s"==========")
-		}
-
-		// Print Time in seconds
-		println(s"Training time (sec)\t$elapsed")
-		// Print Mini Batch Fraction used in each iteration
-		println("Mini Batch Fraction: "+mbfval)
-
-
-
-		"Not returning JSON yet"
+		
+		return Json.stringify(Json.obj("topics" -> JsNull))
 	}
 
 	def getTweetsText(includeTerms: String, excludeTerms: String, top: Int, startDatetime: String, endDatetime: String, sentiment: Int): List[String] =
