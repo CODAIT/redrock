@@ -26,8 +26,9 @@ object Utils {
     val content = new StringWriter
     thr.printStackTrace(new PrintWriter(content))
     content.append("Caused by:")
-    thr.getCause.printStackTrace(new PrintWriter(content))
+    if (thr.getCause != null){
+    	thr.getCause.printStackTrace(new PrintWriter(content))
+    }
     println(content.toString)
   }
-  
 }
