@@ -87,10 +87,13 @@ object ExecuteSentimentAnalysis
 			import sqlContext.implicits._ 
 
 			// Load the raw text docs, assign docIDs, and convert to DataFrame
-			val rawTextRDD = sc.makeRDD(getTweetsText(includeTerms, excludeTerms, top, startDatetime, endDatetime, sentiment)) 
+			val rawTextRDD = sc.makeRDD(getTweetsText(includeTerms, excludeTerms, top, startDatetime, endDatetime, sentiment))
+			//Return empty response if no data was found
+			if (rawTextRDD.isEmpty())
+			{	
+				return Json.stringify(Json.obj("topics" -> Json.arr())) 
+			}
 			val docDF = rawTextRDD.zipWithIndex.toDF("text", "docId")
-
-
 			// tweets splited into words
 			// need to keep #'s and @'s and emoticons
 			val tokens = new RegexTokenizer().
@@ -119,7 +122,6 @@ object ExecuteSentimentAnalysis
 
 			val countVectors = cvModel.transform(filteredTokens).select("docId", "features").
 	  			map { case Row(docId: Long, countVector: Vector) => (docId, countVector) }.cache()
-
 	  		/**
 			 * Configure and run LDA
 			 */
