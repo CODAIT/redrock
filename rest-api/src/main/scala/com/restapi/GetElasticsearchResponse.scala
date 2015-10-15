@@ -38,8 +38,8 @@ class GetElasticsearchResponse(val topTweets: Int, val includeTerms:Array[String
 	val baseURL = "http://" + LoadConf.esConf.getString("bindIP") + ":" + LoadConf.esConf.getString("bindPort") + "/" + LoadConf.esConf.getString("indexName") + "/" + LoadConf.esConf.getString("decahoseType")
 	val searchURL = baseURL + "/_search"
 	val countURL = searchURL + "?search_type=count"
-	val includeTermsES = includeTerms.map(x => s"""$x""").mkString(",")
-	val excludeTermsES = excludeTerms.map(x => s"""$x""").mkString(",")
+	val includeTermsES = includeTerms.map(x => s""""$x"""").mkString(",")
+	val excludeTermsES = excludeTerms.map(x => s""""$x"""").mkString(",")
 
 	def getTopTweetsResponse(): String =
 	{
