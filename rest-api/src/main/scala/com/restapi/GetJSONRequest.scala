@@ -18,293 +18,271 @@ package com.restapi
 
 object GetJSONRequest
 {
-	def getLocationJSONRequest(includeTerms:String, excludeTerms:String, startDatetime: String, endDatetime: String): String =
-	{
-		s"""
-		{
-		 "query": {
-		    "bool": {
-		      "must": [
-		        {"match": {
-		          "tweet_text_tokens": {
-		            "query": "$includeTerms", 
-		            "operator": "and"
-		          }
-		        }},
-		        {"range" : {"created_at" : {"gte" : "$startDatetime"}}},
-		        {"range" : {"created_at" : {"lte" : "$endDatetime"}}}
-		      ],
-		      "must_not": [
-		        {"match": {
-		          "tweet_text_tokens": {
-		            "query": "$excludeTerms", 
-		            "operator": "or"
-		          }
-		        }},
-		        {"match": {
-		          "tweet_location": ""
-		        }}
-		      ]
-		    }
-		  },
-		  "aggs": {
-		    "tweet_cnt": {
-		      "terms": {
-		        "field": "created_at_timestamp",
-		        "order" : { "_term" : "asc" }
-		      },
-		      "aggs": {
-		        "tweet_locat": {
-		          "terms": {
-		            "field": "tweet_location"
-		          }
-		        }
-		      }
-		    }
-		  }
-		}
-		"""
-	}
+  def getLocationJSONRequest(includeTerms:String, excludeTerms:String, startDatetime: String, endDatetime: String): String =
+  {
+    s"""
+    {
+       "query": {
+       "filtered":{
+         "filter":{
+           "bool":{
+              "must":[
+                {"range" : {
+                    "created_at" : {
+                      "from" : "$startDatetime",
+                      "to" : "$endDatetime"
+                    }
+                }},
+                {"terms": {"tweet_text_array_tokens" : ["$includeTerms"], "execution" : "and"}}
+              ],
+              "must_not": [
+                { "terms" : {"tweet_text_array_tokens" : ["$excludeTerms"], "execution" : "or"}},
+                { "term" : { "tweet_location" : ""}}
+              ]
 
-	/* Don't need to sort the field tweet_sentiment beucase the transformation is using a map
-	since the result not always returns all fields */
-	def getSentimentJSONRequest(includeTerms:String, excludeTerms:String, startDatetime: String, endDatetime: String): String =
-	{
-		s"""
-		{
-		 "query": {
-		    "bool": {
-		      "must": [
-		        {"match": {
-		          "tweet_text_tokens": {
-		            "query": "$includeTerms", 
-		            "operator": "and"
-		          }
-		        }},
-		        {"range" : {"created_at" : {"gte" : "$startDatetime"}}},
-		        {"range" : {"created_at" : {"lte" : "$endDatetime"}}}
-		      ],
-		      "must_not": {
-		        "match": {
-		          "tweet_text_tokens": {
-		            "query": "$excludeTerms", 
-		            "operator": "or"
-		          }
-		        }
-		      }
-		    }
-		  },
-		  "aggs": {
-		    "tweet_cnt": {
-		      "terms": {
-		        "field": "created_at_timestamp",
-		        "order" : { "_term" : "asc" }
-		      },
-		      "aggs": {
-		        "tweet_sent": {
-		          "terms": {
-		            "field": "tweet_sentiment"
-		          }
-		        }
-		      }
-		    }
-		  }
-		}
-		"""
-	}
+            }
+         }
+        }
+      },
+      "aggs": {
+        "tweet_cnt": {
+          "terms": {
+            "field": "created_at_timestamp",
+            "order" : { "_term" : "asc" }
+          },
+          "aggs": {
+            "tweet_locat": {
+              "terms": {
+                "field": "tweet_location"
+              }
+            }
+          }
+        }
+      }
+    }
+    """
+  }
 
-	def getProfessionJSONRequest(includeTerms:String, excludeTerms:String, startDatetime: String, endDatetime: String): String =
-	{
-		s"""
-		{
-		  "query": {
-		    "bool": {
-		      "must": [
-		        {
-		          "match": {
-		            "tweet_text_tokens": {
-		              "query": "$includeTerms",
-		              "operator": "and"
-		            }
-		          }
-		        },
-		        {"range": {"created_at": {"gte": "$startDatetime"}}},
-		        {"range": {"created_at": {"lte": "$endDatetime"}}}
-		      ],
-		      "must_not": [
-		        {
-		          "match": {
-		            "tweet_text_tokens": {
-		              "query": "$excludeTerms",
-		              "operator": "or"
-		            }
-		          }
-		        }
-		      ]
-		    }
-		  },
-		  "aggs": {
-		    "tweet_professions": {
-		      "nested": {
-		        "path": "tweet_professions"
-		      },
-		      "aggs": {
-		        "professions": {
-		          "terms": {
-		            "field": "tweet_professions._1"
-		          },
-		          "aggs": {
-		            "keywords": {
-		              "terms": {
-		                "field": "tweet_professions._2"
-		              }
-		            }
-		          }
-		        }
-		      }
-		    }
-		  }
-		}
-		"""
-	}
+  /* Don't need to sort the field tweet_sentiment beucase the transformation is using a map
+  since the result not always returns all fields */
+  def getSentimentJSONRequest(includeTerms:String, excludeTerms:String, startDatetime: String, endDatetime: String): String =
+  {
+    s"""
+    {
+      "query": {
+        "filtered":{
+         "filter":{
+           "bool":{
+              "must":[
+                {"range" : {
+                    "created_at" : {
+                      "from" : "$startDatetime",
+                      "to" : "$endDatetime"
+                    }
+                }},
+                {"terms": {"tweet_text_array_tokens" : ["$includeTerms"], "execution" : "and"}}
+              ],
+              "must_not":
+                { "terms" : {"tweet_text_array_tokens" : ["$excludeTerms"], "execution" : "or"}}
+            }
+         }
+        }
+      },
+      "aggs": {
+        "tweet_cnt": {
+          "terms": {
+            "field": "created_at_timestamp",
+            "order" : { "_term" : "asc" }
+          },
+          "aggs": {
+            "tweet_sent": {
+              "terms": {
+                "field": "tweet_sentiment"
+              }
+            }
+          }
+        }
+      }
+    }
+    """
+  }
 
-	def getTotalTweetsJSONRequest(startDatetime: String, endDatetime: String): String =
-	{
-		s"""
-		{
-		    "query" : {
-		        "filtered" : {
-		            "filter" : {
-		                "range" : {
-		                    "created_at": {
-		                        "gte" : "$startDatetime",
-		                        "lte"  : "$endDatetime"
-		                    }
-		                }
-		            }
-		        }
-		    }
-		}
-		"""
-	}
+  def getProfessionJSONRequest(includeTerms:String, excludeTerms:String, startDatetime: String, endDatetime: String): String =
+  {
+    s"""
+    {
+      "query": {
+        "filtered":{
+         "filter":{
+           "bool":{
+              "must":[
+                {"range" : {
+                    "created_at" : {
+                      "from" : "$startDatetime",
+                      "to" : "$endDatetime"
+                    }
+                }},
+                {"terms": {"tweet_text_array_tokens" : ["$includeTerms"], "execution" : "and"}}
+              ],
+              "must_not":
+                { "terms" : {"tweet_text_array_tokens" : ["$excludeTerms"], "execution" : "or"}}
+            }
+         }
+        }
+      },
+      "aggs": {
+        "tweet_professions": {
+          "nested": {
+            "path": "tweet_professions"
+          },
+          "aggs": {
+            "professions": {
+              "terms": {
+                "field": "tweet_professions._1"
+              },
+              "aggs": {
+                "keywords": {
+                  "terms": {
+                    "field": "tweet_professions._2"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    """
+  }
 
-	def getTotalFilteredTweetsAndTotalUserJSONRequest(includeTerms:String, excludeTerms:String, startDatetime: String, endDatetime: String): String =
-	{
-		s"""
-		{
-		  "query": {
-		    "bool": {
-		      "must": [
-		        {"match": {
-		          "tweet_text_tokens": {
-		            "query": "$includeTerms",
-		            "operator": "and"
-		          }
-		        }},
-		        {"range" : {"created_at" : {"gte" : "$startDatetime"}}},
-		        {"range" : {"created_at" : {"lte" : "$endDatetime"}}}
-		      ],
-		      "must_not": {
-		        "match": {
-		          "tweet_text_tokens": {
-		            "query": "$excludeTerms",
-		            "operator": "or"
-		          }
-		        }
-		      }
-		    }
-		  },
-		  "aggs": {
-		    "distinct_users_by_id": {
-		      "cardinality": {
-		        "field": "user_id"
-		      }
-		    }
-		  }
-		}
-		"""
-	}
+  def getTotalTweetsJSONRequest(startDatetime: String, endDatetime: String): String =
+  {
+    s"""
+    {
+        "query" : {
+            "filtered" : {
+                "filter" : {
+                    "range" : {
+                        "created_at": {
+                            "gte" : "$startDatetime",
+                            "lte"  : "$endDatetime"
+                        }
+                    }
+                }
+            }
+        }
+    }
+    """
+  }
 
-	def getTopTweetsJSONRequest(includeTerms:String, excludeTerms:String, top: Int, startDatetime: String, endDatetime: String): String =
-	{
-		s"""
-		{
-		  "query": {
-		    "bool": {
-		      "must": [
-		        {"match": {
-		          "tweet_text_tokens": {
-		            "query": "$includeTerms",
-		            "operator": "and"
-		          }
-		        }},
-		        {"match": {
-		          "language": "en"
-		        }},
-		        {"range" : {"created_at" : {"gte" : "$startDatetime"}}},
-		        {"range" : {"created_at" : {"lte" : "$endDatetime"}}}
-		      ],
-		      "must_not": {
-		        "match": {
-		          "tweet_text_tokens": {
-		            "query": "$excludeTerms",
-		            "operator": "or"
-		          }
-		        }
-		      }
-		    }
-		  },
-		  "size" : 100,
-		  "sort": [
-		    {
-		      "user_followers_count": {
-		        "order": "desc"
-		      }
-		    }
-		  ]
-		}
-		"""
-	}
+  def getTotalFilteredTweetsAndTotalUserJSONRequest(includeTerms:String, excludeTerms:String, startDatetime: String, endDatetime: String): String =
+  {
+    s"""
+    {
+      "query": {
+        "filtered":{
+         "filter":{
+           "bool":{
+              "must":[
+                {"range" : {
+                    "created_at" : {
+                      "from" : "$startDatetime",
+                      "to" : "$endDatetime"
+                    }
+                }},
+                {"terms": {"tweet_text_array_tokens" : ["$includeTerms"], "execution" : "and"}}
+              ],
+              "must_not":
+                { "terms" : {"tweet_text_array_tokens" : ["$excludeTerms"], "execution" : "or"}}
+            }
+         }
+        }
+      },
+      "aggs": {
+        "distinct_users_by_id": {
+          "cardinality": {
+            "field": "user_id"
+          }
+        }
+      }
+    }
+    """
+  }
 
-	def getTweetsTextBySentimentAndDate(includeTerms:String, excludeTerms:String, startDatetime: String, endDatetime: String, sentiment: Int) =
-	{
-		s"""{
-		    "query": {
-		        "filtered": {
-		            "filter": {
-		                "bool": {
-		                    "must": [
-		                        {
-		                            "range": {
-		                                "created_at": {
-		                                    "from": "$startDatetime",
-		                                    "to": "$endDatetime"
-		                                }
-		                            }
-		                        },
-		                        {
-		                            "term": {
-		                                "tweet_sentiment": "$sentiment"
-		                            }
-		                        },
-		                        {
-		                            "term": {
-		                                "language": "en"
-		                            }
-		                        }
-		                        $includeTerms
-		                    ],
-		                    "must_not": [
-		                    	$excludeTerms
-		                    ]
-		                }
-		            }
-		        }
-		    },
-		    "fields": [
-		        "tweet_text"
-		    ],
-		    "size": 2000000
-		}"""
-	}
+  def getTopTweetsJSONRequest(includeTerms:String, excludeTerms:String, top: Int, startDatetime: String, endDatetime: String): String =
+  {
+    s"""
+    {
+      "query": {
+        "filtered":{
+         "filter":{
+           "bool":{
+              "must":[
+                {"range" : {
+                    "created_at" : {
+                      "from" : "$startDatetime",
+                      "to" : "$endDatetime"
+                    }
+                }},
+                {"terms": {"tweet_text_array_tokens" : ["$includeTerms"], "execution" : "and"}}
+              ],
+              "must_not":
+                { "terms" : {"tweet_text_array_tokens" : ["$excludeTerms"], "execution" : "or"}}
+            }
+         }
+        }
+      },
+      "size" : 100,
+      "sort": [
+        {
+          "user_followers_count": {
+            "order": "desc"
+          }
+        }
+      ]
+    }
+    """
+  }
+
+  def getTweetsTextBySentimentAndDate(includeTerms:String, excludeTerms:String, startDatetime: String, endDatetime: String, sentiment: Int) =
+  {
+    s"""{
+        "query": {
+            "filtered": {
+                "filter": {
+                    "bool": {
+                        "must": [
+                            {
+                                "range": {
+                                    "created_at": {
+                                        "from": "$startDatetime",
+                                        "to": "$endDatetime"
+                                    }
+                                }
+                            },
+                            {
+                                "term": {
+                                    "tweet_sentiment": "$sentiment"
+                                }
+                            },
+                            {
+                                "term": {
+                                    "language": "en"
+                                }
+                            }
+                            $includeTerms
+                        ],
+                        "must_not": [
+                          $excludeTerms
+                        ]
+                    }
+                }
+            }
+        },
+        "fields": [
+            "tweet_text"
+        ],
+        "size": 2000000
+    }"""
+  }
 }
