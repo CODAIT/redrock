@@ -285,4 +285,10 @@ object GetJSONRequest
         "size": 50000
     }"""
   }
+
+  def getPowertrackWordCountAndTweets(statDate: String, endDate: String, topTweets: Int, topWords: Int): String =
+  {
+    //todo: Return word count ES query plus top tweets
+    "Not implemendted yet"
+  }
 }

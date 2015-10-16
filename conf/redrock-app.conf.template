@@ -47,7 +47,8 @@ redrock {
 			executorMemory = "2g"
 		}
 		powertrack {
-			twitterStreamingDataPath = "hdfs://localhost:9000/user/hadoop/powertrack_streaming" 
+			twitterStreamingDataPath = "hdfs://localhost:9000/user/hadoop/powertrack_streaming"
+			tweetTimestampFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
 			streamingBatchTime = 60
 			totalCores = 2
 			sparkUIPort = "4041"

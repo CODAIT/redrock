@@ -34,6 +34,7 @@ trait MyService extends HttpService {
   val search = path("search") & parameters('termsInclude, 'termsExclude, 'top.as[Int] ?, 'user, 'startDate ?, 'endDate ?)
   val sentiment = pathPrefix("sentiment")
   val sentimentAnalysis = path("analysis") & parameters('termsInclude, 'termsExclude, 'sentiment.as[Int] , 'user, 'startDatetime, 'endDatetime, 'top.as[Int])
+  val powertrack = path("powertrack") & parameters('user, 'batchSize.as[Int], 'topTweets.as[Int], 'topWords.as[Int])
 
   val myRoute =
     home {
@@ -59,6 +60,16 @@ trait MyService extends HttpService {
             }
           }
         }
+      } ~
+      powertrack { (user, batchSize, topTweets, topWords) =>
+        get{
+          respondWithMediaType(`application/json`) {
+            complete {
+              ExecutePowertrackRequest.runPowertrackAnalysis(batchSize, topTweets, topWords)
+            }
+          }
+        }
       }
+
     }
 }
