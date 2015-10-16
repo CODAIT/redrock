@@ -224,7 +224,8 @@ object GetJSONRequest
                       "to" : "$endDatetime"
                     }
                 }},
-                {"terms": {"tweet_text_array_tokens" : [$includeTerms], "execution" : "and"}}
+                {"terms": {"tweet_text_array_tokens" : [$includeTerms], "execution" : "and"}},
+                {"term": {"language": "en"}}
               ],
               "must_not":
                 {"terms": {"tweet_text_array_tokens" : [$includeTerms], "execution" : "and"}}

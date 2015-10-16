@@ -88,10 +88,6 @@ curl -XPUT 'http://localhost:9200/redrock/_mapping/processed_tweets' -d '
             }
           }
       },
-      "tweet_text_tokens": {
-        "type": "string",
-        "analyzer": "tweet_analyzer"
-      },
       "created_at_timestamp" : {
         "type": "date",
         "format": "MM/dd HH",
