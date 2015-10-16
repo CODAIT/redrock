@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 #
 # (C) Copyright IBM Corp. 2015, 2015
 #
@@ -15,21 +14,5 @@
 # limitations under the License.
 #
 
-# using environment variable to find RedRock home directory
-if [ -z "$REDROCK_HOME" ]; then echo "REDROCK_HOME is NOT set"; else echo "REDROCK_HOME defined as '$REDROCK_HOME'"; fi
+ps aux |grep "redrock-websockets"      | tr -s " " |  cut -d " " -f 2 | xargs kill >/dev/null 2>&1
 
-echo "========= Stopping Powertrack =========="
-
-$REDROCK_HOME/bin/stop-powertrack.sh
-
-echo "========= Stopping Decahose =========="
-
-$REDROCK_HOME/bin/stop-decahose.sh
-
-echo "========= Stopping REST API =========="
-
-$REDROCK_HOME/bin/stop-restapi.sh
-
-echo "========= Stopping Websockets =========="
-
-$REDROCK_HOME/bin/stop-websockets.sh

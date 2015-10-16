@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 #
 # (C) Copyright IBM Corp. 2015, 2015
 #
@@ -15,21 +14,21 @@
 # limitations under the License.
 #
 
+# using environment variable to find Spark home directory
+if [ -z "$SPARK_HOME" ]; then echo "SPARK_HOME is NOT set"; else echo "SPARK_HOME defined as '$SPARK_HOME'"; fi
 # using environment variable to find RedRock home directory
 if [ -z "$REDROCK_HOME" ]; then echo "REDROCK_HOME is NOT set"; else echo "REDROCK_HOME defined as '$REDROCK_HOME'"; fi
 
-echo "========= Stopping Powertrack =========="
+# generates the new .jar considering new configurations.
+# Run this command separated on cluster, before push code to all nodes. Comment it out on cluster
+echo " ==========  Compiling code and generating .jar ============"
+sbt compile
+sbt 'project redrock-websockets' compile package assembly
 
-$REDROCK_HOME/bin/stop-powertrack.sh
 
-echo "========= Stopping Decahose =========="
+echo "============ Starting WebSockets =============="
+HOSTNAME="$(/bin/hostname -f)"
+nohup sbt 'project redrock-websockets' run > $REDROCK_HOME/websockets/nohup_websockets.out&
 
-$REDROCK_HOME/bin/stop-decahose.sh
+echo "========== WebSockets Started - Check nodup_websockets.out ================="
 
-echo "========= Stopping REST API =========="
-
-$REDROCK_HOME/bin/stop-restapi.sh
-
-echo "========= Stopping Websockets =========="
-
-$REDROCK_HOME/bin/stop-websockets.sh
