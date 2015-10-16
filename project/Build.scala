@@ -77,7 +77,7 @@ object Resolvers {
 
 object Dependency {
   object Version {
-    val Spark        = "1.5.0"
+    val Spark        = "1.5.1"
     val akkaV = "2.3.9"
     val sprayV = "1.3.3"
     val ElasticsearchVersion = "1.7.2"
