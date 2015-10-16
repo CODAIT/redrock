@@ -116,7 +116,6 @@ object PrepareTweets
                         s"getProfession(${TweetField.user_description}) AS tweet_professions",
                         s"getSentiment(${TweetField.tweet_text}) AS tweet_sentiment",
                         s"${TweetField.tweet_text} AS tweet_text",
-                        s"stringTokenizer(${TweetField.tweet_text}) as tweet_text_tokens",
                         s"${TweetField.user_followers_count} AS user_followers_count",
                         s"${TweetField.user_handle} AS user_handle",
                         s"${TweetField.user_id} AS user_id",

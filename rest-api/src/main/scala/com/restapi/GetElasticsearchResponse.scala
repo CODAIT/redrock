@@ -38,8 +38,8 @@ class GetElasticsearchResponse(val topTweets: Int, val includeTerms:Array[String
 	val baseURL = "http://" + LoadConf.esConf.getString("bindIP") + ":" + LoadConf.esConf.getString("bindPort") + "/" + LoadConf.esConf.getString("indexName") + "/" + LoadConf.esConf.getString("decahoseType")
 	val searchURL = baseURL + "/_search"
 	val countURL = searchURL + "?search_type=count"
-	val includeTermsES = includeTerms.mkString(" ")
-	val excludeTermsES = excludeTerms.mkString(" ")
+	val includeTermsES = includeTerms.map(x => s""""$x"""").mkString(",")
+	val excludeTermsES = excludeTerms.map(x => s""""$x"""").mkString(",")
 
 	def getTopTweetsResponse(): String =
 	{
@@ -79,7 +79,7 @@ class GetElasticsearchResponse(val topTweets: Int, val includeTerms:Array[String
 
 	def getSentimentWordAnalysis(sentiment: Int): String =
 	{
-		val jsonRequest = GetJSONRequest.getTweetsTextBySentimentAndDate(constructESTerms(includeTerms), constructESTerms(excludeTerms), startDateTime, endDateTime, sentiment)
+		val jsonRequest = GetJSONRequest.getTweetsTextBySentimentAndDate(includeTermsES, excludeTermsES, startDateTime, endDateTime, sentiment)
 		return performSearch(searchURL, jsonRequest)
 	}
 
@@ -140,19 +140,19 @@ class GetElasticsearchResponse(val topTweets: Int, val includeTerms:Array[String
 		}
 	}
 
-	def constructESTerms(terms: Array[String]): String =
-	{
-		val esTerms = terms.filter(term => term != "").map(term => {
-			s"""{"term":{"tweet_text_array_tokens": "$term"}}"""
-		}).mkString(",")
-
-		if (esTerms != "")
-		{
-			return "," + esTerms
-		}
-		else
-		{
-			return ""
-		}
-	}
+//	def constructESTerms(terms: Array[String]): String =
+//	{
+//		val esTerms = terms.filter(term => term != "").map(term => {
+//			s"""{"term":{"tweet_text_array_tokens": "$term"}}"""
+//		}).mkString(",")
+//
+//		if (esTerms != "")
+//		{
+//			return "," + esTerms
+//		}
+//		else
+//		{
+//			return ""
+//		}
+//	}
 }
