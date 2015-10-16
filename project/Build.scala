@@ -141,7 +141,7 @@ object RedRockBuild extends Build {
   lazy val parent = Project(
     id = "redrock-parent",
     base = file("."),
-    aggregate = Seq(restapi, decahose),
+    aggregate = Seq(restapi, decahose, powertrack),
     settings = rootbuildSettings ++ Seq(
       aggregate in update := false
     )
