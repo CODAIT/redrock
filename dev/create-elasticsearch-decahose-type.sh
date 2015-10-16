@@ -95,7 +95,7 @@ curl -XPUT 'http://localhost:9200/redrock/_mapping/processed_tweets' -d '
       },
       "tweet_text_array_tokens" : {
         "type": "string",
-        "analyzer": "tweet_analyzer"
+        "analyzer": "tweet_analyzer_decahose"
       }
     }
   }

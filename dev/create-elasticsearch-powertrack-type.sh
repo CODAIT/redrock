@@ -36,7 +36,7 @@ curl -XPUT 'http://localhost:9200/redrock/_mapping/powertrack_tweets' -d '
       },
       "tweet_text": {
         "type": "string",
-        "analyzer": "tweet_analyzer"
+        "index": "not_analyzed"
       },
       "created_at": {
         "type": "date",
@@ -66,9 +66,9 @@ curl -XPUT 'http://localhost:9200/redrock/_mapping/powertrack_tweets' -d '
         "type": "string",
         "index": "not_analyzed"
       },
-      "tokens" : {
+      "tweet_text_array_tokens" : {
         "type": "string",
-        "index": "not_analyzed"
+        "analyzer": "tweet_analyzer_powertrak"
       }
     }
   }

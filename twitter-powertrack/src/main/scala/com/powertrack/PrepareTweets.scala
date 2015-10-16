@@ -83,13 +83,12 @@ object PrepareTweets
                         s"${TweetField.tweet_created_at} AS created_at",
                         s"${TweetField.language} AS language",
                         s"${TweetField.tweet_text} AS tweet_text",
-                        s"stringTokenizer(${TweetField.tweet_text}) as tweet_text_tokens",
                         s"${TweetField.user_followers_count} AS user_followers_count",
                         s"${TweetField.user_handle} AS user_handle",
                         s"${TweetField.user_id} AS user_id",
                         s"${TweetField.user_profileImgURL} AS user_image_url",
                         s"${TweetField.user_name} user_name",
-                        s"stringTokenizer(${TweetField.tweet_text}) AS tokens")
+                        s"stringTokenizer(${TweetField.tweet_text}) AS tweet_text_array_tokens")
                         .write.mode(SaveMode.Append)
                         .format("org.elasticsearch.spark.sql")
                         .options(Map("pushdown" -> "true", "es.nodes" -> LoadConf.esConf.getString("bindIP"), "es.port" -> LoadConf.esConf.getString("bindPort")))
