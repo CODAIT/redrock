@@ -33,9 +33,9 @@ import java.text.SimpleDateFormat
 import java.util.TimeZone
 import java.util.Date
 
-class GetElasticsearchResponse(val topTweets: Int, val includeTerms:Array[String], val excludeTerms:Array[String], val startDateTime: String, val endDateTime: String)
+class GetElasticsearchResponse(val topTweets: Int, includeTerms:Array[String] = Array[String](), excludeTerms:Array[String] = Array[String](), val startDateTime: String, val endDateTime: String, esType: String)
 {
-	val baseURL = "http://" + LoadConf.esConf.getString("bindIP") + ":" + LoadConf.esConf.getString("bindPort") + "/" + LoadConf.esConf.getString("indexName") + "/" + LoadConf.esConf.getString("decahoseType")
+	val baseURL = "http://" + LoadConf.esConf.getString("bindIP") + ":" + LoadConf.esConf.getString("bindPort") + "/" + LoadConf.esConf.getString("indexName") + "/" + esType
 	val searchURL = baseURL + "/_search"
 	val countURL = searchURL + "?search_type=count"
 	val includeTermsES = includeTerms.map(x => s""""$x"""").mkString(",")

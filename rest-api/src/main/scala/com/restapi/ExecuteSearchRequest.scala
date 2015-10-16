@@ -56,7 +56,7 @@ object ExecuteSearchRequest
 	{	
 		try{
 			// Object to send the requests and get the responses
-			val elasticsearchRequests = new GetElasticsearchResponse(top, includeTerms.toLowerCase().trim().split(","), excludeTerms.toLowerCase().trim().split(","), startDate, endDate)
+			val elasticsearchRequests = new GetElasticsearchResponse(top, includeTerms.toLowerCase().trim().split(","), excludeTerms.toLowerCase().trim().split(","), startDate, endDate, LoadConf.esConf.getString("decahoseType"))
 			return executeElasticsearchQueries(elasticsearchRequests)
 		}
 		catch {
