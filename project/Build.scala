@@ -180,7 +180,7 @@ object RedRockBuild extends Build {
   lazy val powertrack = Project(
     id = "redrock-powertrack",
     base = file("./twitter-powertrack"),
-    settings = decahosebuildSettings ++ Seq(
+    settings = powertrackbuildSettings ++ Seq(
       maxErrors := 5,
       ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) },
       triggeredMessage := Watched.clearWhenTriggered,
