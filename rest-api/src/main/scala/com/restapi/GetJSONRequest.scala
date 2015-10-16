@@ -228,7 +228,7 @@ object GetJSONRequest
                 {"term": {"language": "en"}}
               ],
               "must_not":
-                {"terms": {"tweet_text_array_tokens" : [$includeTerms], "execution" : "and"}}
+                {"terms": {"tweet_text_array_tokens" : [$excludeTerms], "execution" : "or"}}
             }
          }
         }
@@ -270,11 +270,11 @@ object GetJSONRequest
                                 "term": {
                                     "language": "en"
                                 }
-                            }
+                            },
                             {"terms": {"tweet_text_array_tokens" : [$includeTerms], "execution" : "and"}}
                         ],
                         "must_not":
-       |										{"terms": {"tweet_text_array_tokens" : [$includeTerms], "execution" : "and"}}
+       										{"terms": {"tweet_text_array_tokens" : [$excludeTerms], "execution" : "or"}}
                     }
                 }
             }
@@ -282,7 +282,7 @@ object GetJSONRequest
         "fields": [
             "tweet_text"
         ],
-        "size": 2000000
+        "size": 50000
     }"""
   }
 }
