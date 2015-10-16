@@ -23,9 +23,11 @@ object BuildSettings {
   val RestAPIName = "redrock-restapi"
   val DecahoseName = "redrock-decahose"
   val PowertrackName = "redrock-powertrack"
+  val WebSocketsName = "redrock-websockets"
 
   val Version = "3.0"
   val ScalaVersion = "2.10.4"
+  val ScalaVersion11 = "2.11.6"
 
   lazy val rootbuildSettings = Defaults.coreDefaultSettings ++ Seq (
     name          := ParentProject,
@@ -60,6 +62,15 @@ object BuildSettings {
     scalaVersion  := ScalaVersion,
     organization  := "com.ibm.spark.redrock",
     description   := "RedRock Powertrack Spark Streaming Application",
+    scalacOptions := Seq("-deprecation", "-unchecked", "-encoding", "utf8", "-Xlint")
+  )
+
+  lazy val webSocketsbuildSettings = Defaults.coreDefaultSettings ++ Seq (
+    name          := WebSocketsName,
+    version       := Version,
+    scalaVersion  := ScalaVersion11,
+    organization  := "com.ibm.spark.redrock",
+    description   := "RedRock WebSockets Server",
     scalacOptions := Seq("-deprecation", "-unchecked", "-encoding", "utf8", "-Xlint")
   )
 
@@ -120,6 +131,10 @@ object Dependency {
 
   //HTTP client
   val httpClient     = "org.apache.httpcomponents" % "httpclient" % Version.HttpClientVersion
+
+  //Web Sockets dependencies
+  val akkaStream     = "com.typesafe.akka" %% "akka-stream-experimental" % "1.0-RC2"
+  val akkaHttpCore   = "com.typesafe.akka" %% "akka-http-core-experimental" % "1.0-RC2" 
 }
 
 object Dependencies {
@@ -131,6 +146,7 @@ object Dependencies {
   val restAPIDependecies = Seq(playJson, sprayCan, sprayRouting, akkaActor, 
                                specs2Core, elasticSearch, httpClient, slf4j, log4j, log4Slf4j, configLib,
                                sparkMlLib, sparkCore, sparkSQL)
+  val webSocketsDependencies = Seq(akkaStream, akkaHttpCore, playJson)
 }
 
 object RedRockBuild extends Build {
@@ -188,6 +204,21 @@ object RedRockBuild extends Build {
       libraryDependencies ++= Dependencies.decahoseAndPowertrackDependencies,
       unmanagedResourceDirectories in Compile += file(".") / "conf",
       mainClass := Some("com.powertrack.Application"),
+      fork := true,
+      connectInput in run := true
+    ))
+
+  lazy val websockets = Project(
+    id = "redrock-websockets",
+    base = file("./websockets"),
+    settings = decahosebuildSettings ++ Seq(
+      maxErrors := 5,
+      ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) },
+      triggeredMessage := Watched.clearWhenTriggered,
+      resolvers := allResolvers,
+      libraryDependencies ++= Dependencies.webSocketsDependencies,
+      unmanagedResourceDirectories in Compile += file(".") / "conf",
+      mainClass := Some("com.websokets.Server"),
       fork := true,
       connectInput in run := true
     ))
