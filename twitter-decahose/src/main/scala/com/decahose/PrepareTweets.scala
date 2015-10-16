@@ -61,7 +61,7 @@ object PrepareTweets
         
         println("Creating streaming new context")
         // Create the context with a 1 second batch size
-        val ssc = new StreamingContext(ApplicationContext.sc, Seconds(LoadConf.sparkConf.getInt("decahose.streamingBatchTime")))
+        val ssc = new StreamingContext(ApplicationContext.sparkContext, Seconds(LoadConf.sparkConf.getInt("decahose.streamingBatchTime")))
 
         val tweetsStreaming = ssc.textFileStream(LoadConf.sparkConf.getString("decahose.twitterStreamingDataPath"))
          
@@ -85,7 +85,7 @@ object PrepareTweets
         if (LoadConf.sparkConf.getBoolean("decahose.loadHistoricalData"))
         {
             println(s"""Loading historical data from: ${LoadConf.sparkConf.getString("decahose.twitterHistoricalDataPath")}""")
-            val jsonRDDs = ApplicationContext.sc.textFile(LoadConf.sparkConf.getString("decahose.twitterHistoricalDataPath"),LoadConf.sparkConf.getInt("partitionNumber"))
+            val jsonRDDs = ApplicationContext.sparkContext.textFile(LoadConf.sparkConf.getString("decahose.twitterHistoricalDataPath"),LoadConf.sparkConf.getInt("partitionNumber"))
             if(!jsonRDDs.partitions.isEmpty)
             {
                 loadJSONExtractInfoWriteToDatabase(jsonRDDs)

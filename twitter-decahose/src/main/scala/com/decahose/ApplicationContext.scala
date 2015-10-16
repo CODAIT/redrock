@@ -35,34 +35,34 @@ import java.net.URI
 
 object ApplicationContext
 {
-	val conf = new SparkConf()
-    //conf.setMaster(masterNode)
-    conf.setAppName(LoadConf.globalConf.getString("appName") + " - Decahose")
-    conf.set("spark.scheduler.mode", "FAIR")
+    val sparkConf = new SparkConf()
+    //sparkConf.setMaster(masterNode)
+    sparkConf.setAppName(LoadConf.globalConf.getString("appName") + " - Decahose")
+    sparkConf.set("spark.scheduler.mode", "FAIR")
     
     //Spark master resources
-    conf.set("spark.executor.memory",s"""${LoadConf.sparkConf.getString("decahose.executorMemory")}""")
-    conf.set("spark.ui.port",s"""${LoadConf.sparkConf.getString("decahose.sparkUIPort")}""")
-    conf.set("spark.cores.max",s"""${LoadConf.sparkConf.getInt("decahose.totalCores")}""")
+    sparkConf.set("spark.executor.memory",s"""${LoadConf.sparkConf.getString("decahose.executorMemory")}""")
+    sparkConf.set("spark.ui.port",s"""${LoadConf.sparkConf.getString("decahose.sparkUIPort")}""")
+    sparkConf.set("spark.cores.max",s"""${LoadConf.sparkConf.getInt("decahose.totalCores")}""")
 
     //Do not allow infer schema. Schema must be defined at ES before start the app
-   	conf.set("es.index.auto.create", "false")
-    conf.set("es.batch.size.bytes", "300000000")
-    conf.set("es.batch.size.entries", "10000")
-    conf.set("es.batch.write.refresh", "false")
-    conf.set("es.batch.write.retry.count", "50")
-    conf.set("es.batch.write.retry.wait", "500")
-    conf.set("es.http.timeout", "5m")
-    conf.set("es.http.retries", "50")
-    conf.set("es.action.heart.beat.lead", "50")
+    sparkConf.set("es.index.auto.create", "false")
+    sparkConf.set("es.batch.size.bytes", "300000000")
+    sparkConf.set("es.batch.size.entries", "10000")
+    sparkConf.set("es.batch.write.refresh", "false")
+    sparkConf.set("es.batch.write.retry.count", "50")
+    sparkConf.set("es.batch.write.retry.wait", "500")
+    sparkConf.set("es.http.timeout", "5m")
+    sparkConf.set("es.http.retries", "50")
+    sparkConf.set("es.action.heart.beat.lead", "50")
 
-    val sc = new SparkContext(conf)
-    val sqlContext = new HiveContext(sc)
+    val sparkContext = new SparkContext(sparkConf)
+    val sqlContext = new HiveContext(sparkContext)
 
     /* config sqlContext */
     sqlContext.setConf("spark.sql.shuffle.partitions", s"""${LoadConf.sparkConf.getInt("partitionNumber")}""")
     sqlContext.setConf("spark.sql.codegen", "true")
 
     /* delete HDFS processed files */
-    val hadoopFS :FileSystem = FileSystem.get(sc.hadoopConfiguration)
+    val hadoopFS :FileSystem = FileSystem.get(sparkContext.hadoopConfiguration)
 }

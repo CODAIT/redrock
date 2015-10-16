@@ -19,7 +19,7 @@ package com.powertrack
 import com.typesafe.config._
 
 object LoadConf {
-	// Loading application.conf
+	// Loading application.sparkConf
 	val globalConf:Config = ConfigFactory.load("redrock-app").getConfig("redrock")
     //Loading rest config
     val sparkConf:Config = globalConf.getConfig("spark")
