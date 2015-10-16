@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #
 # (C) Copyright IBM Corp. 2015, 2015
 #

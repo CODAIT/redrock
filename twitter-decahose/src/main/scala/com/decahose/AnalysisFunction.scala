@@ -42,13 +42,13 @@ object AnalysisFunction
 
 	def registerAnalysisFunctions() = 
 	{
-		SparkContVal.sqlContext.udf.register("validTweet", (text: scala.collection.mutable.WrappedArray[String], includeTerms: String, excludeTerms: String) => validateTweetText(text, includeTerms, excludeTerms))
-		SparkContVal.sqlContext.udf.register("getSentiment", (text: String) => extractSentimentFromText(text))
-		SparkContVal.sqlContext.udf.register("getTimeStamp", (text: String) => getTimeStamp(text))
-		SparkContVal.sqlContext.udf.register("getLocation", (text: String) => extractLocation(text))
-		SparkContVal.sqlContext.udf.register("getProfession", (description: String) => extractProfession(description))	
-		SparkContVal.sqlContext.udf.register("stringTokenizerArray", (text: String) => stringTokenizerArray(text))
-		SparkContVal.sqlContext.udf.register("convertCreatedAtFormat", (created_at: String) => convertCreatedAtFormat(created_at))
+		ApplicationContext.sqlContext.udf.register("validTweet", (text: scala.collection.mutable.WrappedArray[String], includeTerms: String, excludeTerms: String) => validateTweetText(text, includeTerms, excludeTerms))
+		ApplicationContext.sqlContext.udf.register("getSentiment", (text: String) => extractSentimentFromText(text))
+		ApplicationContext.sqlContext.udf.register("getTimeStamp", (text: String) => getTimeStamp(text))
+		ApplicationContext.sqlContext.udf.register("getLocation", (text: String) => extractLocation(text))
+		ApplicationContext.sqlContext.udf.register("getProfession", (description: String) => extractProfession(description))
+		ApplicationContext.sqlContext.udf.register("stringTokenizerArray", (text: String) => stringTokenizerArray(text))
+		ApplicationContext.sqlContext.udf.register("convertCreatedAtFormat", (created_at: String) => convertCreatedAtFormat(created_at))
 	}
 	
 	//Check if the text contain all the include terms and do not contain any of the exclude terms

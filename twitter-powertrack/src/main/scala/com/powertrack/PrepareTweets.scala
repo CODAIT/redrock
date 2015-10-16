@@ -54,7 +54,7 @@ object PrepareTweets
         
         println("Creating streaming new context")
         // Create the context with a 1 second batch size
-        val ssc = new StreamingContext(SparkContVal.sc, Seconds(LoadConf.sparkConf.getInt("powertrack.streamingBatchTime")))
+        val ssc = new StreamingContext(ApplicationContext.sc, Seconds(LoadConf.sparkConf.getInt("powertrack.streamingBatchTime")))
 
         val tweetsStreaming = ssc.textFileStream(LoadConf.sparkConf.getString("powertrack.twitterStreamingDataPath"))
          
@@ -77,7 +77,7 @@ object PrepareTweets
     {
         try
         {
-            SparkContVal.sqlContext.read.json(rdd)
+            ApplicationContext.sqlContext.read.json(rdd)
                         .filter(s"${TweetField.verb} = 'post' OR ${TweetField.verb} = 'share'")
                         .selectExpr(s"${TweetField.tweet_id} as tweet_id",
                         s"${TweetField.tweet_created_at} AS created_at",
@@ -106,17 +106,17 @@ object PrepareTweets
     def deleteFile(fileName: String) =
     {
         val filePath = new Path(fileName)
-        if (SparkContVal.hadoopFS.isDirectory(filePath))
+        if (ApplicationContext.hadoopFS.isDirectory(filePath))
         {
-            SparkContVal.hadoopFS.listStatus(filePath).foreach((status) => {
+            ApplicationContext.hadoopFS.listStatus(filePath).foreach((status) => {
                                                         println(status.getPath())
-                                                        SparkContVal.hadoopFS.delete(status.getPath(), true)
+                                                        ApplicationContext.hadoopFS.delete(status.getPath(), true)
                                                     })
         }
         else
         {
             println(fileName)
-            SparkContVal.hadoopFS.delete(filePath, true)
+            ApplicationContext.hadoopFS.delete(filePath, true)
         }
     }
 

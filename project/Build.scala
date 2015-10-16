@@ -157,7 +157,7 @@ object RedRockBuild extends Build {
       resolvers := allResolvers,
       libraryDependencies ++= Dependencies.restAPIDependecies,
       unmanagedResourceDirectories in Compile += file(".") / "conf",
-      mainClass := Some("com.restapi.Boot"),
+      mainClass := Some("com.restapi.Application"),
       fork := true,
       connectInput in run := true
     ))
@@ -172,7 +172,7 @@ object RedRockBuild extends Build {
       resolvers := allResolvers,
       libraryDependencies ++= Dependencies.decahoseAndPowertrackDependencies,
       unmanagedResourceDirectories in Compile += file(".") / "conf",
-      mainClass := Some("com.decahose.Boot"),
+      mainClass := Some("com.decahose.Application"),
       fork := true,
       connectInput in run := true
     ))
@@ -187,7 +187,7 @@ object RedRockBuild extends Build {
       resolvers := allResolvers,
       libraryDependencies ++= Dependencies.decahoseAndPowertrackDependencies,
       unmanagedResourceDirectories in Compile += file(".") / "conf",
-      mainClass := Some("com.powertrack.Boot"),
+      mainClass := Some("com.powertrack.Application"),
       fork := true,
       connectInput in run := true
     ))

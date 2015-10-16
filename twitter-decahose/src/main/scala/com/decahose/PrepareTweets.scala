@@ -61,7 +61,7 @@ object PrepareTweets
         
         println("Creating streaming new context")
         // Create the context with a 1 second batch size
-        val ssc = new StreamingContext(SparkContVal.sc, Seconds(LoadConf.sparkConf.getInt("decahose.streamingBatchTime")))
+        val ssc = new StreamingContext(ApplicationContext.sc, Seconds(LoadConf.sparkConf.getInt("decahose.streamingBatchTime")))
 
         val tweetsStreaming = ssc.textFileStream(LoadConf.sparkConf.getString("decahose.twitterStreamingDataPath"))
          
@@ -85,7 +85,7 @@ object PrepareTweets
         if (LoadConf.sparkConf.getBoolean("decahose.loadHistoricalData"))
         {
             println(s"""Loading historical data from: ${LoadConf.sparkConf.getString("decahose.twitterHistoricalDataPath")}""")
-            val jsonRDDs = SparkContVal.sc.textFile(LoadConf.sparkConf.getString("decahose.twitterHistoricalDataPath"),LoadConf.sparkConf.getInt("partitionNumber"))
+            val jsonRDDs = ApplicationContext.sc.textFile(LoadConf.sparkConf.getString("decahose.twitterHistoricalDataPath"),LoadConf.sparkConf.getInt("partitionNumber"))
             if(!jsonRDDs.partitions.isEmpty)
             {
                 loadJSONExtractInfoWriteToDatabase(jsonRDDs)
@@ -107,7 +107,7 @@ object PrepareTweets
     {
         try
         {
-            SparkContVal.sqlContext.read.json(rdd)
+            ApplicationContext.sqlContext.read.json(rdd)
                         .filter(s"${TweetField.verb} = 'post' OR ${TweetField.verb} = 'share'")
                         .selectExpr(s"${TweetField.tweet_id} as tweet_id",
                         s"${TweetField.tweet_created_at} AS created_at",
@@ -140,17 +140,17 @@ object PrepareTweets
     def deleteFile(fileName: String) =
     {
         val filePath = new Path(fileName)
-        if (SparkContVal.hadoopFS.isDirectory(filePath))
+        if (ApplicationContext.hadoopFS.isDirectory(filePath))
         {
-            SparkContVal.hadoopFS.listStatus(filePath).foreach((status) => {
+            ApplicationContext.hadoopFS.listStatus(filePath).foreach((status) => {
                                                         println(status.getPath())
-                                                        SparkContVal.hadoopFS.delete(status.getPath(), true)
+                                                        ApplicationContext.hadoopFS.delete(status.getPath(), true)
                                                     })
         }
         else
         {
             println(fileName)
-            SparkContVal.hadoopFS.delete(filePath, true)
+            ApplicationContext.hadoopFS.delete(filePath, true)
         }
     }
 

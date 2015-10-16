@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #
 # (C) Copyright IBM Corp. 2015, 2015
 #
@@ -30,7 +31,7 @@ cd $REDROCK_HOME/rest-api
 
 echo "============ Starting REST API =============="
 HOSTNAME="$(/bin/hostname -f)"
-nohup $SPARK_HOME/bin/spark-submit --driver-memory 1g --master spark://$HOSTNAME:7077 --class com.restapi.Boot $REDROCK_HOME/rest-api/target/scala-2.10/redrock-rest-api.jar > $REDROCK_HOME/rest-api/nohup_restapi.out&
+nohup $SPARK_HOME/bin/spark-submit --driver-memory 1g --master spark://$HOSTNAME:7077 --class com.restapi.Application $REDROCK_HOME/rest-api/target/scala-2.10/redrock-rest-api.jar > $REDROCK_HOME/rest-api/nohup_restapi.out&
 
 echo "========== REST API Started - Check nodup_restapi.out ================="
 

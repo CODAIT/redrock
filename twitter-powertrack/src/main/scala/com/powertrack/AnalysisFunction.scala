@@ -25,7 +25,7 @@ object AnalysisFunction
 {
 	def registerAnalysisFunctions() = 
 	{
-		SparkContVal.sqlContext.udf.register("stringTokenizer", (text: String) => stringTokenizer(text))
+		ApplicationContext.sqlContext.udf.register("stringTokenizer", (text: String) => stringTokenizer(text))
 	}
 
 	def stringTokenizer(text: String): Array[String] = 

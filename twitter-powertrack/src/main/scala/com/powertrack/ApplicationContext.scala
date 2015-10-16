@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package com.decahose
+package com.powertrack
 
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
@@ -33,28 +33,17 @@ import org.apache.hadoop.fs._
 import java.net.URI
 
 
-object SparkContVal 
+object ApplicationContext
 {
 	val conf = new SparkConf()
-    //conf.setMaster(masterNode)
-    conf.setAppName(LoadConf.globalConf.getString("appName") + " - Decahose")
+    conf.setAppName(LoadConf.globalConf.getString("appName") + " - Powertrack")
     conf.set("spark.scheduler.mode", "FAIR")
-    
-    //Spark master resources
-    conf.set("spark.executor.memory",s"""${LoadConf.sparkConf.getString("decahose.executorMemory")}""")
-    conf.set("spark.ui.port",s"""${LoadConf.sparkConf.getString("decahose.sparkUIPort")}""")
-    conf.set("spark.cores.max",s"""${LoadConf.sparkConf.getInt("decahose.totalCores")}""")
+    conf.set("es.index.auto.create", "false")
 
-    //Do not allow infer schema. Schema must be defined at ES before start the app
-   	conf.set("es.index.auto.create", "false")
-    conf.set("es.batch.size.bytes", "300000000")
-    conf.set("es.batch.size.entries", "10000")
-    conf.set("es.batch.write.refresh", "false")
-    conf.set("es.batch.write.retry.count", "50")
-    conf.set("es.batch.write.retry.wait", "500")
-    conf.set("es.http.timeout", "5m")
-    conf.set("es.http.retries", "50")
-    conf.set("es.action.heart.beat.lead", "50")
+    //Spark master resources
+    conf.set("spark.executor.memory",s"""${LoadConf.sparkConf.getString("powertrack.executorMemory")}""")
+    conf.set("spark.ui.port",s"""${LoadConf.sparkConf.getString("powertrack.sparkUIPort")}""")
+    conf.set("spark.cores.max",s"""${LoadConf.sparkConf.getInt("powertrack.totalCores")}""")
 
     val sc = new SparkContext(conf)
     val sqlContext = new HiveContext(sc)

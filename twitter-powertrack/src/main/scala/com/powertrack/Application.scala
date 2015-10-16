@@ -14,14 +14,12 @@
  * limitations under the License.
  *
  */
-package com.decahose
+package com.powertrack
 
-object Boot extends App {
+object Application extends App {
 
     println("Registering analysis function")
     AnalysisFunction.registerAnalysisFunctions()
-    
-    /* Load historical data and start tweets streaming */
-    PrepareTweets.loadHistoricalDataAndStartStreaming()
-
+   
+    PrepareTweets.startTweetsStreaming()
 }

@@ -23,7 +23,7 @@ import akka.pattern.ask
 import scala.concurrent.duration._
 import akka.util.Timeout
 
-object Boot extends App {
+object Application extends App {
     /*Starting REST API*/
     // we need an ActorSystem to host our application in
     implicit val system = ActorSystem(LoadConf.restConf.getString("actor"))
