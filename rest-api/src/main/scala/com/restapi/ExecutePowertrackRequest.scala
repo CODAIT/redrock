@@ -23,6 +23,8 @@ import org.apache.commons.lang.time.DateUtils
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future,future, Await}
+import play.api.libs.json._
+
 
 /**
  * Created by barbaragomes on 10/16/15.
@@ -39,16 +41,32 @@ object ExecutePowertrackRequest {
       println(s"UTC end date: $endDate")
 
       val elasticsearchResponse = new GetElasticsearchResponse(topTweets, startDateTime = startDate, endDateTime = endDate, esType = LoadConf.esConf.getString("powertrackType"))
-      val response = elasticsearchResponse.getPowertrackTweetsAndWordCount(topWords)
+      val response = Json.parse(elasticsearchResponse.getPowertrackTweetsAndWordCount(topWords))
 
-      //TODO: manipulate response when the JSON request is ready
+      val tweets = ((response \ "hits" \ "hits").as[List[JsObject]]).map(tweet => {
+        Json.obj(
+          "created_at" -> (tweet \ "_source" \ "created_at"),
+          "text" -> (tweet \ "_source" \ "tweet_text"),
+          "user" -> Json.obj(
+            "name" -> (tweet \ "_source" \ "user_name"),
+            "screen_name" -> (tweet \ "_source" \ "user_handle"),
+            "followers_count" -> (tweet \ "_source" \ "user_followers_count"),
+            "id" -> (tweet \ "_source" \ "user_id"),
+            "profile_image_url" -> (tweet \ "_source" \ "user_image_url")
+          ))
+        }
+      )
 
-      s""" Powertrack request
-       start date: $startDate
-       end date: $endDate
-       top tweets: $topTweets
-       top words: $topWords
-     """
+      val words =  ((response \ "aggregations" \ "top_words" \ "buckets").as[List[JsObject]]).map( wordCount =>{
+        Json.obj("word" -> (wordCount \ "key"), "count" -> (wordCount \ "doc_count"))
+      })
+
+      Json.stringify(Json.obj("tweets" -> tweets, "wordCount" -> words))
+
+    }.recover {
+      case e: Exception =>
+        Utils.printException(e, "Execute Powertrack Word Count");
+        Json.stringify(Json.obj("tweets" -> JsNull, "wordCount" -> JsNull))
     }
   }
 

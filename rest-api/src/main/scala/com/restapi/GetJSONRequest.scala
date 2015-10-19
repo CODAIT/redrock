@@ -288,7 +288,34 @@ object GetJSONRequest
 
   def getPowertrackWordCountAndTweets(statDate: String, endDate: String, topTweets: Int, topWords: Int): String =
   {
-    //todo: Return word count ES query plus top tweets
-    "Not implemendted yet"
+    /* Created by: Nakul Jindal
+    * Modified by: Barbara Gomes
+    */
+    s"""{
+      "size" : $topTweets,
+      "query" : {
+        "filtered": {
+        "filter" : {
+        "bool":{
+        "must":[
+      {
+        "range" : {
+        "created_at" : {
+        "from" : "$statDate",
+        "to" : "$endDate"
+      }
+      }
+      }
+        ]
+      }
+      }
+      }
+      },
+      "aggs" : {
+        "top_words": {
+        "terms" : { "field": "tweet_text_array_tokens" , "size" : $topWords}
+      }
+      }
+    }"""
   }
 }
