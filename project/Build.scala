@@ -135,6 +135,7 @@ object Dependency {
   //Web Sockets dependencies
   val akkaStream     = "com.typesafe.akka" %% "akka-stream-experimental" % "1.0-RC2"
   val akkaHttpCore   = "com.typesafe.akka" %% "akka-http-core-experimental" % "1.0-RC2" 
+  val scalcHttp      = "org.scalaj" %% "scalaj-http" % "1.1.5"
 }
 
 object Dependencies {
@@ -146,7 +147,7 @@ object Dependencies {
   val restAPIDependecies = Seq(playJson, sprayCan, sprayRouting, akkaActor, 
                                specs2Core, elasticSearch, httpClient, slf4j, log4j, log4Slf4j, configLib,
                                sparkMlLib, sparkCore, sparkSQL)
-  val webSocketsDependencies = Seq(akkaStream, akkaHttpCore, playJson)
+  val webSocketsDependencies = Seq(akkaStream, akkaHttpCore, playJson, scalcHttp)
 }
 
 object RedRockBuild extends Build {
@@ -211,7 +212,7 @@ object RedRockBuild extends Build {
   lazy val websockets = Project(
     id = "redrock-websockets",
     base = file("./websockets"),
-    settings = decahosebuildSettings ++ Seq(
+    settings = webSocketsbuildSettings ++ Seq(
       maxErrors := 5,
       ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) },
       triggeredMessage := Watched.clearWhenTriggered,

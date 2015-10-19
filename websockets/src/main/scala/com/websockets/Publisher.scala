@@ -10,6 +10,7 @@ import akka.stream.actor.ActorPublisher
 import play.api.libs.json.Json
 import scala.annotation.tailrec
 import scala.concurrent.duration._
+import scalaj.http._
 
 /**
  * for now a very simple actor, which keeps a separate buffer
@@ -100,7 +101,8 @@ class VMActor(router: ActorRef, delay: FiniteDuration, interval: FiniteDuration)
   import scala.concurrent.ExecutionContext.Implicits.global
 
   context.system.scheduler.schedule(delay, interval) {
-    val json = Json.obj( "stats" -> getStats.map(el => el._1 -> el._2))
+ //   val json = Json.obj( "stats" -> getStats.map(el => el._1 -> el._2))
+    val json = Json.obj("response" -> getResults)
     router ! Json.prettyPrint(json)
   }
 
@@ -123,6 +125,12 @@ class VMActor(router: ActorRef, delay: FiniteDuration, interval: FiniteDuration)
     val usuableSpaceMap = roots.map(root => s"count.fs.usuable.${root.getAbsolutePath}" -> root.getUsableSpace) toMap
 
     baseStats ++ totalSpaceMap ++ freeSpaceMap ++ usuableSpaceMap
+  }
+
+  def getResults : String = {
+    val response: HttpResponse[String] = Http("http://bdavm155.svl.ibm.com:16666/ss/search?user=barbara&termsInclude=:&termsExclude=&top=100").asString
+
+    response.body
   }
 }
 
