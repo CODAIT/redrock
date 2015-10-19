@@ -1,3 +1,21 @@
+/**
+ * (C) Copyright IBM Corp. 2015, 2015
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * Code in this file is modified from:
+ * http://www.smartjava.org/content/create-reactive-websocket-server-akka-streams
+ */
+
 
 package com.websockets
 
@@ -101,30 +119,12 @@ class VMActor(router: ActorRef, delay: FiniteDuration, interval: FiniteDuration)
   import scala.concurrent.ExecutionContext.Implicits.global
 
   context.system.scheduler.schedule(delay, interval) {
- //   val json = Json.obj( "stats" -> getStats.map(el => el._1 -> el._2))
     val json = Json.obj("response" -> getResults)
     router ! Json.prettyPrint(json)
   }
 
   override def receive: Actor.Receive = {
     case _ => // just ignore any messages
-  }
-
-  def getStats: Map[String, Long] = {
-
-    val baseStats = Map[String, Long](
-      "count.procs" -> Runtime.getRuntime.availableProcessors(),
-      "count.mem.free" -> Runtime.getRuntime.freeMemory(),
-      "count.mem.maxMemory" -> Runtime.getRuntime.maxMemory(),
-      "count.mem.totalMemory" -> Runtime.getRuntime.totalMemory()
-    )
-
-    val roots = File.listRoots()
-    val totalSpaceMap = roots.map(root => s"count.fs.total.${root.getAbsolutePath}" -> root.getTotalSpace) toMap
-    val freeSpaceMap = roots.map(root => s"count.fs.free.${root.getAbsolutePath}" -> root.getFreeSpace) toMap
-    val usuableSpaceMap = roots.map(root => s"count.fs.usuable.${root.getAbsolutePath}" -> root.getUsableSpace) toMap
-
-    baseStats ++ totalSpaceMap ++ freeSpaceMap ++ usuableSpaceMap
   }
 
   def getResults : String = {
