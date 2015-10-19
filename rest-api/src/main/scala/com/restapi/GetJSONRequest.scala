@@ -286,36 +286,41 @@ object GetJSONRequest
     }"""
   }
 
-  def getPowertrackWordCountAndTweets(statDate: String, endDate: String, topTweets: Int, topWords: Int): String =
+  def getPowertrackWordCountAndTweets(includeTerms:String, excludeTerms:String, statDate:String, endDate:String, topTweets:Int, topWords:Int): String =
   {
     /* Created by: Nakul Jindal
     * Modified by: Barbara Gomes
     */
     s"""{
-      "size" : $topTweets,
-      "query" : {
-        "filtered": {
-        "filter" : {
-        "bool":{
-        "must":[
-      {
-        "range" : {
-        "created_at" : {
-        "from" : "$statDate",
-        "to" : "$endDate"
-      }
-      }
-      }
-        ]
-      }
-      }
-      }
-      },
-      "aggs" : {
-        "top_words": {
-        "terms" : { "field": "tweet_text_array_tokens" , "size" : $topWords}
-      }
-      }
+        "size": $topTweets,
+        "query": {
+            "filtered": {
+                "filter": {
+                    "bool": {
+                        "must": [
+                            {
+                                "range": {
+                                    "created_at": {
+                                        "from": "$statDate",
+                                        "to": "$endDate"
+                                    }
+                                }
+                            },
+                            {"terms": {"tweet_text_array_tokens" : [$includeTerms], "execution" : "and"}}
+                        ],
+                        "must_not": {"terms": { "tweet_text_array_tokens": [$excludeTerms],"execution": "or"}}
+                    }
+                }
+            }
+        },
+        "aggs": {
+            "top_words": {
+                "terms": {
+                    "field": "tweet_text_array_tokens",
+                    "size": $topWords
+                }
+            }
+        }
     }"""
   }
 }

@@ -31,7 +31,7 @@ import play.api.libs.json._
  */
 object ExecutePowertrackRequest {
 
-  def runPowertrackAnalysis(batchTime: Int, topTweets: Int, topWords: Int): Future[String] =
+  def runPowertrackAnalysis(batchTime: Int, topTweets: Int, topWords: Int, termsInclude: String, termsExclude: String): Future[String] =
   {
     Future {
 
@@ -39,8 +39,10 @@ object ExecutePowertrackRequest {
       println("Powertrack request")
       println(s"UTC start date: $startDate")
       println(s"UTC end date: $endDate")
+      println(s"Included terms: $termsInclude")
+      println(s"Excluded terms: $termsExclude")
 
-      val elasticsearchResponse = new GetElasticsearchResponse(topTweets, startDateTime = startDate, endDateTime = endDate, esType = LoadConf.esConf.getString("powertrackType"))
+      val elasticsearchResponse = new GetElasticsearchResponse(topTweets, termsInclude.toLowerCase().trim().split(","), termsExclude.toLowerCase().trim().split(","), startDate,  endDate, LoadConf.esConf.getString("powertrackType"))
       val response = Json.parse(elasticsearchResponse.getPowertrackTweetsAndWordCount(topWords))
 
       val tweets = ((response \ "hits" \ "hits").as[List[JsObject]]).map(tweet => {

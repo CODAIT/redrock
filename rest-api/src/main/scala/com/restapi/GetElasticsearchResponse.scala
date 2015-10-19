@@ -85,7 +85,7 @@ class GetElasticsearchResponse(val topTweets: Int, includeTerms:Array[String] = 
 
 	def getPowertrackTweetsAndWordCount(topWords: Int): String =
 	{
-		val jsonRequest = GetJSONRequest.getPowertrackWordCountAndTweets(startDateTime, endDateTime, topTweets, topWords)
+		val jsonRequest = GetJSONRequest.getPowertrackWordCountAndTweets(includeTermsES, excludeTermsES, startDateTime, endDateTime, topTweets, topWords)
 		return performSearch(searchURL, jsonRequest)
 	}
 
