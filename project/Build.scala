@@ -141,7 +141,7 @@ object Dependency {
 object Dependencies {
   import Dependency._
 
-  val decahoseAndPowertrackDependencies = Seq(sparkCore,sparkSQL,sparkRepl,
+  val decahoseAndPowertrackDependencies = Seq(sparkCore,sparkSQL,sparkRepl,playJson,
                                               sparkHive, elasticSearchConnector, readCSV, configLib)
 
   val restAPIDependecies = Seq(playJson, sprayCan, sprayRouting, akkaActor, 

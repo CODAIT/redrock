@@ -33,6 +33,7 @@ import org.elasticsearch.spark._
 import org.elasticsearch.spark.sql._
 
 import org.apache.hadoop.fs.{FileSystem, Path, PathFilter}
+import play.api.libs.json._
 
 
 object PrepareTweets
@@ -77,7 +78,9 @@ object PrepareTweets
     {
         try
         {
-            ApplicationContext.sqlContext.read.json(rdd)
+          /*Get each tweet as one line result*/
+          val tweets = rdd.flatMap(file => (Json.parse(file) \ TweetField.jsonPrefix).as[List[JsObject]]).map(tweet => Json.stringify(tweet))
+          ApplicationContext.sqlContext.read.json(tweets)
                         .filter(s"${TweetField.verb} = 'post' OR ${TweetField.verb} = 'share'")
                         .selectExpr(s"${TweetField.tweet_id} as tweet_id",
                         s"${TweetField.tweet_created_at} AS created_at",
