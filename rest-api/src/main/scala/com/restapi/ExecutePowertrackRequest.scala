@@ -63,7 +63,7 @@ object ExecutePowertrackRequest {
         Json.obj("word" -> (wordCount \ "key"), "count" -> (wordCount \ "doc_count"))
       })
 
-      Json.stringify(Json.obj("tweets" -> tweets, "wordCount" -> words))
+      Json.stringify(Json.obj("toptweets" -> Json.obj("tweets" -> tweets), "wordCount" -> words))
 
     }.recover {
       case e: Exception =>
