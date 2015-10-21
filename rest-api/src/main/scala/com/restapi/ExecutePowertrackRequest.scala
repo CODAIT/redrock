@@ -43,6 +43,35 @@ object ExecutePowertrackRequest {
       println(s"Excluded terms: $termsExclude")
 
       val elasticsearchResponse = new GetElasticsearchResponse(topTweets, termsInclude.toLowerCase().trim().split(","), termsExclude.toLowerCase().trim().split(","), startDate,  endDate, LoadConf.esConf.getString("powertrackType"))
+      val wordCountJson = getTweetsAndWordCount(elasticsearchResponse, topWords)
+      val totalUserAndTweetsJson = getUsersAndTweets(elasticsearchResponse)
+
+      Json.stringify((wordCountJson ++ totalUserAndTweetsJson).as[JsValue])
+
+    }.recover {
+      case e: Exception =>
+        Utils.printException(e, "Execute Powertrack Word Count");
+        Json.stringify(Json.obj("toptweets" -> Json.obj("tweets" -> JsNull), "wordCount" -> JsNull,"totalfilteredtweets" -> JsNull, "totalusers" -> JsNull))
+    }
+  }
+
+  def getUsersAndTweets(elasticsearchResponse: GetElasticsearchResponse): JsObject =
+  {
+    try {
+      val countResponse = Json.parse(elasticsearchResponse.getTotalFilteredTweetsAndTotalUserResponse())
+      return (Json.obj("totalfilteredtweets" -> (countResponse \ "hits" \ "total")) ++
+        Json.obj("totalusers" -> (countResponse \ "aggregations" \ "distinct_users_by_id" \ "value")))
+    }
+    catch {
+      case e: Exception => Utils.printException(e, "Powertrack user and tweets count")
+        Json.obj("totalfilteredtweets" -> JsNull, "totalusers" -> JsNull)
+    }
+  }
+
+  def getTweetsAndWordCount(elasticsearchResponse: GetElasticsearchResponse, topWords: Int): JsObject =
+  {
+    try
+    {
       val response = Json.parse(elasticsearchResponse.getPowertrackTweetsAndWordCount(topWords))
 
       val tweets = ((response \ "hits" \ "hits").as[List[JsObject]]).map(tweet => {
@@ -56,20 +85,19 @@ object ExecutePowertrackRequest {
             "id" -> (tweet \ "_source" \ "user_id"),
             "profile_image_url" -> (tweet \ "_source" \ "user_image_url")
           ))
-        }
+      }
       )
 
       val words =  ((response \ "aggregations" \ "top_words" \ "buckets").as[List[JsObject]]).map( wordCount =>{
-        Json.obj("word" -> (wordCount \ "key"), "count" -> (wordCount \ "doc_count"))
+        Json.arr((wordCount \ "key"), (wordCount \ "doc_count"))
       })
 
-      Json.stringify(Json.obj("toptweets" -> Json.obj("tweets" -> tweets), "wordCount" -> words))
-
-    }.recover {
-      case e: Exception =>
-        Utils.printException(e, "Execute Powertrack Word Count");
-        Json.stringify(Json.obj("tweets" -> JsNull, "wordCount" -> JsNull))
+      Json.obj("toptweets" -> Json.obj("tweets" -> tweets), "wordCount" -> words)
     }
+    catch {
+        case e: Exception => Utils.printException(e, "Powertrack word count")
+          Json.obj("toptweets" -> Json.obj("tweets" -> JsNull), "wordCount" -> JsNull)
+      }
   }
 
   def getStartAndEndDateAccordingBatchTime(batchTime: Int): (String, String) = {
