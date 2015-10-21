@@ -30,6 +30,6 @@ echo "========= Starting REST API =========="
 
 $REDROCK_HOME/bin/start-restapi.sh
 
-echo "========= Starting Websockets =========="
+#echo "========= Starting Websockets =========="
 
-$REDROCK_HOME/bin/start-websockets.sh
+#$REDROCK_HOME/bin/start-websockets.sh
