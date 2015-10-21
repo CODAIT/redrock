@@ -80,22 +80,28 @@ object PrepareTweets
         {
           /*Get each tweet as one line result*/
           val tweets = rdd.flatMap(file => (Json.parse(file) \ TweetField.jsonPrefix).as[List[JsObject]]).map(tweet => Json.stringify(tweet))
-          ApplicationContext.sqlContext.read.json(tweets)
-                        .filter(s"${TweetField.verb} = 'post' OR ${TweetField.verb} = 'share'")
-                        .selectExpr(s"${TweetField.tweet_id} as tweet_id",
-                        s"${TweetField.tweet_created_at} AS created_at",
-                        s"${TweetField.language} AS language",
-                        s"${TweetField.tweet_text} AS tweet_text",
-                        s"${TweetField.user_followers_count} AS user_followers_count",
-                        s"${TweetField.user_handle} AS user_handle",
-                        s"${TweetField.user_id} AS user_id",
-                        s"${TweetField.user_profileImgURL} AS user_image_url",
-                        s"${TweetField.user_name} user_name",
-                        s"stringTokenizer(${TweetField.tweet_text}) AS tweet_text_array_tokens")
-                        .write.mode(SaveMode.Append)
-                        .format("org.elasticsearch.spark.sql")
-                        .options(Map("pushdown" -> "true", "es.nodes" -> LoadConf.esConf.getString("bindIP"), "es.port" -> LoadConf.esConf.getString("bindPort")))
-                        .save(s"""${LoadConf.esConf.getString("indexName")}/${LoadConf.esConf.getString("powertrackType")}""")
+          if(tweets.count() > 0) {
+            ApplicationContext.sqlContext.read.json(tweets)
+              .filter(s"${TweetField.verb} = 'post' OR ${TweetField.verb} = 'share'")
+              .selectExpr(s"${TweetField.tweet_id} as tweet_id",
+                s"${TweetField.tweet_created_at} AS created_at",
+                s"${TweetField.language} AS language",
+                s"${TweetField.tweet_text} AS tweet_text",
+                s"${TweetField.user_followers_count} AS user_followers_count",
+                s"${TweetField.user_handle} AS user_handle",
+                s"${TweetField.user_id} AS user_id",
+                s"${TweetField.user_profileImgURL} AS user_image_url",
+                s"${TweetField.user_name} user_name",
+                s"stringTokenizer(${TweetField.tweet_text}) AS tweet_text_array_tokens")
+              .write.mode(SaveMode.Append)
+              .format("org.elasticsearch.spark.sql")
+              .options(Map("pushdown" -> "true", "es.nodes" -> LoadConf.esConf.getString("bindIP"), "es.port" -> LoadConf.esConf.getString("bindPort")))
+              .save( s"""${LoadConf.esConf.getString("indexName")}/${LoadConf.esConf.getString("powertrackType")}""")
+          }
+          else
+          {
+            println(" ========= Empty File =========")
+          }
         }
         catch {
           case e: Exception => 
