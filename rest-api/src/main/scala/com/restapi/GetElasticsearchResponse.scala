@@ -89,6 +89,12 @@ class GetElasticsearchResponse(val topTweets: Int, includeTerms:Array[String] = 
 		return performSearch(searchURL, jsonRequest)
 	}
 
+	def getTotalRetweets(): String =
+	{
+		val jsonRequest = GetJSONRequest.getTotalRetweets(includeTermsES, excludeTermsES, startDateTime, endDateTime)
+		return performSearch(countURL, jsonRequest)
+	}
+
 	def performSearch(url: String, jsonQueryRequest:String): String = {
 		try
 		{

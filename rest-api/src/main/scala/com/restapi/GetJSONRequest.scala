@@ -323,4 +323,31 @@ object GetJSONRequest
         }
     }"""
   }
+
+  def getTotalRetweets(includeTerms:String, excludeTerms:String, startDatetime: String, endDatetime: String): String =
+  {
+    s"""
+    {
+      "query": {
+        "filtered":{
+         "filter":{
+           "bool":{
+              "must":[
+                {"range" : {
+                    "created_at" : {
+                      "from" : "$startDatetime",
+                      "to" : "$endDatetime"
+                    }
+                }},
+                {"terms": {"tweet_text_array_tokens" : [$includeTerms, "rt"], "execution" : "and"}}
+              ],
+              "must_not":
+                { "terms" : {"tweet_text_array_tokens" : [$excludeTerms], "execution" : "or"}}
+            }
+         }
+        }
+      }
+    }
+    """
+  }
 }

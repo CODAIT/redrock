@@ -45,13 +45,26 @@ object ExecutePowertrackRequest {
       val elasticsearchResponse = new GetElasticsearchResponse(topTweets, termsInclude.toLowerCase().trim().split(","), termsExclude.toLowerCase().trim().split(","), startDate,  endDate, LoadConf.esConf.getString("powertrackType"))
       val wordCountJson = getTweetsAndWordCount(elasticsearchResponse, topWords)
       val totalUserAndTweetsJson = getUsersAndTweets(elasticsearchResponse)
+      val totalRetweetsJson = getRetweetsCount(elasticsearchResponse)
 
-      Json.stringify((wordCountJson ++ totalUserAndTweetsJson).as[JsValue])
+      Json.stringify((totalUserAndTweetsJson ++ totalRetweetsJson ++ wordCountJson).as[JsValue])
 
     }.recover {
       case e: Exception =>
         Utils.printException(e, "Execute Powertrack Word Count");
-        Json.stringify(Json.obj("toptweets" -> Json.obj("tweets" -> JsNull), "wordCount" -> JsNull,"totalfilteredtweets" -> JsNull, "totalusers" -> JsNull))
+        Json.stringify(Json.obj("toptweets" -> Json.obj("tweets" -> JsNull), "wordCount" -> JsNull,"totalfilteredtweets" -> JsNull, "totalusers" -> JsNull, "totalretweets" -> JsNull))
+    }
+  }
+
+  def getRetweetsCount(elasticsearchResponse: GetElasticsearchResponse): JsObject =
+  {
+    try {
+      val countResponse = Json.parse(elasticsearchResponse.getTotalRetweets())
+      return Json.obj("totalretweets" -> (countResponse \ "hits" \ "total"))
+    }
+    catch {
+      case e: Exception => Utils.printException(e, "Powertrack user and tweets count")
+        Json.obj("totalretweets" -> JsNull)
     }
   }
 
