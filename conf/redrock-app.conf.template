@@ -7,6 +7,8 @@ redrock {
 		name = "redrock-restapi"
 		actor = "redrock-actor"
 		port = 16666
+
+		groupByESField="created_at_timestamp"
 		
 		python-code {
 			classPath = ${redrock.homePath}"/rest-api/python/main.py"

@@ -47,7 +47,7 @@ object GetJSONRequest
       "aggs": {
         "tweet_cnt": {
           "terms": {
-            "field": "created_at_timestamp",
+            "field": "${LoadConf.restConf.getString("groupByESField")}",
             "order" : { "_term" : "asc" }
           },
           "aggs": {
@@ -91,7 +91,7 @@ object GetJSONRequest
       "aggs": {
         "tweet_cnt": {
           "terms": {
-            "field": "created_at_timestamp",
+            "field": "${LoadConf.restConf.getString("groupByESField")}",
             "order" : { "_term" : "asc" }
           },
           "aggs": {
