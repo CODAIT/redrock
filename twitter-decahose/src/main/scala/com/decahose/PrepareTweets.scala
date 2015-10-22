@@ -72,8 +72,6 @@ object PrepareTweets
                 println("Processing File(s):")
                 regExp.findAllMatchIn(rdd.toDebugString).foreach(println)
                 loadJSONExtractInfoWriteToDatabase(rdd)
-                println("Deleting File(s):")
-                regExp.findAllMatchIn(rdd.toDebugString).foreach((name) => deleteFile(name.toString))
             }
         }
 
@@ -89,8 +87,6 @@ object PrepareTweets
             if(!jsonRDDs.partitions.isEmpty)
             {
                 loadJSONExtractInfoWriteToDatabase(jsonRDDs)
-                println("Deleting File(s):")
-                regExp.findAllMatchIn(jsonRDDs.toDebugString).foreach((name) => deleteFile(name.toString))
             }
             else
             {
@@ -129,11 +125,16 @@ object PrepareTweets
                         .format("org.elasticsearch.spark.sql")
                         .options(Map("pushdown" -> "true", "es.nodes" -> LoadConf.esConf.getString("bindIP"), "es.port" -> LoadConf.esConf.getString("bindPort")))
                         .save(s"""${LoadConf.esConf.getString("decahoseIndexName")}/${LoadConf.esConf.getString("esType")}""")
+
+            //Delete file just if it was processed
+            println("Deleting File(s):")
+            regExp.findAllMatchIn(rdd.toDebugString).foreach((name) => deleteFile(name.toString))
         }
         catch {
           case e: Exception => 
           {
             Utils.printException(e, "Processing Tweets")
+            println("####### File(s) not processed ########")
           }
         }
     }
