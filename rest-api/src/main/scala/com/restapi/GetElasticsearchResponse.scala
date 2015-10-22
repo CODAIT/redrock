@@ -33,13 +33,15 @@ import java.text.SimpleDateFormat
 import java.util.TimeZone
 import java.util.Date
 
-class GetElasticsearchResponse(val topTweets: Int, includeTerms:Array[String] = Array[String](), excludeTerms:Array[String] = Array[String](), val startDateTime: String, val endDateTime: String, esType: String)
+class GetElasticsearchResponse(val topTweets: Int, includeTerms:Array[String] = Array[String](), excludeTerms:Array[String] = Array[String](), val startDateTime: String, val endDateTime: String, esIndex: String)
 {
-	val baseURL = "http://" + LoadConf.esConf.getString("bindIP") + ":" + LoadConf.esConf.getString("bindPort") + "/" + LoadConf.esConf.getString("indexName") + "/" + esType
+	val baseURL = "http://" + LoadConf.esConf.getString("bindIP") + ":" + LoadConf.esConf.getString("bindPort") + "/" + esIndex + "/" + LoadConf.esConf.getString("esType")
 	val searchURL = baseURL + "/_search"
 	val countURL = searchURL + "?search_type=count"
 	val includeTermsES = includeTerms.map(x => s""""${x.trim()}"""").mkString(",")
 	val excludeTermsES = excludeTerms.map(x => s""""${x.trim()}"""").mkString(",")
+
+	println(s"Base URL => $baseURL")
 
 	def getTopTweetsResponse(): String =
 	{

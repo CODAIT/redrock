@@ -172,7 +172,7 @@ object ExecuteSentimentAnalysis
 
 	def getTweetsText(includeTerms: String, excludeTerms: String, top: Int, startDatetime: String, endDatetime: String, sentiment: Int): List[String] =
 	{
-		val elasticsearchRequests = new GetElasticsearchResponse(top, includeTerms.toLowerCase().trim().split(","), excludeTerms.toLowerCase().trim().split(","), startDatetime, endDatetime, LoadConf.esConf.getString("decahoseType"))
+		val elasticsearchRequests = new GetElasticsearchResponse(top, includeTerms.toLowerCase().trim().split(","), excludeTerms.toLowerCase().trim().split(","), startDatetime, endDatetime, LoadConf.esConf.getString("decahoseIndexName"))
 		val tweets = (Json.parse(elasticsearchRequests.getSentimentWordAnalysis(sentiment)) \ "hits" \ "hits").as[List[JsObject]]
 		
 		tweets.map(tweet => (tweet \ "fields" \ "tweet_text")(0).as[String])

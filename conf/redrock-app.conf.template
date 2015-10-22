@@ -65,8 +65,8 @@ redrock {
 		bindIP = "127.0.0.1"
 		bindPort = "9200"
 		bindAPIPort = "9300"
-		indexName = "redrock"
-		decahoseType = "processed_tweets"
-		powertrackType = "powertrack_tweets"
+		decahoseIndexName = "redrock_decahose"
+		powertrackIndexName = "redrock_powertrack"
+		esType = "processed_tweets"
 	}
 }

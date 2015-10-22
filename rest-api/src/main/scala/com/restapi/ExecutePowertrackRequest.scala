@@ -42,7 +42,7 @@ object ExecutePowertrackRequest {
       println(s"Included terms: $termsInclude")
       println(s"Excluded terms: $termsExclude")
 
-      val elasticsearchResponse = new GetElasticsearchResponse(topTweets, termsInclude.toLowerCase().trim().split(","), termsExclude.toLowerCase().trim().split(","), startDate,  endDate, LoadConf.esConf.getString("powertrackType"))
+      val elasticsearchResponse = new GetElasticsearchResponse(topTweets, termsInclude.toLowerCase().trim().split(","), termsExclude.toLowerCase().trim().split(","), startDate,  endDate, LoadConf.esConf.getString("powertrackIndexName"))
       val wordCountJson = getTweetsAndWordCount(elasticsearchResponse, topWords)
       val totalUserAndTweetsJson = getUsersAndTweets(elasticsearchResponse)
       val totalRetweetsJson = getRetweetsCount(elasticsearchResponse)

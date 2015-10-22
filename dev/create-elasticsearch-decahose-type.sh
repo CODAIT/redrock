@@ -15,15 +15,40 @@
 # limitations under the License.
 #
 
+if [ -z "$REDROCK_HOME" ]; then echo "REDROCK_HOME is NOT set"; else echo "REDROCK_HOME defined as '$REDROCK_HOME'"; fi
+
 if [ "$1" = "--delete" ]
 then
-  echo " ==========  Deleting ES Decahose Type ============"
-  curl -XDELETE 'http://localhost:9200/redrock/processed_tweets'
+  echo " ==========  Deleting ES Redrock Decahose Index ============"
+  curl -XDELETE 'http://localhost:9200/redrock_decahose/'
   echo ""
 fi
 
+# \u0027 = unicode for '
+# asciifolding - converts 'ā, ă, etc' to 'a'
+
+echo " ==========  Creating ES Redrock Decahose Index ============"
+curl -XPUT 'http://localhost:9200/redrock_decahose/' -d '
+{
+"settings": {
+    "analysis": {
+      "analyzer": {
+        "tweet_analyzer_decahose":{
+          "type" : "custom",
+          "char_filter": "html_strip",
+          "tokenizer" : "whitespace",
+          "filter" : [ "lowercase"],
+          "analyzer" : "tweet_analyzer"
+        }
+      }
+    }
+  }
+}
+'
+echo ""
+
 echo " ==========  Creating ES Decahose Type ============"
-curl -XPUT 'http://localhost:9200/redrock/_mapping/processed_tweets' -d '
+curl -XPUT 'http://localhost:9200/redrock_decahose/_mapping/processed_tweets' -d '
 {
   "processed_tweets": {
     "_id": {

@@ -127,7 +127,7 @@ object PrepareTweets
                         .write.mode(SaveMode.Append)
                         .format("org.elasticsearch.spark.sql")
                         .options(Map("pushdown" -> "true", "es.nodes" -> LoadConf.esConf.getString("bindIP"), "es.port" -> LoadConf.esConf.getString("bindPort")))
-                        .save(s"""${LoadConf.esConf.getString("indexName")}/${LoadConf.esConf.getString("decahoseType")}""")
+                        .save(s"""${LoadConf.esConf.getString("decahoseIndexName")}/${LoadConf.esConf.getString("esType")}""")
         }
         catch {
           case e: Exception => 

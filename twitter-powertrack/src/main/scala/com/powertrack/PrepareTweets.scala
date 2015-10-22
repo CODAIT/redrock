@@ -96,7 +96,7 @@ object PrepareTweets
               .write.mode(SaveMode.Append)
               .format("org.elasticsearch.spark.sql")
               .options(Map("pushdown" -> "true", "es.nodes" -> LoadConf.esConf.getString("bindIP"), "es.port" -> LoadConf.esConf.getString("bindPort")))
-              .save( s"""${LoadConf.esConf.getString("indexName")}/${LoadConf.esConf.getString("powertrackType")}""")
+              .save( s"""${LoadConf.esConf.getString("powertrackIndexName")}/${LoadConf.esConf.getString("esType")}""")
           }
           else
           {
