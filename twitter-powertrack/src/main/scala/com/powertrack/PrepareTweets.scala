@@ -66,8 +66,6 @@ object PrepareTweets
                 println("Processing File(s):")
                 regExp.findAllMatchIn(rdd.toDebugString).foreach(println)
                 loadJSONExtractInfoWriteToDatabase(rdd)
-                println("Deleting File(s):")
-                regExp.findAllMatchIn(rdd.toDebugString).foreach((name) => deleteFile(name.toString))
             }
         }
 
@@ -97,6 +95,10 @@ object PrepareTweets
               .format("org.elasticsearch.spark.sql")
               .options(Map("pushdown" -> "true", "es.nodes" -> LoadConf.esConf.getString("bindIP"), "es.port" -> LoadConf.esConf.getString("bindPort")))
               .save( s"""${LoadConf.esConf.getString("powertrackIndexName")}/${LoadConf.esConf.getString("esType")}""")
+
+            //Delete files if they where processed
+            println("Deleting File(s):")
+            regExp.findAllMatchIn(rdd.toDebugString).foreach((name) => deleteFile(name.toString))
           }
           else
           {
@@ -107,6 +109,7 @@ object PrepareTweets
           case e: Exception => 
           {
             printException(e, "Processing Tweets")
+            println("Files not processed")
           }
         }
     }
