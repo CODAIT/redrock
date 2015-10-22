@@ -121,8 +121,9 @@ object PrepareTweets
                         s"${TweetField.user_id} AS user_id",
                         s"${TweetField.user_profileImgURL} AS user_image_url",
                         s"${TweetField.user_name} user_name",
-                        s"convertCreatedAtFormat(${TweetField.tweet_created_at}) AS created_at_timestamp",
-                        s"stringTokenizerArray(${TweetField.tweet_text}) as tweet_text_array_tokens")
+                        s"convertCreatedAtFormat(${TweetField.tweet_created_at}, '${LoadConf.sparkConf.getString("decahose.timestampFormat")}') AS created_at_timestamp",
+                        s"stringTokenizerArray(${TweetField.tweet_text}) as tweet_text_array_tokens",
+                        s"convertCreatedAtFormat(${TweetField.tweet_created_at}, '${LoadConf.sparkConf.getString("decahose.timestampFormatDay")}') AS created_at_timestamp_day")
                         //.filter(s"created_at IS NOT NULL AND tweet_text IS NOT NULL")
                         .write.mode(SaveMode.Append)
                         .format("org.elasticsearch.spark.sql")

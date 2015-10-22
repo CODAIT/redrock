@@ -48,7 +48,7 @@ object AnalysisFunction
 		ApplicationContext.sqlContext.udf.register("getLocation", (text: String) => extractLocation(text))
 		ApplicationContext.sqlContext.udf.register("getProfession", (description: String) => extractProfession(description))
 		ApplicationContext.sqlContext.udf.register("stringTokenizerArray", (text: String) => stringTokenizerArray(text))
-		ApplicationContext.sqlContext.udf.register("convertCreatedAtFormat", (created_at: String) => convertCreatedAtFormat(created_at))
+		ApplicationContext.sqlContext.udf.register("convertCreatedAtFormat", (created_at: String, format:String) => convertCreatedAtFormat(created_at, format))
 	}
 	
 	//Check if the text contain all the include terms and do not contain any of the exclude terms
@@ -152,13 +152,13 @@ object AnalysisFunction
 		return null
 	}
 
-	def convertCreatedAtFormat(created_at: String): String =
+	def convertCreatedAtFormat(created_at: String, format: String): String =
 	{
 		val sdf:SimpleDateFormat = new SimpleDateFormat(LoadConf.sparkConf.getString("decahose.tweetTimestampFormat"))   //2014-01-16T01:49:50.000Z
 		TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
 		val date = sdf.parse(created_at)
 
-		val sdf_new:SimpleDateFormat = new SimpleDateFormat(LoadConf.sparkConf.getString("decahose.timestampFormat"))
+		val sdf_new:SimpleDateFormat = new SimpleDateFormat(format)
 		return sdf_new.format(date)
 		//Fri May 01 07:12:43 +0000 2015
 	}

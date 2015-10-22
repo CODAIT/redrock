@@ -121,6 +121,11 @@ curl -XPUT 'http://localhost:9200/redrock_decahose/_mapping/processed_tweets' -d
       "tweet_text_array_tokens" : {
         "type": "string",
         "analyzer": "tweet_analyzer_decahose"
+      },
+      "created_at_timestamp_day" : {
+        "type": "date",
+        "format": "MM/dd",
+        "index": "not_analyzed"
       }
     }
   }
