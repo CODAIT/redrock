@@ -320,7 +320,14 @@ object GetJSONRequest
                     "size": $topWords
                 }
             }
-        }
+        },
+        "sort": [
+          {
+            "created_at": {
+              "order": "desc"
+            }
+          }
+        ]
     }"""
   }
 
