@@ -48,6 +48,8 @@ redrock {
 			totalCores = 2
 			sparkUIPort = "4040"
 			executorMemory = "2g"
+			fileExtension = ".json.gz"
+			fileExtensionAuxiliar = ".gson.gz"
 		}
 		powertrack {
 			twitterStreamingDataPath = "hdfs://localhost:9000/user/hadoop/powertrack_streaming"
@@ -56,6 +58,7 @@ redrock {
 			totalCores = 2
 			sparkUIPort = "4041"
 			executorMemory = "2g"
+			fileExtension = ".txt"
 		}
 		restapi {
 			totalCores = 1

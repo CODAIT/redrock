@@ -34,7 +34,8 @@ import org.elasticsearch.spark.sql._
 
 import org.apache.hadoop.fs.{FileSystem, Path, PathFilter}
 import play.api.libs.json._
-
+import org.apache.hadoop.io.{LongWritable, Text}
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat
 
 object PrepareTweets
 {
@@ -57,7 +58,13 @@ object PrepareTweets
         // Create the context with a 1 second batch size
         val ssc = new StreamingContext(ApplicationContext.sparkContext, Seconds(LoadConf.sparkConf.getInt("powertrack.streamingBatchTime")))
 
-        val tweetsStreaming = ssc.textFileStream(LoadConf.sparkConf.getString("powertrack.twitterStreamingDataPath"))
+
+        //Filtering file's path in order to avoid _copying files
+        val tweetsStreaming = ssc.fileStream[LongWritable, Text, TextInputFormat](LoadConf.sparkConf.getString("powertrack.twitterStreamingDataPath"),
+            (p: Path) => {
+              if (p.getName().toLowerCase().endsWith(LoadConf.sparkConf.getString("powertrack.fileExtension"))) true else false
+            }, true).map(_._2.toString)
+        //ssc.textFileStream(LoadConf.sparkConf.getString("powertrack.twitterStreamingDataPath"))
          
         tweetsStreaming.foreachRDD{ (rdd: RDD[String], time: Time) =>
             println(s"========= $time =========")
@@ -109,7 +116,7 @@ object PrepareTweets
           case e: Exception => 
           {
             printException(e, "Processing Tweets")
-            println("Files not processed")
+            println(" ##### Files not processed #####")
           }
         }
     }
