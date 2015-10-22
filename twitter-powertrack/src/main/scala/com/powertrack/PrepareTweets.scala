@@ -58,7 +58,6 @@ object PrepareTweets
         // Create the context with a 1 second batch size
         val ssc = new StreamingContext(ApplicationContext.sparkContext, Seconds(LoadConf.sparkConf.getInt("powertrack.streamingBatchTime")))
 
-
         //Filtering file's path in order to avoid _copying files
         val tweetsStreaming = ssc.fileStream[LongWritable, Text, TextInputFormat](LoadConf.sparkConf.getString("powertrack.twitterStreamingDataPath"),
             (p: Path) => {

@@ -16,6 +16,8 @@
  */
 package com.decahose
 
+import org.apache.hadoop.io.{Text, LongWritable}
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
 import org.apache.spark.SparkConf
@@ -63,7 +65,14 @@ object PrepareTweets
         // Create the context with a 1 second batch size
         val ssc = new StreamingContext(ApplicationContext.sparkContext, Seconds(LoadConf.sparkConf.getInt("decahose.streamingBatchTime")))
 
-        val tweetsStreaming = ssc.textFileStream(LoadConf.sparkConf.getString("decahose.twitterStreamingDataPath"))
+      //Filtering file's path in order to avoid _copying files
+      val tweetsStreaming = ssc.fileStream[LongWritable, Text, TextInputFormat](LoadConf.sparkConf.getString("decahose.twitterStreamingDataPath"),
+        (p: Path) => {
+          if (p.getName().toLowerCase().endsWith(LoadConf.sparkConf.getString("decahose.fileExtension"))) true
+          else if ((p.getName().toLowerCase().endsWith(LoadConf.sparkConf.getString("decahose.fileExtensionAuxiliar")))) true
+          else false
+        }, true).map(_._2.toString)
+      //val tweetsStreaming = ssc.textFileStream(LoadConf.sparkConf.getString("decahose.twitterStreamingDataPath"))
          
         tweetsStreaming.foreachRDD{ (rdd: RDD[String], time: Time) =>
             println(s"========= $time =========")
