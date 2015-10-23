@@ -95,13 +95,13 @@ object GetJSONRequest
           "terms": {
             "field": "${LoadConf.restConf.getString("groupByESField")}",
             "order" : { "_term" : "asc" },
-            "size" = 10000
+            "size": 10000
           },
           "aggs": {
             "tweet_sent": {
               "terms": {
                 "field": "tweet_sentiment",
-                "size" = 10000
+                "size": 10000
               }
             }
           }
