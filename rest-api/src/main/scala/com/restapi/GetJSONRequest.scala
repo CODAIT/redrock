@@ -48,12 +48,14 @@ object GetJSONRequest
         "tweet_cnt": {
           "terms": {
             "field": "${LoadConf.restConf.getString("groupByESField")}",
-            "order" : { "_term" : "asc" }
+            "order" : { "_term" : "asc" },
+            "size": 10000
           },
           "aggs": {
             "tweet_locat": {
               "terms": {
-                "field": "tweet_location"
+                "field": "tweet_location",
+                "size": 10000
               }
             }
           }
@@ -92,12 +94,14 @@ object GetJSONRequest
         "tweet_cnt": {
           "terms": {
             "field": "${LoadConf.restConf.getString("groupByESField")}",
-            "order" : { "_term" : "asc" }
+            "order" : { "_term" : "asc" },
+            "size" = 10000
           },
           "aggs": {
             "tweet_sent": {
               "terms": {
-                "field": "tweet_sentiment"
+                "field": "tweet_sentiment",
+                "size" = 10000
               }
             }
           }
@@ -138,12 +142,14 @@ object GetJSONRequest
           "aggs": {
             "professions": {
               "terms": {
-                "field": "tweet_professions._1"
+                "field": "tweet_professions._1",
+                "size": 10000
               },
               "aggs": {
                 "keywords": {
                   "terms": {
-                    "field": "tweet_professions._2"
+                    "field": "tweet_professions._2",
+                    "size": 10000
                   }
                 }
               }
