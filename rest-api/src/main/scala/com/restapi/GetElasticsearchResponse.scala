@@ -46,72 +46,99 @@ class GetElasticsearchResponse(val topTweets: Int, includeTerms:Array[String] = 
 	def getTopTweetsResponse(): String =
 	{
 		val jsonRequest = GetJSONRequest.getTopTweetsJSONRequest(includeTermsES, excludeTermsES, topTweets, startDateTime, endDateTime)
+		println("========== Request ==========")
+		println(jsonRequest)
 		val result = performSearch(searchURL, jsonRequest)
 		println("ES Response Top tweets")
+		println(result)
 		return result
 	}
 
 	def getLocationResponse(): String =
 	{
 		val jsonRequest = GetJSONRequest.getLocationJSONRequest(includeTermsES, excludeTermsES, startDateTime, endDateTime)
+		println("========== Request ==========")
+		println(jsonRequest)
 		val result = performSearch(countURL, jsonRequest)
 		println("ES Response Location")
+		println(result)
 		return result
 	}
 
 	def getSentimentResponse(): String =
 	{
 		val jsonRequest = GetJSONRequest.getSentimentJSONRequest(includeTermsES, excludeTermsES, startDateTime, endDateTime)
+		println("========== Request ==========")
+		println(jsonRequest)
 		val result = performSearch(countURL, jsonRequest)
 		println("ES Response Sentiment")
+		println(result)
 		return result
 	}
 
 	def getProfessionResponse(): String =
 	{
 		val jsonRequest = GetJSONRequest.getProfessionJSONRequest(includeTermsES, excludeTermsES, startDateTime, endDateTime)
+		println("========== Request ==========")
+		println(jsonRequest)
 		val result = performSearch(countURL, jsonRequest)
 		println("ES Response Profession")
+		println(result)
 		return result
 	}
 
 	def getTotalTweetsESResponse(): String =
 	{
 		val jsonRequest = GetJSONRequest.getTotalTweetsJSONRequest(startDateTime, endDateTime)
+		println("========== Request ==========")
+		println(jsonRequest)
 		val result =  performSearch(countURL, jsonRequest)
 		println("ES Response Total Tweets")
+		println(result)
 		return result
 	}
 
 	def getTotalFilteredTweetsAndTotalUserResponse(): String =
 	{
 		val jsonRequest = GetJSONRequest.getTotalFilteredTweetsAndTotalUserJSONRequest(includeTermsES, excludeTermsES, startDateTime, endDateTime)
+		println("========== Request ==========")
+		println(jsonRequest)
 		val result = performSearch(countURL, jsonRequest)
 		println("ES Response Filtered and User count")
+		println(result)
 		return result
 	}
 
 	def getSentimentWordAnalysis(sentiment: Int): String =
 	{
 		val jsonRequest = GetJSONRequest.getTweetsTextBySentimentAndDate(includeTermsES, excludeTermsES, startDateTime, endDateTime, sentiment)
+		println("========== Request ==========")
+		println(jsonRequest)
 		val result = performSearch(searchURL, jsonRequest)
 		println("ES Response Sentiment Word Analysis")
+		println(result)
 		return result
 	}
 
 	def getPowertrackTweetsAndWordCount(topWords: Int): String =
 	{
 		val jsonRequest = GetJSONRequest.getPowertrackWordCountAndTweets(includeTermsES, excludeTermsES, startDateTime, endDateTime, topTweets, topWords)
+		println("========== Request ==========")
+		println(jsonRequest)
 		val result = performSearch(searchURL, jsonRequest)
 		println("ES Response Powertrack word count")
+		println(result)
 		return result
 	}
 
 	def getTotalRetweets(): String =
 	{
 		val jsonRequest = GetJSONRequest.getTotalRetweets(includeTermsES, excludeTermsES, startDateTime, endDateTime)
+		println("========== Request ==========")
+		println(jsonRequest)
 		val result = performSearch(countURL, jsonRequest)
 		println("ES Response Powertrack total retweets")
+		println(result)
 		return result
 	}
 
