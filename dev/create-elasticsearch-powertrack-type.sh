@@ -68,31 +68,32 @@ curl -XPUT 'http://localhost:9200/redrock_powertrack/_mapping/processed_tweets' 
       },
       "tweet_text": {
         "type": "string",
-        "index": "not_analyzed"
+        "index": "no"
       },
       "created_at": {
         "type": "date",
-        "format": "dateOptionalTime"
+        "format": "dateOptionalTime",
+        "index": "not_analyzed"
       },
       "language": {
         "type": "string",
-        "index": "not_analyzed"
+        "index": "no"
       },
       "user_image_url": {
         "type": "string",
-        "index": "not_analyzed"
+        "index": "no"
       },
       "user_followers_count": {
         "type": "long",
-        "index": "not_analyzed"
+        "index": "no"
       },
       "user_name": {
         "type": "string",
-        "index": "not_analyzed"
+        "index": "no"
       },
       "user_handle": {
         "type": "string",
-        "index": "not_analyzed"
+        "index": "no"
       },
       "user_id": {
         "type": "string",

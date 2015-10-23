@@ -61,11 +61,12 @@ curl -XPUT 'http://localhost:9200/redrock_decahose/_mapping/processed_tweets' -d
       },
       "tweet_text": {
         "type": "string",
-        "index": "not_analyzed"
+        "index": "no"
       },
       "created_at": {
         "type": "date",
-        "format": "dateOptionalTime"
+        "format": "dateOptionalTime",
+        "index": "not_analyzed"
       },
       "language": {
         "type": "string",
@@ -73,7 +74,7 @@ curl -XPUT 'http://localhost:9200/redrock_decahose/_mapping/processed_tweets' -d
       },
       "user_image_url": {
         "type": "string",
-        "index": "not_analyzed"
+        "index": "no"
       },
       "user_followers_count": {
         "type": "long",
@@ -81,11 +82,11 @@ curl -XPUT 'http://localhost:9200/redrock_decahose/_mapping/processed_tweets' -d
       },
       "user_name": {
         "type": "string",
-        "index": "not_analyzed"
+        "index": "no"
       },
       "user_handle": {
         "type": "string",
-        "index": "not_analyzed"
+        "index": "no"
       },
       "user_id": {
         "type": "string",
