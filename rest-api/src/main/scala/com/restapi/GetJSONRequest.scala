@@ -288,7 +288,7 @@ object GetJSONRequest
         "fields": [
             "tweet_text"
         ],
-        "size": 50000
+        "size": 5000
     }"""
   }
 
