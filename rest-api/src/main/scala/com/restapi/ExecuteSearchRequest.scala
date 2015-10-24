@@ -38,7 +38,7 @@ object ExecuteSearchRequest
 	def executeAsynchronous(top: Int, includeTerms: String, excludeTerms: String, startDate: String, endDate: String): Future[JsValue] =
 	{
 		val cluster_distance: Future[JsValue] = future { extracTopWordDistance(includeTerms,excludeTerms) }
-		val elasticsearch_dataAnalisys: Future[JsValue] = future { extractElasticsearchAnalysis(top,includeTerms,excludeTerms,startDate,endDate) }
+		val elasticsearch_dataAnalisys: Future[JsValue] = extractElasticsearchAnalysis(top,includeTerms,excludeTerms,startDate,endDate)
 			
 		val tasks: Seq[Future[JsValue]] = Seq(elasticsearch_dataAnalisys, cluster_distance)
 		val aggregated: Future[Seq[JsValue]] = Future.sequence(tasks)
@@ -46,29 +46,47 @@ object ExecuteSearchRequest
 
 		result.recover{
 			case e: Exception => 
-				Utils.printException(e, "Execute Python and Spark Asynchronous"); 
+				Utils.printException(e, "Execute Python and ES Asynchronous");
 		  		emptyJSONResponse()
 		}
 
 	}
 
-	def extractElasticsearchAnalysis(top: Int, includeTerms: String, excludeTerms: String, startDate: String, endDate: String): JsValue =
+	def extractElasticsearchAnalysis(top: Int, includeTerms: String, excludeTerms: String, startDate: String, endDate: String): Future[JsValue] =
 	{	
-		try{
+		//try{
 			// Object to send the requests and get the responses
 			val elasticsearchRequests = new GetElasticsearchResponse(top, includeTerms.toLowerCase().trim().split(","), excludeTerms.toLowerCase().trim().split(","), startDate, endDate, LoadConf.esConf.getString("decahoseIndexName"))
-			return executeElasticsearchQueries(elasticsearchRequests)
+
+			val totalTweets: Future[JsObject] = future { formatTotalTweets(elasticsearchRequests) }
+			val totalUsersAndFilteresTweets: Future[JsObject] = future {formatTotalFilteredTweetsAndTotalUsers(elasticsearchRequests) }
+			val sentiment: Future[JsObject] = future {formatSentiment(elasticsearchRequests) }
+			val professions: Future[JsObject] = future {formatProfession(elasticsearchRequests) }
+			val location: Future[JsObject] = future {formatLocation(elasticsearchRequests) }
+			val topTweets: Future[JsObject] = future {formatTopTweets(elasticsearchRequests) }
+
+			val tasks: Seq[Future[JsObject]] = Seq(topTweets, totalTweets, totalUsersAndFilteresTweets, sentiment, professions, location)
+			val aggregated: Future[Seq[JsObject]] = Future.sequence(tasks)
+			val initialJson: JsObject = Json.obj("status" -> 0)
+			val result = aggregated.map(jsonResults => initialJson ++ jsonResults(0) ++ jsonResults(1) ++ jsonResults(2) ++ jsonResults(3) ++ jsonResults(4) ++ jsonResults(5))
+
+		result.recover{
+			case e: Exception =>
+				Utils.printException(e, "Extract Elasticsearch Analysis")
+				emptyJSONResponseES()
 		}
+
+		/*}
 		catch {
 		  case e: Exception => 
 		  {
 		  	Utils.printException(e, "Extract Elasticsearch Analysis")
 		  	return emptyJSONResponseES()
 		  }
-		}
+		}*/
 	}
-
-	def executeElasticsearchQueries(elasticsearchRequests: GetElasticsearchResponse): JsValue =
+	/* Use this function if you dont want to send the queries assyncronous*/
+	/*def executeElasticsearchQueries(elasticsearchRequests: GetElasticsearchResponse): JsValue =
 	{
 		try {
 
@@ -89,7 +107,7 @@ object ExecuteSearchRequest
 		  	return emptyJSONResponseES()
 		  }
 		}
-	}
+	}*/
 
 	def formatTotalTweets(elasticsearchRequests: GetElasticsearchResponse): JsObject = 
 	{
