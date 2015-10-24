@@ -95,7 +95,7 @@ object ExecuteSearchRequest
 	{
 		try { 
 			val totalTweetsResponse = Json.parse(elasticsearchRequests.getTotalTweetsESResponse())
-			 return Json.obj("totaltweets" -> (totalTweetsResponse \ "hits" \ "total"))
+			return Json.obj("totaltweets" -> (totalTweetsResponse \ "hits" \ "total"))
 		} catch {
 		  case e: Exception => Utils.printException(e, "Format Total Tweets")
 		}

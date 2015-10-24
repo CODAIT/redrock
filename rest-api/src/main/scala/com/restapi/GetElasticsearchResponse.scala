@@ -46,61 +46,62 @@ class GetElasticsearchResponse(val topTweets: Int, includeTerms:Array[String] = 
 	def getTopTweetsResponse(): String =
 	{
 		val jsonRequest = GetJSONRequest.getTopTweetsJSONRequest(includeTermsES, excludeTermsES, topTweets, startDateTime, endDateTime)
-		return performSearch(searchURL, jsonRequest)
+		return performSearch(searchURL, jsonRequest, "Top Tweets")
 	}
 
 	def getLocationResponse(): String =
 	{
 		val jsonRequest = GetJSONRequest.getLocationJSONRequest(includeTermsES, excludeTermsES, startDateTime, endDateTime)
- 		return performSearch(countURL, jsonRequest)
+ 		return performSearch(countURL, jsonRequest, "Location")
 	}
 
 	def getSentimentResponse(): String =
 	{
 		val jsonRequest = GetJSONRequest.getSentimentJSONRequest(includeTermsES, excludeTermsES, startDateTime, endDateTime)
-		return performSearch(countURL, jsonRequest)
+		return performSearch(countURL, jsonRequest, "Sentiment")
 
 	}
 
 	def getProfessionResponse(): String =
 	{
 		val jsonRequest = GetJSONRequest.getProfessionJSONRequest(includeTermsES, excludeTermsES, startDateTime, endDateTime)
-		return performSearch(countURL, jsonRequest)
+		return performSearch(countURL, jsonRequest, "Profession")
 	}
 
 	def getTotalTweetsESResponse(): String =
 	{
 		val jsonRequest = GetJSONRequest.getTotalTweetsJSONRequest(startDateTime, endDateTime)
-		return performSearch(countURL, jsonRequest)
+		return performSearch(countURL, jsonRequest, "Total Tweets")
 	}
 
 	def getTotalFilteredTweetsAndTotalUserResponse(): String =
 	{
 		val jsonRequest = GetJSONRequest.getTotalFilteredTweetsAndTotalUserJSONRequest(includeTermsES, excludeTermsES, startDateTime, endDateTime)
-		return performSearch(countURL, jsonRequest)
+		return performSearch(countURL, jsonRequest, "Filtered and User Count")
 	}
 
 	def getSentimentWordAnalysis(sentiment: Int): String =
 	{
 		val jsonRequest = GetJSONRequest.getTweetsTextBySentimentAndDate(includeTermsES, excludeTermsES, startDateTime, endDateTime, sentiment)
-		return performSearch(searchURL, jsonRequest)
+		return performSearch(searchURL, jsonRequest, "ML Sentiment Analysis")
 	}
 
 	def getPowertrackTweetsAndWordCount(topWords: Int): String =
 	{
 		val jsonRequest = GetJSONRequest.getPowertrackWordCountAndTweets(includeTermsES, excludeTermsES, startDateTime, endDateTime, topTweets, topWords)
-		return performSearch(searchURL, jsonRequest)
+		return performSearch(searchURL, jsonRequest, "Powertrack Tweets Word Count")
 	}
 
 	def getTotalRetweets(): String =
 	{
 		val jsonRequest = GetJSONRequest.getTotalRetweets(includeTermsES, excludeTermsES, startDateTime, endDateTime)
-		return performSearch(countURL, jsonRequest)
+		return performSearch(countURL, jsonRequest, "Total Retweets")
 	}
 
-	def performSearch(url: String, jsonQueryRequest:String): String = {
+	def performSearch(url: String, jsonQueryRequest:String, queryName:String): String = {
 		try
 		{
+			val startTime = System.nanoTime()
 			val httpClient = new DefaultHttpClient()
 	    	val request = new HttpPost(url)
 	    	request.setEntity(new StringEntity(jsonQueryRequest) )
@@ -115,6 +116,8 @@ class GetElasticsearchResponse(val topTweets: Int, includeTerms:Array[String] = 
 	    	}
 
 	    	httpClient.getConnectionManager().shutdown()
+				val elapsed = (System.nanoTime() - startTime) / 1e9
+				println(s"ES response for $queryName (sec): $elapsed")
 			return jsonResponse
 		} catch {
 			case e: Exception => {
