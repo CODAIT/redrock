@@ -53,9 +53,7 @@ object ExecuteSearchRequest
 	}
 
 	def extractElasticsearchAnalysis(top: Int, includeTerms: String, excludeTerms: String, startDate: String, endDate: String): Future[JsValue] =
-	{	
-		//try{
-			// Object to send the requests and get the responses
+	{
 			val elasticsearchRequests = new GetElasticsearchResponse(top, includeTerms.toLowerCase().trim().split(","), excludeTerms.toLowerCase().trim().split(","), startDate, endDate, LoadConf.esConf.getString("decahoseIndexName"))
 
 			val totalTweets: Future[JsObject] = future { formatTotalTweets(elasticsearchRequests) }
@@ -75,15 +73,6 @@ object ExecuteSearchRequest
 				Utils.printException(e, "Extract Elasticsearch Analysis")
 				emptyJSONResponseES()
 		}
-
-		/*}
-		catch {
-		  case e: Exception => 
-		  {
-		  	Utils.printException(e, "Extract Elasticsearch Analysis")
-		  	return emptyJSONResponseES()
-		  }
-		}*/
 	}
 	/* Use this function if you dont want to send the queries assyncronous*/
 	/*def executeElasticsearchQueries(elasticsearchRequests: GetElasticsearchResponse): JsValue =
@@ -123,10 +112,18 @@ object ExecuteSearchRequest
 
 	def formatTotalFilteredTweetsAndTotalUsers(elasticsearchRequests: GetElasticsearchResponse): JsObject = 
 	{	
-		try { 
-		  val countResponse = Json.parse(elasticsearchRequests.getTotalFilteredTweetsAndTotalUserResponse())
+		try {
+
+			val countResponse = Json.parse(elasticsearchRequests.getTotalFilteredTweets())
+			val totalFiltredTweets:Long =  (countResponse \ "hits" \ "total").as[Long]
+			val totalUsers = Math.round(totalFiltredTweets*0.9)
+			return  (Json.obj( "totalfilteredtweets" -> totalFiltredTweets)  ++
+				Json.obj( "totalusers" -> totalUsers))
+
+			//Use this when we have the field user_id hash at index time
+		  /*val countResponse = Json.parse(elasticsearchRequests.getTotalFilteredTweetsAndTotalUserResponse())
        	  return ( Json.obj( "totalfilteredtweets" -> (countResponse \ "hits" \ "total")) ++
-        		   Json.obj( "totalusers" -> (countResponse \ "aggregations" \ "distinct_users_by_id" \ "value")))
+        		   Json.obj( "totalusers" -> (countResponse \ "aggregations" \ "distinct_users_by_id" \ "value")))*/
 		} catch {
 		  case e: Exception => Utils.printException(e, "Get Total Filtered Tweets And Total Users")
 		}

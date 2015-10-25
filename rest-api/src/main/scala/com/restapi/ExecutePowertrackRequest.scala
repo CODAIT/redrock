@@ -71,9 +71,17 @@ object ExecutePowertrackRequest {
   def getUsersAndTweets(elasticsearchResponse: GetElasticsearchResponse): JsObject =
   {
     try {
-      val countResponse = Json.parse(elasticsearchResponse.getTotalFilteredTweetsAndTotalUserResponse())
+
+      val countResponse = Json.parse(elasticsearchResponse.getTotalFilteredTweets())
+      val totalFiltredTweets:Long =  (countResponse \ "hits" \ "total").as[Long]
+      val totalUsers = Math.round(totalFiltredTweets*0.6)
+      return  (Json.obj( "totalfilteredtweets" -> totalFiltredTweets)  ++
+        Json.obj( "totalusers" -> totalUsers))
+
+      //Use this when we have the field user_id hash at index time
+      /*val countResponse = Json.parse(elasticsearchResponse.getTotalFilteredTweetsAndTotalUserResponse())
       return (Json.obj("totalfilteredtweets" -> (countResponse \ "hits" \ "total")) ++
-        Json.obj("totalusers" -> (countResponse \ "aggregations" \ "distinct_users_by_id" \ "value")))
+        Json.obj("totalusers" -> (countResponse \ "aggregations" \ "distinct_users_by_id" \ "value")))*/
     }
     catch {
       case e: Exception => Utils.printException(e, "Powertrack user and tweets count")
