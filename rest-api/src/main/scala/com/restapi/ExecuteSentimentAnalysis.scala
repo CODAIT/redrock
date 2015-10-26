@@ -152,12 +152,13 @@ object ExecuteSentimentAnalysis
 			val topics = topicIndices.map { case (terms, termWeights) =>
 			  terms.map(vocabArray(_)).zip(termWeights)
 			}
-			countVectors.unpersist()
 			println(s"Training time (sec)\t$elapsed")
 
 			val response = topics.zipWithIndex.map { case (topic, i) =>
 			  topic.map({ case (term, weight) => Json.arr(term, i, weight)}) 
 			}flatten
+
+			countVectors.unpersist()
 
 			return Json.stringify(Json.obj("topics" -> response))
 			// Print Time in seconds

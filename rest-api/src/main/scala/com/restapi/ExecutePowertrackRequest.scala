@@ -39,10 +39,12 @@ object ExecutePowertrackRequest {
       println("Powertrack request")
       println(s"UTC start date: $startDate")
       println(s"UTC end date: $endDate")
-      println(s"Included terms: $termsInclude")
+      /* Temporary fix to search for #SparkSummitEU when searching for #SparkSummit*/
+      val tempIncludeTerms = if (termsInclude.toLowerCase().trim() == "#SparkSummit") s"$termsInclude,#sparksummiteu" else termsInclude
+      println(s"Included terms: $tempIncludeTerms")
       println(s"Excluded terms: $termsExclude")
 
-      val elasticsearchResponse = new GetElasticsearchResponse(topTweets, termsInclude.toLowerCase().trim().split(","), termsExclude.toLowerCase().trim().split(","), startDate,  endDate, LoadConf.esConf.getString("powertrackIndexName"))
+      val elasticsearchResponse = new GetElasticsearchResponse(topTweets, tempIncludeTerms.toLowerCase().trim().split(","), termsExclude.toLowerCase().trim().split(","), startDate,  endDate, LoadConf.esConf.getString("powertrackIndexName"))
       val wordCountJson = getTweetsAndWordCount(elasticsearchResponse, topWords)
       val totalUserAndTweetsJson = getUsersAndTweets(elasticsearchResponse)
       val totalRetweetsJson = getRetweetsCount(elasticsearchResponse)
