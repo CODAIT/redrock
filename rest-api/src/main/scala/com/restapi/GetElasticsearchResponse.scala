@@ -98,9 +98,9 @@ class GetElasticsearchResponse(val topTweets: Int, includeTerms:Array[String] = 
 		return performSearch(countURL, jsonRequest, "Total Retweets")
 	}
 
-	def getTotalFilteredTweets(): String =
+	def getTotalFilteredTweets(includeTermCondition: String): String =
 	{
-		val jsonRequest = GetJSONRequest.getTotalFilteredTweets(includeTermsES, excludeTermsES, startDateTime, endDateTime)
+		val jsonRequest = GetJSONRequest.getTotalFilteredTweets(includeTermsES, excludeTermsES, startDateTime, endDateTime, includeTermCondition)
 		return performSearch(countURL, jsonRequest, "Filtered and User Count")
 	}
 

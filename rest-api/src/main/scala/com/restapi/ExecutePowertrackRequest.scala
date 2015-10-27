@@ -40,7 +40,7 @@ object ExecutePowertrackRequest {
       println(s"UTC start date: $startDate")
       println(s"UTC end date: $endDate")
       /* Temporary fix to search for #SparkSummitEU when searching for #SparkSummit*/
-      val tempIncludeTerms = if (termsInclude.toLowerCase().trim() == "#SparkSummit") s"$termsInclude,#sparksummiteu" else termsInclude
+      val tempIncludeTerms = if (termsInclude.toLowerCase().trim() == "#sparksummit") s"$termsInclude,#sparksummiteu" else termsInclude
       println(s"Included terms: $tempIncludeTerms")
       println(s"Excluded terms: $termsExclude")
 
@@ -74,7 +74,7 @@ object ExecutePowertrackRequest {
   {
     try {
 
-      val countResponse = Json.parse(elasticsearchResponse.getTotalFilteredTweets())
+      val countResponse = Json.parse(elasticsearchResponse.getTotalFilteredTweets("or"))
       val totalFiltredTweets:Long =  (countResponse \ "hits" \ "total").as[Long]
       val totalUsers = Math.round(totalFiltredTweets*0.6)
       return  (Json.obj( "totalfilteredtweets" -> totalFiltredTweets)  ++
