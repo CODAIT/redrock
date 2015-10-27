@@ -296,6 +296,7 @@ object GetJSONRequest
   {
     /* Created by: Nakul Jindal
     * Modified by: Barbara Gomes
+    * include terms for powertrack will use OR condition because of SparkSummit and SparkSummitEU
     */
     s"""{
         "size": $topTweets,
@@ -312,7 +313,7 @@ object GetJSONRequest
                                     }
                                 }
                             },
-                            {"terms": {"tweet_text_array_tokens" : [$includeTerms], "execution" : "and"}}
+                            {"terms": {"tweet_text_array_tokens" : [$includeTerms], "execution" : "or"}}
                         ],
                         "must_not": {"terms": { "tweet_text_array_tokens": [$excludeTerms],"execution": "or"}}
                     }
@@ -337,6 +338,7 @@ object GetJSONRequest
     }"""
   }
 
+  /* used just for powertrack, if decahose will use it, the execution for includeterms must be "and" */
   def getTotalRetweets(includeTerms:String, excludeTerms:String, startDatetime: String, endDatetime: String): String =
   {
     s"""
@@ -352,7 +354,8 @@ object GetJSONRequest
                       "to" : "$endDatetime"
                     }
                 }},
-                {"terms": {"tweet_text_array_tokens" : [$includeTerms, "rt"], "execution" : "and"}}
+                {"terms": {"tweet_text_array_tokens" : [$includeTerms], "execution" : "or"}},
+                {"terms": {"tweet_text_array_tokens" : ["rt"]}}
               ],
               "must_not":
                 { "terms" : {"tweet_text_array_tokens" : [$excludeTerms], "execution" : "or"}}
@@ -364,7 +367,7 @@ object GetJSONRequest
     """
   }
 
-  def getTotalFilteredTweets(includeTerms:String, excludeTerms:String, startDatetime: String, endDatetime: String): String =
+  def getTotalFilteredTweets(includeTerms:String, excludeTerms:String, startDatetime: String, endDatetime: String, includeCondition: String): String =
   {
     s"""
     {
@@ -379,7 +382,7 @@ object GetJSONRequest
                       "to" : "$endDatetime"
                     }
                 }},
-                {"terms": {"tweet_text_array_tokens" : [$includeTerms], "execution" : "and"}}
+                {"terms": {"tweet_text_array_tokens" : [$includeTerms], "execution" : "$includeCondition"}}
               ],
               "must_not":
                 { "terms" : {"tweet_text_array_tokens" : [$excludeTerms], "execution" : "or"}}

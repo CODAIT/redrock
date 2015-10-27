@@ -114,7 +114,7 @@ object ExecuteSearchRequest
 	{	
 		try {
 
-			val countResponse = Json.parse(elasticsearchRequests.getTotalFilteredTweets())
+			val countResponse = Json.parse(elasticsearchRequests.getTotalFilteredTweets("and"))
 			val totalFiltredTweets:Long =  (countResponse \ "hits" \ "total").as[Long]
 			val totalUsers = Math.round(totalFiltredTweets*0.9)
 			return  (Json.obj( "totalfilteredtweets" -> totalFiltredTweets)  ++
