@@ -22,13 +22,67 @@ package com.websockets
 import java.io.File
 
 import akka.actor._
+import akka.http.scaladsl.model.ws.{TextMessage, Message}
 import akka.routing.{RemoveRoutee, ActorRefRoutee, AddRoutee}
 import akka.routing._
 import akka.stream.actor.ActorPublisher
+import akka.stream.scaladsl.{Merge, Source, FlowGraph, Flow}
 import play.api.libs.json.Json
 import scala.annotation.tailrec
 import scala.concurrent.duration._
 import scalaj.http._
+import com.websockets._
+
+class Channel(channel_id: String, router: ActorRef, actorSystem: ActorSystem) {
+
+  val vmactor: ActorRef = actorSystem.actorOf(Props(classOf[ChannelVMActor], router , 10 seconds, 10 seconds, channel_id))
+  /* If object Flow can be shared with multiple channels
+  def channelFlowWithJson() : Flow[Message, Message, Unit] = {
+    Flows.graphFlowWithStats(router)
+  }
+  */
+  def graphFlowWithJson(): Flow[Message, Message, Unit] = {
+    Flow() { implicit b =>
+      import FlowGraph.Implicits._
+
+      // create an actor source
+      val source = Source.actorPublisher[String](Props(classOf[VMStatsPublisher],router))
+
+      // Graph elements we'll use
+      val merge = b.add(Merge[String](2))
+      val filter = b.add(Flow[String].filter(_ => false))
+
+      // convert to int so we can connect to merge
+      val mapMsgToString = b.add(Flow[Message].map[String] { msg => "" })
+      val mapStringToMsg = b.add(Flow[String].map[Message]( x => TextMessage.Strict(x)))
+
+      val statsSource = b.add(source)
+
+      // connect the graph
+      mapMsgToString ~> filter ~> merge // this part of the merge will never provide msgs
+      statsSource ~> merge ~> mapStringToMsg
+
+      // expose ports
+      (mapMsgToString.inlet, mapStringToMsg.outlet)
+    }
+  }
+}
+
+object Channel {
+  def apply(channel_id: String, router: ActorRef)(implicit actorSystem: ActorSystem) = new Channel(channel_id, router, actorSystem)
+}
+
+object Channels {
+  var channels : Map[String, Channel] = Map.empty[String, Channel]
+  def findOrCreate(channel_id: String)(implicit actorSystem: ActorSystem) : Channel = channels.getOrElse(channel_id, createNewChannel(channel_id))
+
+  private def createNewChannel (channel_id: String)(implicit actorSystem: ActorSystem) : Channel = {
+    val router: ActorRef = actorSystem.actorOf(Props[RouterActor], "router")
+    val channel = Channel(channel_id, router)
+    channels += channel_id -> channel
+    channel
+  }
+}
 
 /**
  * for now a very simple actor, which keeps a separate buffer
@@ -107,6 +161,25 @@ class VMStatsPublisher(router: ActorRef) extends ActorPublisher[String] {
       onNext(queue.dequeue())
       deliver()
     }
+  }
+}
+
+class ChannelVMActor(router: ActorRef, delay: FiniteDuration, interval: FiniteDuration, searchString: String) extends Actor {
+  import scala.concurrent.ExecutionContext.Implicits.global
+
+  context.system.scheduler.schedule(delay, interval) {
+    val json = Json.obj("response" -> getResults)
+    router ! Json.prettyPrint(json)
+  }
+
+  override def receive: Actor.Receive = {
+    case _ => // just ignore any messages
+  }
+
+  def getResults : String = {
+ //   val response: HttpResponse[String] = Http("http://bdavm155.svl.ibm.com:16666/ss/search?user=barbara&termsInclude=:&termsExclude=&top=100").asString
+    val response: HttpResponse[String] = Http(searchString).asString
+    response.body
   }
 }
 
