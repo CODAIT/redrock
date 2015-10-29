@@ -20,6 +20,7 @@ package com.restapi
 import java.text.SimpleDateFormat
 import java.util.{Calendar, TimeZone}
 import org.apache.commons.lang.time.DateUtils
+import org.slf4j.LoggerFactory
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future,future, Await}
@@ -31,18 +32,19 @@ import play.api.libs.json._
  */
 object ExecutePowertrackRequest {
 
+  val logger = LoggerFactory.getLogger(this.getClass)
+
   def runPowertrackAnalysis(batchTime: Int, topTweets: Int, topWords: Int, termsInclude: String, termsExclude: String): Future[String] =
   {
     Future {
 
       val (startDate, endDate) = getStartAndEndDateAccordingBatchTime(batchTime)
-      println("Powertrack request")
-      println(s"UTC start date: $startDate")
-      println(s"UTC end date: $endDate")
+      logger.info(s"UTC start date: $startDate")
+      logger.info(s"UTC end date: $endDate")
       /* Temporary fix to search for #SparkSummitEU when searching for #SparkSummit*/
       val tempIncludeTerms = if (termsInclude.toLowerCase().trim() == "#sparksummit") s"$termsInclude,#sparksummiteu" else termsInclude
-      println(s"Included terms: $tempIncludeTerms")
-      println(s"Excluded terms: $termsExclude")
+      logger.info(s"Included terms: $tempIncludeTerms")
+      logger.info(s"Excluded terms: $termsExclude")
 
       val elasticsearchResponse = new GetElasticsearchResponse(topTweets, tempIncludeTerms.toLowerCase().trim().split(","), termsExclude.toLowerCase().trim().split(","), startDate,  endDate, LoadConf.esConf.getString("powertrackIndexName"))
       val wordCountJson = getTweetsAndWordCount(elasticsearchResponse, topWords)
@@ -53,7 +55,7 @@ object ExecutePowertrackRequest {
 
     }.recover {
       case e: Exception =>
-        Utils.printException(e, "Execute Powertrack Word Count");
+        logger.error("Execute Powertrack Word Count", e)
         Json.stringify(Json.obj("toptweets" -> Json.obj("tweets" -> JsNull), "wordCount" -> JsNull,"totalfilteredtweets" -> JsNull, "totalusers" -> JsNull, "totalretweets" -> JsNull))
     }
   }
@@ -65,7 +67,8 @@ object ExecutePowertrackRequest {
       return Json.obj("totalretweets" -> (countResponse \ "hits" \ "total"))
     }
     catch {
-      case e: Exception => Utils.printException(e, "Powertrack user and tweets count")
+      case e: Exception =>
+        logger.error("Powertrack user and tweets count", e)
         Json.obj("totalretweets" -> JsNull)
     }
   }
@@ -86,7 +89,8 @@ object ExecutePowertrackRequest {
         Json.obj("totalusers" -> (countResponse \ "aggregations" \ "distinct_users_by_id" \ "value")))*/
     }
     catch {
-      case e: Exception => Utils.printException(e, "Powertrack user and tweets count")
+      case e: Exception =>
+        logger.error("Powertrack user and tweets count",e)
         Json.obj("totalfilteredtweets" -> JsNull, "totalusers" -> JsNull)
     }
   }
@@ -118,7 +122,8 @@ object ExecutePowertrackRequest {
       Json.obj("toptweets" -> Json.obj("tweets" -> tweets), "wordCount" -> words)
     }
     catch {
-        case e: Exception => Utils.printException(e, "Powertrack word count")
+        case e: Exception =>
+          logger.error("Powertrack word count", e)
           Json.obj("toptweets" -> Json.obj("tweets" -> JsNull), "wordCount" -> JsNull)
       }
   }

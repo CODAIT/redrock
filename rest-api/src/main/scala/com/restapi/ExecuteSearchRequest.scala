@@ -16,6 +16,7 @@
  */
 package com.restapi
 
+import org.slf4j.LoggerFactory
 import play.api.libs.json._
 import java.io._
 import scala.concurrent.duration._
@@ -24,11 +25,13 @@ import scala.concurrent.{Future,future, Await}
 
 object ExecuteSearchRequest 
 {
+	val logger = LoggerFactory.getLogger(this.getClass)
+
 	def runSearchAnalysis(includeTerms: String, excludeTerms: String, top: Int, startDate: String, endDate: String): Future[String]= 
-	{	
-		println("Processing search:")
-		println("Include: " + includeTerms)
-		println("Exclude: " + excludeTerms)
+	{
+		logger.info("Processing search:")
+		logger.info("Include: " + includeTerms)
+		logger.info("Exclude: " + excludeTerms)
 			
 		executeAsynchronous(top,includeTerms.toLowerCase(),excludeTerms.toLowerCase(), startDate, endDate) map { js =>
 			Json.stringify(js)
@@ -46,7 +49,7 @@ object ExecuteSearchRequest
 
 		result.recover{
 			case e: Exception => 
-				Utils.printException(e, "Execute Python and ES Asynchronous");
+					logger.error("Execute Python and ES Asynchronous", e)
 		  		emptyJSONResponse()
 		}
 
@@ -70,7 +73,7 @@ object ExecuteSearchRequest
 
 		result.recover{
 			case e: Exception =>
-				Utils.printException(e, "Extract Elasticsearch Analysis")
+				logger.error("Extract Elasticsearch Analysis",e)
 				emptyJSONResponseES()
 		}
 	}
@@ -104,7 +107,7 @@ object ExecuteSearchRequest
 			val totalTweetsResponse = Json.parse(elasticsearchRequests.getTotalTweetsESResponse())
 			return Json.obj("totaltweets" -> (totalTweetsResponse \ "hits" \ "total"))
 		} catch {
-		  case e: Exception => Utils.printException(e, "Format Total Tweets")
+		  case e: Exception => logger.error("Format Total Tweets",e)
 		}
 
 		return Json.obj("totaltweets" -> JsNull)
@@ -125,7 +128,7 @@ object ExecuteSearchRequest
        	  return ( Json.obj( "totalfilteredtweets" -> (countResponse \ "hits" \ "total")) ++
         		   Json.obj( "totalusers" -> (countResponse \ "aggregations" \ "distinct_users_by_id" \ "value")))*/
 		} catch {
-		  case e: Exception => Utils.printException(e, "Get Total Filtered Tweets And Total Users")
+		  case e: Exception => logger.error("Get Total Filtered Tweets And Total Users",e)
 		}
 
 		return Json.obj("totalfilteredtweets" -> JsNull, "totalusers" -> JsNull)
@@ -151,7 +154,7 @@ object ExecuteSearchRequest
 			return Json.obj("toptweets" -> Json.obj("tweets" -> sortedTweets))
 		}
 		catch {
-		  case e: Exception => Utils.printException(e, "Get Top Tweets")
+		  case e: Exception => logger.error("Get Top Tweets",e)
 		}
 
 		return Json.obj("toptweets" -> Json.obj("tweets" -> JsNull))
@@ -176,7 +179,7 @@ object ExecuteSearchRequest
     		return Json.obj("profession" -> Json.obj("profession" -> mapProfessions))
 		}
 		catch {
-		  case e: Exception =>Utils.printException(e, "Format Professions")
+		  case e: Exception =>logger.error("Format Professions",e)
 		}
 
 		return Json.obj("profession" -> JsNull)
@@ -199,7 +202,7 @@ object ExecuteSearchRequest
     		return Json.obj("location" ->  Json.obj("fields" -> Json.arr("Date", "Country", "Count"), "location" -> mapLocations))
 		}
 		catch {
-		  case e: Exception => Utils.printException(e, "Format Location")
+		  case e: Exception => logger.error("Format Location",e)
 		}
 
 		return Json.obj("location" ->  Json.obj("fields" -> Json.arr("Date", "Country", "Count"), "location" -> JsNull))
@@ -224,7 +227,7 @@ object ExecuteSearchRequest
     		return Json.obj("sentiment" -> Json.obj("fields" -> Json.arr("Date", "Positive", "Negative", "Neutral"), "sentiment" -> transformedData))
 			
 		} catch {
-		  case e: Exception => Utils.printException(e, "Format Sentiment")
+		  case e: Exception => logger.error("Format Sentiment",e)
 		}
 
 		return Json.obj("sentiment" -> Json.obj("fields" -> Json.arr("Date", "Positive", "Negative", "Neutral"), "sentiment" -> JsNull))
@@ -248,11 +251,11 @@ object ExecuteSearchRequest
 			val error = stdError.readLine()
 			if(error != null)
 			{
-				println(error)
+				logger.error(error)
 				var error_ite = stdError.readLine()
 				while(error_ite != null)
 				{
-					println(error_ite)
+					logger.error(error_ite)
 					error_ite = stdError.readLine()
 				}
 			}
@@ -263,7 +266,7 @@ object ExecuteSearchRequest
 			}
 
 		}catch {
-			  case e: Exception => Utils.printException(e, "Execute Python: Cluster and Distance")
+			  case e: Exception => logger.error("Execute Python: Cluster and Distance",e)
 		}
 		return Json.obj("cluster" -> JsNull, "distance" -> JsNull)
 	}

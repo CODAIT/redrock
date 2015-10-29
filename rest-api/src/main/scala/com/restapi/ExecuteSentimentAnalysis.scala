@@ -16,6 +16,7 @@
  */
 package com.restapi
 
+import org.slf4j.LoggerFactory
 import play.api.libs.json._
 import java.io._
 import scala.concurrent.duration._
@@ -62,17 +63,19 @@ object ExecuteSentimentAnalysis
 	// low   ( >= 1 ) -> faster but less accurate
 	val miniBatchIncreaseAcc: Int = 4*1                   
 	val maxIterations: Int = 100 // iterations 
-	val vocabSize: Int = 10000  // 
+	val vocabSize: Int = 10000  //
+
+	val logger = LoggerFactory.getLogger(this.getClass)
 
 	def runSentimentAnalysis(includeTerms: String, excludeTerms: String, top: Int, startDatetime: String, endDatetime: String, sentiment: Int): Future[String]= 
 	{	
 		Future
 		{
-			println("Processing sentiment Analysis:")
-			println("Include: " + includeTerms)
-			println("Exclude: " + excludeTerms)
-			println(s"Date Range: $startDatetime -> $endDatetime")
-			println("Sentiment: " + sentiment)
+			logger.info("Processing sentiment Analysis:")
+			logger.info("Include: " + includeTerms)
+			logger.info("Exclude: " + excludeTerms)
+			logger.info(s"Date Range: $startDatetime -> $endDatetime")
+			logger.info("Sentiment: " + sentiment)
 
 			runTopicModel(includeTerms, excludeTerms, top, startDatetime, endDatetime, sentiment)	
 		}
@@ -144,7 +147,7 @@ object ExecuteSentimentAnalysis
 			val elapsed = (System.nanoTime() - startTime) / 1e9
 
 			// Print Results
-			println(s"Finished training LDA model. Summary: ")
+			logger.info(s"Finished training LDA model. Summary: ")
 
 			// Print the topics, showing the top-weighted terms for each topic.
 			val topicIndices = ldaModel.describeTopics(maxTermsPerTopic = termsPerTopic)
@@ -152,7 +155,7 @@ object ExecuteSentimentAnalysis
 			val topics = topicIndices.map { case (terms, termWeights) =>
 			  terms.map(vocabArray(_)).zip(termWeights)
 			}
-			println(s"Training time (sec)\t$elapsed")
+			logger.info(s"Training time (sec)\t$elapsed")
 
 			val response = topics.zipWithIndex.map { case (topic, i) =>
 			  topic.map({ case (term, weight) => Json.arr(term, i, weight)}) 
@@ -164,7 +167,7 @@ object ExecuteSentimentAnalysis
 			// Print Time in seconds
 		} catch {
 		  	case e: Exception => {
-				Utils.printException(e, "Topics Training model")
+					logger.error("Topics Training model",e)
 			} 
 		}
 		

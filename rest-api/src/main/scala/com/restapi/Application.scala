@@ -22,8 +22,11 @@ import spray.can.Http
 import akka.pattern.ask
 import scala.concurrent.duration._
 import akka.util.Timeout
+import org.slf4j.LoggerFactory;
+
 
 object Application extends App {
+    val logger = LoggerFactory.getLogger(this.getClass)
     /*Starting REST API*/
     // we need an ActorSystem to host our application in
     implicit val system = ActorSystem(LoadConf.restConf.getString("actor"))
@@ -31,5 +34,6 @@ object Application extends App {
     val service = system.actorOf(Props[MyServiceActor], LoadConf.restConf.getString("name"))
     implicit val timeout = Timeout(800.seconds)
     IO(Http) ? Http.Bind(service, interface = "0.0.0.0", port = LoadConf.restConf.getInt("port"))
-    println(s"""Application: ${LoadConf.globalConf.getString("appName")} running version: ${LoadConf.globalConf.getString("appVersion")}""")
+
+    logger.info(s"""Application: ${LoadConf.globalConf.getString("appName")} running version: ${LoadConf.globalConf.getString("appVersion")}""")
 }

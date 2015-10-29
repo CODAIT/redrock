@@ -28,10 +28,9 @@ import org.apache.http.client.ClientProtocolException
 import org.apache.http.client.HttpClient
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.impl.client.DefaultHttpClient
+import org.slf4j.LoggerFactory
 import scala.io.Source._
-import java.text.SimpleDateFormat
-import java.util.TimeZone
-import java.util.Date
+
 
 class GetElasticsearchResponse(val topTweets: Int, includeTerms:Array[String] = Array[String](), excludeTerms:Array[String] = Array[String](), val startDateTime: String, val endDateTime: String, esIndex: String)
 {
@@ -40,8 +39,9 @@ class GetElasticsearchResponse(val topTweets: Int, includeTerms:Array[String] = 
 	val countURL = searchURL + "?search_type=count"
 	val includeTermsES = includeTerms.map(x => s""""${x.trim()}"""").mkString(",")
 	val excludeTermsES = excludeTerms.map(x => s""""${x.trim()}"""").mkString(",")
+	val logger = LoggerFactory.getLogger(this.getClass)
 
-	println(s"Base URL => $baseURL")
+	logger.info(s"Base URL => $baseURL")
 
 	def getTopTweetsResponse(): String =
 	{
@@ -123,11 +123,11 @@ class GetElasticsearchResponse(val topTweets: Int, includeTerms:Array[String] = 
 
 	    	httpClient.getConnectionManager().shutdown()
 				val elapsed = (System.nanoTime() - startTime) / 1e9
-				println(s"ES response for $queryName (sec): $elapsed")
+				logger.info(s"ES response for $queryName (sec): $elapsed")
 			return jsonResponse
 		} catch {
 			case e: Exception => {
-				Utils.printException(e, "Retrieve ElasticSearch Response")
+				logger.error("Retrieve ElasticSearch Response",e)
 				return ""
 			}
 		}
@@ -158,25 +158,9 @@ class GetElasticsearchResponse(val topTweets: Int, includeTerms:Array[String] = 
 			return jsonResponse
 		} catch {
 			case e: Exception => {
-				Utils.printException(e, "Retrieve ElasticSearch Response")
+				logger.error("Retrieve ElasticSearch Response",e)
 				return ""
 		  }
 		}
 	}
-
-//	def constructESTerms(terms: Array[String]): String =
-//	{
-//		val esTerms = terms.filter(term => term != "").map(term => {
-//			s"""{"term":{"tweet_text_array_tokens": "$term"}}"""
-//		}).mkString(",")
-//
-//		if (esTerms != "")
-//		{
-//			return "," + esTerms
-//		}
-//		else
-//		{
-//			return ""
-//		}
-//	}
 }
