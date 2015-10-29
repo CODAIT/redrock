@@ -146,9 +146,6 @@ object ExecuteSentimentAnalysis
 			val ldaModel = lda.run(countVectors)
 			val elapsed = (System.nanoTime() - startTime) / 1e9
 
-			// Print Results
-			logger.info(s"Finished training LDA model. Summary: ")
-
 			// Print the topics, showing the top-weighted terms for each topic.
 			val topicIndices = ldaModel.describeTopics(maxTermsPerTopic = termsPerTopic)
 			val vocabArray = cvModel.vocabulary
