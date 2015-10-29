@@ -126,8 +126,7 @@ object Dependency {
   val elasticSearchConnector = "org.elasticsearch" %% "elasticsearch-spark" % Version.ElasticasearchSparkVersion % "provided"
   val elasticSearch  = "org.elasticsearch" % "elasticsearch" % Version.ElasticsearchVersion
   val slf4j          = "org.slf4j" % "slf4j-api" % Version.Slf4jVersion % "provided"
-  val log4j          = "log4j" % "log4j" % Version.Log4jVersion % "provided"
-  val log4Slf4j      = "org.slf4j" % "log4j-over-slf4j" % Version.Slf4jVersion % "provided"
+  val log4jbind      = "org.slf4j" % "slf4j-log4j12" % "1.7.12" % "provided"
 
   //HTTP client
   val httpClient     = "org.apache.httpcomponents" % "httpclient" % Version.HttpClientVersion
@@ -142,12 +141,12 @@ object Dependencies {
   import Dependency._
 
   val decahoseAndPowertrackDependencies = Seq(sparkCore,sparkSQL,sparkRepl,playJson,
-                                              sparkHive, elasticSearchConnector, readCSV, configLib)
+                                              sparkHive, elasticSearchConnector, readCSV, configLib, slf4j, log4jbind)
 
   val restAPIDependecies = Seq(playJson, sprayCan, sprayRouting, akkaActor, 
-                               specs2Core, elasticSearch, httpClient, slf4j, log4j, log4Slf4j, configLib,
+                               specs2Core, elasticSearch, httpClient, slf4j, log4jbind, configLib,
                                sparkMlLib, sparkCore, sparkSQL)
-  val webSocketsDependencies = Seq(akkaStream, akkaHttpCore, playJson, scalcHttp)
+  val webSocketsDependencies = Seq(akkaStream, akkaHttpCore, playJson, scalcHttp, slf4j, log4jbind)
 }
 
 object RedRockBuild extends Build {
