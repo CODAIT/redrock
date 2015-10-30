@@ -246,7 +246,7 @@ object ExecuteSearchRequest
 	def extracTopWordDistance(includeTerms: String, excludeTerms: String): JsValue =
 	{
 		try{
-			 
+			val startTime = System.nanoTime()
 			val cmd = Array[String](LoadConf.restConf.getString("python-code.pythonVersion"),LoadConf.restConf.getString("python-code.classPath"),includeTerms,excludeTerms, LoadConf.globalConf.getString("homePath"))
 			
 			// create runtime to execute external command
@@ -269,7 +269,9 @@ object ExecuteSearchRequest
 			}
 			else
 			{
-				// If no errors occurs, Json will be printed in the first line of th program 
+				// If no errors occurs, Json will be printed in the first line of th program
+				val elapsed = (System.nanoTime() - startTime) / 1e9
+				logger.info(s"Caculate Cluster and Distance (sec): $elapsed")
 				return Json.parse(stdOutput.readLine())
 			}
 
