@@ -8,7 +8,16 @@ redrock {
 		actor = "redrock-actor"
 		port = 16666
 
+		validateTweetsBeforeDisplaying = true
+
 		groupByESField="created_at_timestamp_day"
+
+		bluemixProduction {
+			//Replace user and password with your IBM Insights for twitter credential
+			user = "IBM Insights for twitter credential"
+			password = "IBM Insights for twitter credential"
+			requestURLforMessagesCheck = "https://"${redrock.rest-api.bluemixProduction.user}":"${redrock.rest-api.bluemixProduction.password}"@cdeservice.mybluemix.net:443/api/v1/messages/check"
+        }
 		
 		python-code {
 			classPath = ${redrock.homePath}"/rest-api/python/main.py"

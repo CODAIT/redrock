@@ -134,11 +134,18 @@ object ExecuteSearchRequest
 		return Json.obj("totalfilteredtweets" -> JsNull, "totalusers" -> JsNull)
 	}
 
-	def formatTopTweets(elasticsearchRequests: GetElasticsearchResponse): JsObject =
-	{
-		try { 
+	def formatTopTweets(elasticsearchRequests: GetElasticsearchResponse): JsObject = {
+		try {
 			val topTweetsResponse = Json.parse(elasticsearchRequests.getTopTweetsResponse())
-			val sortedTweets = ((topTweetsResponse \ "hits" \ "hits" ).as[List[JsObject]]).map(tweet => {
+			var sortedTweets = ((topTweetsResponse \ "hits" \ "hits").as[List[JsObject]])
+
+			if (LoadConf.restConf.getBoolean("validateTweetsBeforeDisplaying")) {
+				val tweetsID = Json.obj("messages" -> sortedTweets.map(tweet => (tweet \ "_source" \ "tweet_id")))
+				val nonComplientTweets = ValidateTweetCompliance.getNonCompliantTweets(Json.stringify(tweetsID))
+				sortedTweets = sortedTweets.filter(tweet => !nonComplientTweets.contains((tweet \ "_source" \ "tweet_id").as[String]))
+			}
+
+			val validatedTweets = sortedTweets.map(tweet => {
 				Json.obj(
 					"created_at" -> (tweet \ "_source" \ "created_at"),
 					"text" -> (tweet \ "_source" \ "tweet_text"),
@@ -151,10 +158,11 @@ object ExecuteSearchRequest
 					)
 				)
 			})
-			return Json.obj("toptweets" -> Json.obj("tweets" -> sortedTweets))
+
+			return Json.obj("toptweets" -> Json.obj("tweets" -> validatedTweets))
 		}
 		catch {
-		  case e: Exception => logger.error("Get Top Tweets",e)
+			case e: Exception => logger.error("Get Top Tweets", e)
 		}
 
 		return Json.obj("toptweets" -> Json.obj("tweets" -> JsNull))
