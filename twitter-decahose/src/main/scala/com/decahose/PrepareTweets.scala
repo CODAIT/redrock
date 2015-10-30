@@ -25,6 +25,7 @@ import org.apache.spark.sql.{SQLContext, DataFrame, SaveMode}
 import org.apache.spark.streaming._
 import org.apache.spark.streaming.StreamingContext._
 import org.apache.spark.streaming.dstream.DStream
+import org.slf4j.LoggerFactory
 import scala.util.matching.Regex
 import scala.concurrent.{Future,future, Await}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -42,6 +43,8 @@ object PrepareTweets
 {
     //Extract file names
     val regExp = "\\b(hdfs:|file:)\\S+".r
+    val logger = LoggerFactory.getLogger(this.getClass)
+
     def loadHistoricalDataAndStartStreaming() =
     {
         loadHistoricalData()
@@ -50,18 +53,18 @@ object PrepareTweets
 
     def startTweetsStreaming() =
     {
-        println(s"""Starting Streaming at: ${LoadConf.sparkConf.getString("decahose.twitterStreamingDataPath")}""")
-        println(s"""Partition number: ${LoadConf.sparkConf.getInt("partitionNumber")}""")
+        logger.info(s"""Starting Streaming at: ${LoadConf.sparkConf.getString("decahose.twitterStreamingDataPath")}""")
+        logger.info(s"""Partition number: ${LoadConf.sparkConf.getInt("partitionNumber")}""")
 
         val ssc = createContext()
-        println("Starting Streaming")
+        logger.info("Starting Streaming")
         ssc.start()
         ssc.awaitTermination()
     }
 
     def createContext(): StreamingContext = {
         
-        println("Creating streaming new context")
+        logger.info("Creating streaming new context")
         // Create the context with a 1 second batch size
         val ssc = new StreamingContext(ApplicationContext.sparkContext, Seconds(LoadConf.sparkConf.getInt("decahose.streamingBatchTime")))
 
@@ -75,11 +78,11 @@ object PrepareTweets
       //val tweetsStreaming = ssc.textFileStream(LoadConf.sparkConf.getString("decahose.twitterStreamingDataPath"))
          
         tweetsStreaming.foreachRDD{ (rdd: RDD[String], time: Time) =>
-            println(s"========= $time =========")
+            logger.info(s"========= $time =========")
             if(!rdd.partitions.isEmpty)
             {
-                println("Processing File(s):")
-                regExp.findAllMatchIn(rdd.toDebugString).foreach(println)
+                logger.info("Processing File(s):")
+                regExp.findAllMatchIn(rdd.toDebugString).foreach((name) => logger.info(name.toString))
                 loadJSONExtractInfoWriteToDatabase(rdd)
             }
         }
@@ -91,7 +94,7 @@ object PrepareTweets
     {
         if (LoadConf.sparkConf.getBoolean("decahose.loadHistoricalData"))
         {
-            println(s"""Loading historical data from: ${LoadConf.sparkConf.getString("decahose.twitterHistoricalDataPath")}""")
+            logger.info(s"""Loading historical data from: ${LoadConf.sparkConf.getString("decahose.twitterHistoricalDataPath")}""")
             val jsonRDDs = ApplicationContext.sparkContext.textFile(LoadConf.sparkConf.getString("decahose.twitterHistoricalDataPath"),LoadConf.sparkConf.getInt("partitionNumber"))
             if(!jsonRDDs.partitions.isEmpty)
             {
@@ -99,12 +102,12 @@ object PrepareTweets
             }
             else
             {
-                println("No historical files to be loaded")
+                logger.warn("No historical files to be loaded")
             }
         }
         else
         {
-            println(s"No historical data to be loaded.")
+          logger.warn(s"No historical data to be loaded.")
         }
     }
 
@@ -136,14 +139,14 @@ object PrepareTweets
                         .save(s"""${LoadConf.esConf.getString("decahoseIndexName")}/${LoadConf.esConf.getString("esType")}""")
 
             //Delete file just if it was processed
-            println("Deleting File(s):")
+            logger.info("Deleting File(s):")
             regExp.findAllMatchIn(rdd.toDebugString).foreach((name) => deleteFile(name.toString))
         }
         catch {
           case e: Exception => 
           {
-            Utils.printException(e, "Processing Tweets")
-            println("####### File(s) not processed ########")
+            logger.error("Processing Tweets", e)
+            logger.error("####### File(s) not processed ########")
           }
         }
     }
@@ -154,13 +157,13 @@ object PrepareTweets
         if (ApplicationContext.hadoopFS.isDirectory(filePath))
         {
             ApplicationContext.hadoopFS.listStatus(filePath).foreach((status) => {
-                                                        println(status.getPath())
+                                                        logger.info(status.getPath().toString)
                                                         ApplicationContext.hadoopFS.delete(status.getPath(), true)
                                                     })
         }
         else
         {
-            println(fileName)
+            logger.info(fileName)
             ApplicationContext.hadoopFS.delete(filePath, true)
         }
     }

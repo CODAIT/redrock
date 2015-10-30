@@ -16,11 +16,14 @@
  */
 package com.decahose
 
+import org.slf4j.LoggerFactory
+
 import scala.io.Source._
 import scala.util.matching.Regex
 
 object ProfessionInfo
 {
+	val logger = LoggerFactory.getLogger(this.getClass)
 	val professions = loadProfessionsTable()
 
 	def loadProfessionsTable():Array[(Regex,String)] =
@@ -30,7 +33,7 @@ object ProfessionInfo
 		val professionsList = fromFile(professionsPath)("ISO-8859-1").getLines.drop(1).filter(line => line.trim().length > 0).
 												map(line => mapProfession(line)).toArray
 
- 		println(s"Professions Loaded ==> ${professionsList.size}")
+ 		logger.info(s"Professions Loaded ==> ${professionsList.size}")
  		return professionsList
 	}
 

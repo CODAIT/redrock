@@ -16,15 +16,18 @@
  */
 package com.decahose
 
+import org.slf4j.LoggerFactory
+
 import scala.io.Source._
 
 object SentimentInfo
 {
+	val logger = LoggerFactory.getLogger(this.getClass)
 	val positivePath = LoadConf.globalConf.getString("homePath") + "/twitter-decahose/src/main/resources/Sentiment/positive.txt"
 	val negativePath = LoadConf.globalConf.getString("homePath") + "/twitter-decahose/src/main/resources/Sentiment/negative.txt"
 
 	val positiveWords = fromFile(positivePath)("ISO-8859-1").getLines.map(line => line.trim().toLowerCase()).toArray
-	println(s"Sentiment loaded ==> Positive ==> ${positiveWords.size}")
+	logger.info(s"Sentiment loaded ==> Positive ==> ${positiveWords.size}")
 	val negativeWords = fromFile(negativePath)("ISO-8859-1").getLines.map(line => line.trim().toLowerCase()).toArray
-	println(s"Sentiment loaded ==> Negative ==> ${negativeWords.size}")
+	logger.info(s"Sentiment loaded ==> Negative ==> ${negativeWords.size}")
 }

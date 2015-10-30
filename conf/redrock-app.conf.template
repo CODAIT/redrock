@@ -8,7 +8,7 @@ redrock {
 		actor = "redrock-actor"
 		port = 16666
 
-		groupByESField="created_at_timestamp"
+		groupByESField="created_at_timestamp_day"
 		
 		python-code {
 			classPath = ${redrock.homePath}"/rest-api/python/main.py"

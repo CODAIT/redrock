@@ -18,11 +18,15 @@ package com.decahose
 
 import java.io._
 import java.util.zip._
+import org.slf4j.LoggerFactory
+
 import scala.io.Source._
 
 
 object LoadLocationData
 {
+	val logger = LoggerFactory.getLogger(this.getClass)
+
 	val states:Array[String] = Array("AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS",
 								"KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND",
 								"OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY")
@@ -64,7 +68,7 @@ object LoadLocationData
 		val citiesMap = fromInputStream(citiesStream)("ISO-8859-1").getLines.drop(1).filter(line => filterCityLine(line)).
 											map(line => mapCity(line)).toArray.sortBy(city => city._2._2).toMap
 
- 		println(s"Cities Loaded ==> ${citiesMap.size}")
+ 		logger.info(s"Cities Loaded ==> ${citiesMap.size}")
  		return citiesMap
 	}
 
@@ -95,7 +99,7 @@ object LoadLocationData
 		val countryMap = fromFile(countryPath)("utf-8").getLines.map(line => proccessCountryLine(line)).
 														filter(country => country != ("" -> "")).toMap
 
-		println(s"Countries Loaded ==> ${countryMap.size}")
+		logger.info(s"Countries Loaded ==> ${countryMap.size}")
  		return countryMap
 	}
 

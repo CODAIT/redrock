@@ -16,9 +16,12 @@
  */
 package com.powertrack
 
+import org.slf4j.LoggerFactory
+
 object Application extends App {
 
-    println("Registering analysis function")
+    val logger = LoggerFactory.getLogger(this.getClass)
+    logger.info("Registering analysis function")
     AnalysisFunction.registerAnalysisFunctions()
    
     PrepareTweets.startTweetsStreaming()

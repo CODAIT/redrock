@@ -16,9 +16,11 @@
  */
 package com.decahose
 
-object Application extends App {
+import org.slf4j.LoggerFactory
 
-    println("Registering analysis function")
+object Application extends App {
+    val logger = LoggerFactory.getLogger(this.getClass)
+    logger.info("Registering analysis function")
     AnalysisFunction.registerAnalysisFunctions()
     
     /* Load historical data and start tweets streaming */
