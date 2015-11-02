@@ -100,8 +100,14 @@ object ExecutePowertrackRequest {
     try
     {
       val response = Json.parse(elasticsearchResponse.getPowertrackTweetsAndWordCount(topWords))
+      var tweets = ((response \ "hits" \ "hits").as[List[JsObject]])
+      if (LoadConf.restConf.getBoolean("validateTweetsBeforeDisplaying")) {
+        val tweetsID = Json.obj("messages" -> tweets.map(tweet => (tweet \ "_source" \ "tweet_id")))
+        val nonComplientTweets = ValidateTweetCompliance.getNonCompliantTweets(Json.stringify(tweetsID))
+        tweets = tweets.filter(tweet => !nonComplientTweets.contains((tweet \ "_source" \ "tweet_id").as[String]))
+      }
 
-      val tweets = ((response \ "hits" \ "hits").as[List[JsObject]]).map(tweet => {
+      val validatedTweets = tweets.map(tweet => {
         Json.obj(
           "created_at" -> (tweet \ "_source" \ "created_at"),
           "text" -> (tweet \ "_source" \ "tweet_text"),
@@ -119,7 +125,7 @@ object ExecutePowertrackRequest {
         Json.arr((wordCount \ "key"), (wordCount \ "doc_count"))
       })
 
-      Json.obj("toptweets" -> Json.obj("tweets" -> tweets), "wordCount" -> words)
+      Json.obj("toptweets" -> Json.obj("tweets" -> validatedTweets), "wordCount" -> words)
     }
     catch {
         case e: Exception =>
