@@ -46,13 +46,7 @@ import org.apache.commons.codec.digest.DigestUtils
 import scala.io.Source
 
 case class MapUpdateMsg(Msg: Map[String, (String, DateTime)])
-case class Md5SumMsg(Msg: String)
 case class TimeoutMsg(Msg: List[String])
-
-object sessionTable {
-  val sessionTable: Map[String, (String, DateTime)] = Map.empty[String, (String, DateTime)]
-  var fileMd5Sum: String=""
-}
 
 trait FileMd5Sum {
   def getFileMd5Sum(file: String) : String = {
