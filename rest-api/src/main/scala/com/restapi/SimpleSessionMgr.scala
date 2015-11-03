@@ -55,6 +55,16 @@ trait FileMd5Sum {
     fis.close()
     md5
   }
+
+  def loadSessionTable (filename: String): Map[String, (String, DateTime)] = {
+    val source = Source.fromFile(LoadConf.restConf.getString("access-list"))
+    val lines = try source.getLines().toList finally source.close()
+    var newSessionTable = Map.empty[String, (String, DateTime)]
+    for (line <- lines) {
+      newSessionTable += (line -> Pair("", DateTime(1979, 1, 1, 0, 0, 0)))
+    }
+    newSessionTable
+  }
 }
 
 class SimpleSession(timeoutActor: ActorRef, delay: FiniteDuration, interval: FiniteDuration) extends Actor with FileMd5Sum {
@@ -121,6 +131,10 @@ class SimpleSession(timeoutActor: ActorRef, delay: FiniteDuration, interval: Fin
   def sendMsgToTimeoutAcotr (): Unit = {
     timeoutActor ! MapUpdateMsg(sessionTable)
   }
+
+  def initSessionTable (): Unit = {
+    sessionTable = loadSessionTable(LoadConf.restConf.getString("access-list")
+  }
 }
 
 class SessionTimeoutActor () extends Actor  {
@@ -168,16 +182,6 @@ class LoadSessionActor (sessionActor: ActorRef, delay: FiniteDuration, interval:
       current_md5 = lastest_md5
       true
     }
-  }
-
-  def loadSessionTable (filename: String): Map[String, (String, DateTime)] = {
-    val source = Source.fromFile(LoadConf.restConf.getString("access-list"))
-    val lines = try source.getLines().toList finally source.close()
-    var newSessionTable = Map.empty[String, (String, DateTime)]
-    for (line <- lines) {
-      newSessionTable += (line -> Pair("", DateTime(1979, 1, 1, 0, 0, 0)))
-    }
-    newSessionTable
   }
 
   def updateSessionTable = {
