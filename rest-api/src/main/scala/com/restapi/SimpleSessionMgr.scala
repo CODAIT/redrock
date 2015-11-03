@@ -133,7 +133,7 @@ class SimpleSession(timeoutActor: ActorRef, delay: FiniteDuration, interval: Fin
   }
 
   def initSessionTable (): Unit = {
-    sessionTable = loadSessionTable(LoadConf.restConf.getString("access-list")
+    sessionTable = loadSessionTable(LoadConf.restConf.getString("access-list"))
   }
 }
 
