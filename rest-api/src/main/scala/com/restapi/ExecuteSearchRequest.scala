@@ -141,8 +141,10 @@ object ExecuteSearchRequest
 
 			if (LoadConf.restConf.getBoolean("validateTweetsBeforeDisplaying")) {
 				val tweetsID = Json.obj("messages" -> sortedTweets.map(tweet => (tweet \ "_source" \ "tweet_id")))
-				val nonComplientTweets = ValidateTweetCompliance.getNonCompliantTweets(Json.stringify(tweetsID))
-				sortedTweets = sortedTweets.filter(tweet => !nonComplientTweets.contains((tweet \ "_source" \ "tweet_id").as[String]))
+				val nonCompliantTweets = ValidateTweetCompliance.getNonCompliantTweets(Json.stringify(tweetsID))
+				if (!nonCompliantTweets.isEmpty) {
+					sortedTweets = sortedTweets.filter(tweet => !nonCompliantTweets.contains((tweet \ "_source" \ "tweet_id").as[String]))
+				}
 			}
 
 			val validatedTweets = sortedTweets.map(tweet => {
