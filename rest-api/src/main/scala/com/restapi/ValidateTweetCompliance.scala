@@ -22,6 +22,10 @@ import org.apache.http.impl.client.DefaultHttpClient
 import org.slf4j.LoggerFactory
 import play.api.libs.json._
 
+import org.apache.http.params.BasicHttpParams
+import org.apache.http.params.HttpConnectionParams
+import org.apache.http.params.HttpParams
+
 import scala.io.Source._
 
 /**
@@ -58,6 +62,10 @@ object ValidateTweetCompliance {
     {
       val startTime = System.nanoTime()
       val httpClient = new DefaultHttpClient()
+      val params = httpClient.getParams();
+      HttpConnectionParams.setConnectionTimeout(params, 3000);
+      HttpConnectionParams.setSoTimeout(params, 3000);
+
       val request = new HttpPost(LoadConf.restConf.getString("bluemixProduction.requestURLforMessagesCheck"))
 
       val JSONentity:StringEntity = new StringEntity(jsonMessageRequest, "UTF-8")
