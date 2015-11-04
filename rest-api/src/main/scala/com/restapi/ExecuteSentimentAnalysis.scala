@@ -67,10 +67,9 @@ object ExecuteSentimentAnalysis
 
 	val logger = LoggerFactory.getLogger(this.getClass)
 
-	def runSentimentAnalysis(includeTerms: String, excludeTerms: String, top: Int, startDatetime: String, endDatetime: String, sentiment: Int): Future[String]= 
+	def runSentimentAnalysis(includeTerms: String, excludeTerms: String, top: Int, startDatetime: String, endDatetime: String, sentiment: Int): String=
 	{	
-		Future
-		{
+
 			logger.info("Processing sentiment Analysis:")
 			logger.info("Include: " + includeTerms)
 			logger.info("Exclude: " + excludeTerms)
@@ -78,7 +77,7 @@ object ExecuteSentimentAnalysis
 			logger.info("Sentiment: " + sentiment)
 
 			runTopicModel(includeTerms, excludeTerms, top, startDatetime, endDatetime, sentiment)	
-		}
+
 	}
 
 	def runTopicModel(includeTerms: String, excludeTerms: String, top: Int, startDatetime: String, endDatetime: String, sentiment: Int): String =
