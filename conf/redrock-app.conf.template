@@ -84,4 +84,13 @@ redrock {
 		powertrackIndexName = "redrock_powertrack"
 		esType = "processed_tweets"
 	}
+
+	access-control {
+    	access-list = ${redrock.homePath}"/rest-api/src/main/resources/access_list.txt"
+    	max-allowed-users = 40
+    	session-timeout = 120
+    	delay = 10
+        timeout-interval = 60
+        check-interval = 600
+    }
 }

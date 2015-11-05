@@ -36,6 +36,7 @@ import java.io.{File, FileInputStream}
 
 import akka.actor.{ActorRef, Actor, ActorSystem, Props}
 import akka.io.IO
+import org.slf4j.LoggerFactory
 import spray.can.Http
 import akka.pattern.ask
 import spray.http.DateTime
@@ -47,8 +48,13 @@ import scala.io.Source
 
 case class MapUpdateMsg(Msg: Map[String, (String, DateTime)])
 case class TimeoutMsg(Msg: List[String])
+case class InitSessionTable()
+case class SessionCheckMsg(userid: String, ip: String, timestamp: DateTime)
+case class SessionUpdateMsg(userid: String, ip: String, timestamp: DateTime)
+case class SessionCheckResultMsg(Msg: Boolean)
 
 trait FileMd5Sum {
+  val logger = LoggerFactory.getLogger(this.getClass)
   def getFileMd5Sum(file: String) : String = {
     val fis: FileInputStream = new FileInputStream(new File(file))
     val md5: String = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis)
@@ -57,12 +63,13 @@ trait FileMd5Sum {
   }
 
   def loadSessionTable (filename: String): Map[String, (String, DateTime)] = {
-    val source = Source.fromFile(LoadConf.restConf.getString("access-list"))
+    val source = Source.fromFile(LoadConf.accessConf.getString("access-list"))
     val lines = try source.getLines().toList finally source.close()
     var newSessionTable = Map.empty[String, (String, DateTime)]
     for (line <- lines) {
       newSessionTable += (line -> Pair("", DateTime(1979, 1, 1, 0, 0, 0)))
     }
+    if(newSessionTable.size == 0) logger.error("Session Table loaded from "+ LoadConf.accessConf.getString("access-list")+ "is empty!")
     newSessionTable
   }
 }
@@ -102,10 +109,18 @@ class SimpleSession(timeoutActor: ActorRef, delay: FiniteDuration, interval: Fin
         if (onlineUsers > 0) onlineUsers -= 1
       }
     }
+    case InitSessionTable => initSessionTable()
+    case SessionCheckMsg(userid, ip, timestamp) => {
+      sender ! SessionCheckResultMsg(shouldAcceptSession(userid, ip, timestamp))
+    }
+    case SessionUpdateMsg(userid, ip, timestamp) => {
+      updateSession(userid, ip, timestamp)
+    }
     case _ =>
   }
 
   def updateSession (userid: String, ip: String, timestamp: DateTime) = {
+    logger.info("User "+userid+" IP "+ip+" for update.")
     val result = sessionTable get userid
     result match {
       case Some(t) => sessionTable += (userid -> Pair(ip, timestamp))
@@ -114,7 +129,8 @@ class SimpleSession(timeoutActor: ActorRef, delay: FiniteDuration, interval: Fin
   }
 
   def shouldAcceptSession(userid: String, ip: String, timestamp: DateTime) : Boolean = {
-    val maxUsers:Int = LoadConf.restConf.getInt("max-allowed-users")
+    logger.info("User "+userid+" IP "+ip+" for authentication.")
+    val maxUsers:Int = LoadConf.accessConf.getInt("max-allowed-users")
     var accept: Boolean = true
     if (onlineUsers > maxUsers) accept = false
     val user = sessionTable get userid
@@ -133,11 +149,12 @@ class SimpleSession(timeoutActor: ActorRef, delay: FiniteDuration, interval: Fin
   }
 
   def initSessionTable (): Unit = {
-    sessionTable = loadSessionTable(LoadConf.restConf.getString("access-list"))
+    sessionTable = loadSessionTable(LoadConf.accessConf.getString("access-list"))
   }
 }
 
 class SessionTimeoutActor () extends Actor  {
+  val logger = LoggerFactory.getLogger(this.getClass)
   override def receive: Actor.Receive = {
     case MapUpdateMsg(msg) => {
       sender ! TimeoutMsg(iterateSessionTable(msg))
@@ -148,18 +165,21 @@ class SessionTimeoutActor () extends Actor  {
   def iterateSessionTable (sessions: Map[String, (String, DateTime)]): List[String] = {
     val timeoutList: List[String] = List.empty[String]
     val currentTime: Int = DateTime.now.second
-    val sesnTimeout: Int = LoadConf.restConf.getInt("session-timeout")
+    val sesnTimeout: Int = LoadConf.accessConf.getInt("session-timeout")
     for(session <- sessions) {
-      val lastUpdate: Int = session._2._2.second
-      if ((currentTime - lastUpdate) > sesnTimeout) {
-        session._1::timeoutList
+      if (session._2._1 != "") {
+        val lastUpdate: Int = session._2._2.second
+        if ((currentTime - lastUpdate) > sesnTimeout) {
+          session._1 :: timeoutList
+          logger.info("User "+session._1+" session is timeout.")
+        }
       }
     }
     timeoutList
   }
 }
 
-class LoadSessionActor (sessionActor: ActorRef, delay: FiniteDuration, interval: FiniteDuration, timeout: FiniteDuration) extends Actor  with FileMd5Sum {
+class LoadSessionActor (sessionActor: ActorRef, delay: FiniteDuration, interval: FiniteDuration) extends Actor  with FileMd5Sum {
   context.system.scheduler.schedule(delay, interval) {
     updateSessionTable
   }
@@ -167,7 +187,7 @@ class LoadSessionActor (sessionActor: ActorRef, delay: FiniteDuration, interval:
   private var current_md5: String = ""
 
   def initSessionFileMd5sum (): Unit = {
-    current_md5 = getFileMd5Sum(LoadConf.restConf.getString("access-list"))
+    current_md5 = getFileMd5Sum(LoadConf.accessConf.getString("access-list"))
   }
 
   override def receive: Actor.Receive = {
@@ -175,7 +195,7 @@ class LoadSessionActor (sessionActor: ActorRef, delay: FiniteDuration, interval:
   }
 
   def fileChanged : Boolean = {
-    val lastest_md5: String = getFileMd5Sum(LoadConf.restConf.getString("access-list"))
+    val lastest_md5: String = getFileMd5Sum(LoadConf.accessConf.getString("access-list"))
     if (lastest_md5 == current_md5) {
       false
     } else {
@@ -186,7 +206,7 @@ class LoadSessionActor (sessionActor: ActorRef, delay: FiniteDuration, interval:
 
   def updateSessionTable = {
     if (fileChanged) {
-      sessionActor ! MapUpdateMsg(loadSessionTable(LoadConf.restConf.getString("access-list")))
+      sessionActor ! MapUpdateMsg(loadSessionTable(LoadConf.accessConf.getString("access-list")))
     }
   }
 }

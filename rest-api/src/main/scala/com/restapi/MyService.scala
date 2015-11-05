@@ -40,13 +40,31 @@ trait MyService extends HttpService {
   val myRoute =
     home {
       search { (includeTerms, excludeTerms, top, user, startDate, endDate) =>
-        get{
-          respondWithMediaType(`application/json`) {
-            complete {
-                ExecuteSearchRequest.runSearchAnalysis(includeTerms, excludeTerms, 
-                  top.getOrElse(LoadConf.restConf.getInt("searchParam.defaultTopTweets")), 
-                  startDate.getOrElse(LoadConf.restConf.getString("searchParam.defaulStartDatetime")), 
+        get {
+          if (LoadConf.accessConf.getString("enable") == "on") {
+            clientIP { ip => {
+              ip.toOption.map(_.getHostAddress).getOrElse("unknown")
+              println("User " + "is : " + user)
+              println("IP is: " + ip)
+              respondWithMediaType(`application/json`) {
+                complete {
+                    ExecuteSearchRequest.runSearchAnalysis(includeTerms, excludeTerms,
+                      top.getOrElse(LoadConf.restConf.getInt("searchParam.defaultTopTweets")),
+                      startDate.getOrElse(LoadConf.restConf.getString("searchParam.defaulStartDatetime")),
+                      endDate.getOrElse(LoadConf.restConf.getString("searchParam.defaultEndDatetime")))
+                  }
+                }
+              }
+            }
+          }
+          else {
+            respondWithMediaType(`application/json`) {
+              complete {
+                ExecuteSearchRequest.runSearchAnalysis(includeTerms, excludeTerms,
+                  top.getOrElse(LoadConf.restConf.getInt("searchParam.defaultTopTweets")),
+                  startDate.getOrElse(LoadConf.restConf.getString("searchParam.defaulStartDatetime")),
                   endDate.getOrElse(LoadConf.restConf.getString("searchParam.defaultEndDatetime")))
+              }
             }
           }
         }

@@ -32,6 +32,10 @@ object Application extends App {
     implicit val system = ActorSystem(LoadConf.restConf.getString("actor"))
     // create and start our service actor
     val service = system.actorOf(Props[MyServiceActor], LoadConf.restConf.getString("name"))
+    val sessionTimeout = system.actorOf(Props[SessionTimeoutActor])
+    val sessionTable = system.actorOf(Props(classOf[SimpleSession], sessionTimeout, LoadConf.accessConf.getInt("delay") seconds, LoadConf.accessConf.getInt("timeout-interval") seconds))
+    sessionTable ! InitSessionTable
+    val sessionLoader = system.actorOf(Props(classOf[LoadSessionActor], sessionTimeout, LoadConf.accessConf.getInt("delay") seconds, LoadConf.accessConf.getInt("check-interval") seconds))
     implicit val timeout = Timeout(800.seconds)
     IO(Http) ? Http.Bind(service, interface = "0.0.0.0", port = LoadConf.restConf.getInt("port"))
 

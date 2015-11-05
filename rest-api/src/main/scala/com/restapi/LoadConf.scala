@@ -25,4 +25,6 @@ object LoadConf {
     val restConf:Config = globalConf.getConfig("rest-api")
     // Loading elasticsearch config
     val esConf:Config = globalConf.getConfig("elasticsearch")
+    // Loading access control config
+    val accessConf:Config = globalConf.getConfig("access-control")
 }
