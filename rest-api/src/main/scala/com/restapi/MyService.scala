@@ -7,11 +7,14 @@ import MediaTypes._
 import Directives._
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
+import akka.pattern.ask
+import akka.util.Timeout
+import scala.concurrent.duration._
+import spray.http.DateTime
 
 // we don't implement our route structure directly in the service actor because
 // we want to be able to test it independently, without having to spin up an actor
 class MyServiceActor extends Actor with MyService {
-
   def handleTimeouts: Receive = {
     case Timedout(x: HttpRequest) =>
       sender ! HttpResponse(StatusCodes.InternalServerError, "Too late")
@@ -36,23 +39,45 @@ trait MyService extends HttpService {
   val sentimentAnalysis = path("analysis") & parameters('termsInclude, 'termsExclude, 'sentiment.as[Int] , 'user, 'startDatetime, 'endDatetime, 'top.as[Int])
   val powertrack = pathPrefix("powertrack")
   val wordcount = path("wordcount") & parameters('user, 'batchSize.as[Int], 'topTweets.as[Int], 'topWords.as[Int], 'termsInclude, 'termsExclude)
+  implicit val timeout = Timeout(2.second)
 
   val myRoute =
     home {
       search { (includeTerms, excludeTerms, top, user, startDate, endDate) =>
         get {
           if (LoadConf.accessConf.getString("enable") == "on") {
-            clientIP { ip => {
-              ip.toOption.map(_.getHostAddress).getOrElse("unknown")
-              println("User " + "is : " + user)
-              println("IP is: " + ip)
-              respondWithMediaType(`application/json`) {
-                complete {
-                    ExecuteSearchRequest.runSearchAnalysis(includeTerms, excludeTerms,
-                      top.getOrElse(LoadConf.restConf.getInt("searchParam.defaultTopTweets")),
-                      startDate.getOrElse(LoadConf.restConf.getString("searchParam.defaulStartDatetime")),
-                      endDate.getOrElse(LoadConf.restConf.getString("searchParam.defaultEndDatetime")))
+            clientIP {
+              ip => {
+                ip.toOption.map(_.getHostAddress).getOrElse("unknown")
+                println("User " + "is : " + user)
+                println("IP is: " + ip)
+
+                val f: Future[Any] = Application.sessionTable ? SessionCheckMsg(user, ip.toString(), DateTime.now)
+                var authorized: Boolean = false
+                f.onSuccess {
+                  case SessionCheckResultMsg(msg) => {
+                    println("get check result")
+                    authorized = msg
+                    if (msg)
+                      println("true")
+                    else
+                      println("false")
                   }
+                  case _ => println("get something else")// ignore other messages
+                }
+                Await.result(f, 50.millisecond)
+                if (authorized) {
+                  println("hit true case")
+                  respondWithMediaType(`application/json`) {
+                    complete {
+                      ExecuteSearchRequest.runSearchAnalysis(includeTerms, excludeTerms,
+                        top.getOrElse(LoadConf.restConf.getInt("searchParam.defaultTopTweets")),
+                        startDate.getOrElse(LoadConf.restConf.getString("searchParam.defaulStartDatetime")),
+                        endDate.getOrElse(LoadConf.restConf.getString("searchParam.defaultEndDatetime")))
+                    }
+                  }
+                } else {
+                  complete{HttpResponse(StatusCodes.InternalServerError, "User is not authorized!")}
                 }
               }
             }

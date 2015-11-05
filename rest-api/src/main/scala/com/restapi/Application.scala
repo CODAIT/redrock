@@ -35,7 +35,8 @@ object Application extends App {
     val sessionTimeout = system.actorOf(Props[SessionTimeoutActor])
     val sessionTable = system.actorOf(Props(classOf[SimpleSession], sessionTimeout, LoadConf.accessConf.getInt("delay") seconds, LoadConf.accessConf.getInt("timeout-interval") seconds))
     sessionTable ! InitSessionTable
-    val sessionLoader = system.actorOf(Props(classOf[LoadSessionActor], sessionTimeout, LoadConf.accessConf.getInt("delay") seconds, LoadConf.accessConf.getInt("check-interval") seconds))
+    val sessionLoader = system.actorOf(Props(classOf[LoadSessionActor], sessionTable, LoadConf.accessConf.getInt("delay") seconds, LoadConf.accessConf.getInt("check-interval") seconds))
+    sessionLoader ! InitFileMd5Sum
     implicit val timeout = Timeout(800.seconds)
     IO(Http) ? Http.Bind(service, interface = "0.0.0.0", port = LoadConf.restConf.getInt("port"))
 
