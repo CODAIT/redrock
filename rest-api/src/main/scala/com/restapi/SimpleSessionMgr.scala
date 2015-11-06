@@ -52,6 +52,7 @@ case class InitSessionTable()
 case class SessionCheckMsg(userid: String, ip: String, timestamp: DateTime)
 case class SessionUpdateMsg(userid: String, ip: String, timestamp: DateTime)
 case class SessionCheckResultMsg(Msg: Boolean)
+case class SignOutMsg(Msg: String)
 case object InitFileMd5Sum
 
 trait FileMd5Sum {
@@ -116,6 +117,18 @@ class SimpleSession(timeoutActor: ActorRef, delay: FiniteDuration, interval: Fin
         sessionTable += (i -> Pair("", DateTime(1979, 1, 1, 0, 0, 0)))
         if (onlineUsers > 0) onlineUsers -= 1
         logger.info("User "+i+" timeout!"+"online users "+onlineUsers)
+      }
+    }
+    case SignOutMsg(msg) => {
+      logger.info("Receive user "+msg+" signout msg.")
+      val result = sessionTable get msg
+      result match {
+        case Some(t) => {
+          sessionTable += (msg -> Pair("", DateTime(1979, 1, 1, 0, 0, 0)))
+          if (onlineUsers > 0) onlineUsers -= 1
+          logger.info("User "+msg+" sign out. Online users: "+onlineUsers)
+        }
+        case _ => logger.info("User"+msg+" doesn't exist when sign out. Online users: "+onlineUsers)
       }
     }
     case InitSessionTable => initSessionTable()

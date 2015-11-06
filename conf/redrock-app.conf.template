@@ -92,5 +92,6 @@ redrock {
     	delay = 10
         timeout-interval = 60
         check-interval = 600
+        enable = "off"
     }
 }

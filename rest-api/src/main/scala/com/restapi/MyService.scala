@@ -1,6 +1,7 @@
 package com.restapi
 
 import akka.actor.Actor
+import com.restapi.SignOutMsg
 import spray.http.HttpHeaders.`Content-Type`
 import spray.routing._
 import spray.http._
@@ -40,6 +41,9 @@ trait MyService extends HttpService {
   val sentimentAnalysis = path("analysis") & parameters('termsInclude, 'termsExclude, 'sentiment.as[Int] , 'user, 'startDatetime, 'endDatetime, 'top.as[Int])
   val powertrack = pathPrefix("powertrack")
   val wordcount = path("wordcount") & parameters('user, 'batchSize.as[Int], 'topTweets.as[Int], 'topWords.as[Int], 'termsInclude, 'termsExclude)
+  val auth = pathPrefix("auth")
+  val signin = path("signin") & parameters('user)
+  val signout = path("signout") & parameters('user)
   implicit val timeout = Timeout(2.second)
 
   val myRoute =
@@ -50,8 +54,6 @@ trait MyService extends HttpService {
             clientIP {
               ip => {
                 ip.toOption.map(_.getHostAddress).getOrElse("unknown")
-                println("User " + "is : " + user)
-                println("IP is: " + ip)
 
                 val f: Future[Any] = Application.sessionTable ? SessionCheckMsg(user, ip.toString(), DateTime.now)
 
@@ -106,6 +108,39 @@ trait MyService extends HttpService {
                 ExecutePowertrackRequest.runPowertrackAnalysis(batchSize, topTweets, topWords, termsInclude, termsExclude)
               }
             }
+          }
+        }
+      }~
+      auth {
+        signin { (user) =>
+          get {
+            clientIP {
+              ip => {
+                ip.toOption.map(_.getHostAddress).getOrElse("unknown")
+
+                val f: Future[Any] = Application.sessionTable ? SessionCheckMsg(user, ip.toString(), DateTime.now)
+
+                val response = f flatMap {
+                  case SessionCheckResultMsg(msg) => {
+                    if (msg) {
+                      Future{HttpResponse(StatusCodes.OK, "User " +user+" sign in")}
+                    } else {
+                      Future(HttpResponse(StatusCodes.InternalServerError, "User"+user+" does not exist!"))
+                    }
+                  }
+                  case _ => {
+                    Future(HttpResponse(StatusCodes.InternalServerError, "User is not authorized!"))
+                  }
+                }
+                complete{response}
+              }
+            }
+          }
+        }~
+        signout { (user) =>
+          get {
+            Application.sessionTable ! SignOutMsg(user)
+            complete{HttpResponse(StatusCodes.OK, "User " +user+" sign out")}
           }
         }
       }
