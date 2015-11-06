@@ -154,7 +154,11 @@ class SimpleSession(timeoutActor: ActorRef, delay: FiniteDuration, interval: Fin
     logger.info("User "+userid+" IP "+ip+" for authentication.")
     val maxUsers:Int = LoadConf.accessConf.getInt("max-allowed-users")
     var accept: Boolean = true
-    if (onlineUsers > maxUsers) accept = false
+    if (onlineUsers > maxUsers)
+    {
+      logger.info("User "+userid+" denied: Too many users online.")
+      return false
+    }
     val user = sessionTable get userid
     user match {
       case Some(t) => {

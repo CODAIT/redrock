@@ -67,11 +67,11 @@ trait MyService extends HttpService {
                       endDate.getOrElse(LoadConf.restConf.getString("searchParam.defaultEndDatetime")))
                       search map (x => HttpResponse(StatusCodes.OK, entity = x, headers = List(`Content-Type`(`application/json`))))
                     } else {
-                      Future(HttpResponse(StatusCodes.InternalServerError, "User is not authorized!"))
+                      Future(HttpResponse(StatusCodes.InternalServerError, s"""{"success":false, "message":"User $user is not authorized!"}"""))
                     }
                   }
                   case _ => {
-                    Future(HttpResponse(StatusCodes.InternalServerError, "User is not authorized!"))
+                    Future(HttpResponse(StatusCodes.InternalServerError, s"""{"success":false, "message":"User $user is not authorized!"}"""))
                   }
                 }
                 complete{response}
@@ -105,11 +105,11 @@ trait MyService extends HttpService {
                       val search = runSentimentAnalysis(termsInclude, termsExclude, top, startDatetime, endDatetime, sentiment)
                       Future(HttpResponse(StatusCodes.OK, entity = search, headers = List(`Content-Type`(`application/json`))))
                     } else {
-                      Future(HttpResponse(StatusCodes.InternalServerError, "User is not authorized!"))
+                      Future(HttpResponse(StatusCodes.InternalServerError, s"""{"success":false, "message":"User $user is not authorized!"}"""))
                     }
                   }
                   case _ => {
-                    Future(HttpResponse(StatusCodes.InternalServerError, "User is not authorized!"))
+                    Future(HttpResponse(StatusCodes.InternalServerError, s"""{"success":false, "message":"User $user is not authorized!"}"""))
                   }
                 }
                   complete{response}
@@ -141,11 +141,11 @@ trait MyService extends HttpService {
                       val search = ExecutePowertrackRequest.runPowertrackAnalysis(batchSize, topTweets, topWords, termsInclude, termsExclude)
                       search map (x => HttpResponse(StatusCodes.OK, entity = x, headers = List(`Content-Type`(`application/json`))))
                     } else {
-                      Future(HttpResponse(StatusCodes.InternalServerError, "User is not authorized!"))
+                      Future(HttpResponse(StatusCodes.InternalServerError, s"""{"success":false, "message":"User $user is not authorized!"}"""))
                     }
                   }
                   case _ => {
-                    Future(HttpResponse(StatusCodes.InternalServerError, "User is not authorized!"))
+                    Future(HttpResponse(StatusCodes.InternalServerError, s"""{"success":false, "message":"User $user is not authorized!"}"""))
                   }
                 }
                   complete{response}
@@ -173,13 +173,13 @@ trait MyService extends HttpService {
                 val response = f flatMap {
                   case SessionCheckResultMsg(msg) => {
                     if (msg) {
-                      Future{HttpResponse(StatusCodes.OK, "User " +user+" sign in")}
+                      Future{HttpResponse(StatusCodes.OK, s"""{"success":true, "message":"User $user signed in!"}""")}
                     } else {
-                      Future(HttpResponse(StatusCodes.InternalServerError, "User"+user+" does not exist!"))
+                      Future(HttpResponse(StatusCodes.InternalServerError, s"""{"success":false, "message":"User $user is not authorized!"}"""))
                     }
                   }
                   case _ => {
-                    Future(HttpResponse(StatusCodes.InternalServerError, "User is not authorized!"))
+                    Future(HttpResponse(StatusCodes.InternalServerError, s"""{"success":false, "message":"User $user is not authorized!"}"""))
                   }
                 }
                 complete{response}
@@ -190,7 +190,7 @@ trait MyService extends HttpService {
         signout { (user) =>
           get {
             Application.sessionTable ! SignOutMsg(user)
-            complete{HttpResponse(StatusCodes.OK, "User " +user+" sign out")}
+            complete{HttpResponse(StatusCodes.OK, s"""{"success":true, "message":"User $user signed out!"}""")}
           }
         }
       }
