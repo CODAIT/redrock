@@ -159,7 +159,7 @@ object ExecuteSentimentAnalysis
 
 			countVectors.unpersist()
 
-			return Json.stringify(Json.obj("topics" -> response))
+			return Json.stringify(Json.obj("topics" -> response, "success" -> true))
 			// Print Time in seconds
 		} catch {
 		  	case e: Exception => {
@@ -167,7 +167,7 @@ object ExecuteSentimentAnalysis
 			} 
 		}
 		
-		return Json.stringify(Json.obj("topics" -> JsNull))
+		return Json.stringify(Json.obj("topics" -> JsNull, "success" -> true))
 	}
 
 	def getTweetsText(includeTerms: String, excludeTerms: String, top: Int, startDatetime: String, endDatetime: String, sentiment: Int): List[String] =

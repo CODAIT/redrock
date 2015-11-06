@@ -51,12 +51,12 @@ object ExecutePowertrackRequest {
       val totalUserAndTweetsJson = getUsersAndTweets(elasticsearchResponse)
       val totalRetweetsJson = getRetweetsCount(elasticsearchResponse)
 
-      Json.stringify((totalUserAndTweetsJson ++ totalRetweetsJson ++ wordCountJson).as[JsValue])
+      Json.stringify((Json.obj("success" -> true) ++ totalUserAndTweetsJson ++ totalRetweetsJson ++ wordCountJson).as[JsValue])
 
     }.recover {
       case e: Exception =>
         logger.error("Execute Powertrack Word Count", e)
-        Json.stringify(Json.obj("toptweets" -> Json.obj("tweets" -> JsNull), "wordCount" -> JsNull,"totalfilteredtweets" -> JsNull, "totalusers" -> JsNull, "totalretweets" -> JsNull))
+        Json.stringify(Json.obj("toptweets" -> Json.obj("tweets" -> JsNull), "wordCount" -> JsNull,"totalfilteredtweets" -> JsNull, "totalusers" -> JsNull, "totalretweets" -> JsNull, "success" -> true))
     }
   }
 

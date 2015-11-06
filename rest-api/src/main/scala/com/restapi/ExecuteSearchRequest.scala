@@ -45,7 +45,7 @@ object ExecuteSearchRequest
 			
 		val tasks: Seq[Future[JsValue]] = Seq(elasticsearch_dataAnalisys, cluster_distance)
 		val aggregated: Future[Seq[JsValue]] = Future.sequence(tasks)
-		val result = aggregated.map(jsonResults => jsonResults(0).as[JsObject] ++ jsonResults(1).as[JsObject])
+		val result = aggregated.map(jsonResults => Json.obj("success" -> true) ++ jsonResults(0).as[JsObject] ++ jsonResults(1).as[JsObject])
 
 		result.recover{
 			case e: Exception => 
@@ -290,7 +290,7 @@ object ExecuteSearchRequest
 		  		"totalfilteredtweets" -> JsNull, "totalusers" -> JsNull,
 				"profession" -> JsNull, "location" -> JsNull, 
 				"sentiment" -> JsNull, "toptweets" -> JsNull,
-				"cluster" -> JsNull, "distance" -> JsNull)
+				"cluster" -> JsNull, "distance" -> JsNull, "success" -> true)
 	}
 
 	def emptyJSONResponseES(): JsValue = 
