@@ -1,6 +1,7 @@
 package com.restapi
 
 import akka.actor.Actor
+import spray.http.HttpHeaders.`Content-Type`
 import spray.routing._
 import spray.http._
 import MediaTypes._
@@ -53,32 +54,24 @@ trait MyService extends HttpService {
                 println("IP is: " + ip)
 
                 val f: Future[Any] = Application.sessionTable ? SessionCheckMsg(user, ip.toString(), DateTime.now)
-                var authorized: Boolean = false
-                f.onSuccess {
+
+                val response = f flatMap {
                   case SessionCheckResultMsg(msg) => {
-                    println("get check result")
-                    authorized = msg
-                    if (msg)
-                      println("true")
-                    else
-                      println("false")
-                  }
-                  case _ => println("get something else")// ignore other messages
-                }
-                Await.result(f, 50.millisecond)
-                if (authorized) {
-                  println("hit true case")
-                  respondWithMediaType(`application/json`) {
-                    complete {
-                      ExecuteSearchRequest.runSearchAnalysis(includeTerms, excludeTerms,
-                        top.getOrElse(LoadConf.restConf.getInt("searchParam.defaultTopTweets")),
-                        startDate.getOrElse(LoadConf.restConf.getString("searchParam.defaulStartDatetime")),
-                        endDate.getOrElse(LoadConf.restConf.getString("searchParam.defaultEndDatetime")))
+                    if (msg) {
+                    val search = ExecuteSearchRequest.runSearchAnalysis(includeTerms, excludeTerms,
+                      top.getOrElse(LoadConf.restConf.getInt("searchParam.defaultTopTweets")),
+                      startDate.getOrElse(LoadConf.restConf.getString("searchParam.defaulStartDatetime")),
+                      endDate.getOrElse(LoadConf.restConf.getString("searchParam.defaultEndDatetime")))
+                      search map (x => HttpResponse(StatusCodes.OK, entity = x, headers = List(`Content-Type`(`application/json`))))
+                    } else {
+                      Future(HttpResponse(StatusCodes.InternalServerError, "User is not authorized!"))
                     }
                   }
-                } else {
-                  complete{HttpResponse(StatusCodes.InternalServerError, "User is not authorized!")}
+                  case _ => {
+                    Future(HttpResponse(StatusCodes.InternalServerError, "User is not authorized!"))
+                  }
                 }
+                complete{response}
               }
             }
           }
