@@ -1,6 +1,7 @@
 package com.restapi
 
 import akka.actor.Actor
+import com.restapi.ExecuteSentimentAnalysis._
 import com.restapi.SignOutMsg
 import spray.http.HttpHeaders.`Content-Type`
 import spray.routing._
@@ -92,9 +93,34 @@ trait MyService extends HttpService {
       sentiment {
         sentimentAnalysis { (termsInclude, termsExclude, sentiment, user, startDatetime, endDatetime, top) =>
           get{
-            respondWithMediaType(`application/json`) {
-              complete {
-                ExecuteSentimentAnalysis.runSentimentAnalysis(termsInclude, termsExclude, top, startDatetime, endDatetime, sentiment)
+            if (LoadConf.accessConf.getString("enable") == "on") {
+              clientIP {
+                ip => {
+                  ip.toOption.map(_.getHostAddress).getOrElse("unknown")
+
+                  val f: Future[Any] = Application.sessionTable ? SessionCheckMsg(user, ip.toString(), DateTime.now)
+                  val response = f flatMap {
+                  case SessionCheckResultMsg(msg) => {
+                    if (msg) {
+                      val search = runSentimentAnalysis(termsInclude, termsExclude, top, startDatetime, endDatetime, sentiment)
+                      Future(HttpResponse(StatusCodes.OK, entity = search, headers = List(`Content-Type`(`application/json`))))
+                    } else {
+                      Future(HttpResponse(StatusCodes.InternalServerError, "User is not authorized!"))
+                    }
+                  }
+                  case _ => {
+                    Future(HttpResponse(StatusCodes.InternalServerError, "User is not authorized!"))
+                  }
+                }
+                  complete{response}
+                }
+              }
+
+            } else {
+              respondWithMediaType(`application/json`) {
+                complete {
+                  runSentimentAnalysis(termsInclude, termsExclude, top, startDatetime, endDatetime, sentiment)
+                }
               }
             }
           }
@@ -103,9 +129,33 @@ trait MyService extends HttpService {
       powertrack {
         wordcount { (user, batchSize, topTweets, topWords, termsInclude, termsExclude) =>
           get {
-            respondWithMediaType(`application/json`) {
-              complete {
-                ExecutePowertrackRequest.runPowertrackAnalysis(batchSize, topTweets, topWords, termsInclude, termsExclude)
+            if (LoadConf.accessConf.getString("enable") == "on") {
+              clientIP {
+                ip => {
+                  ip.toOption.map(_.getHostAddress).getOrElse("unknown")
+
+                  val f: Future[Any] = Application.sessionTable ? SessionCheckMsg(user, ip.toString(), DateTime.now)
+                  val response = f flatMap {
+                  case SessionCheckResultMsg(msg) => {
+                    if (msg) {
+                      val search = ExecutePowertrackRequest.runPowertrackAnalysis(batchSize, topTweets, topWords, termsInclude, termsExclude)
+                      search map (x => HttpResponse(StatusCodes.OK, entity = x, headers = List(`Content-Type`(`application/json`))))
+                    } else {
+                      Future(HttpResponse(StatusCodes.InternalServerError, "User is not authorized!"))
+                    }
+                  }
+                  case _ => {
+                    Future(HttpResponse(StatusCodes.InternalServerError, "User is not authorized!"))
+                  }
+                }
+                  complete{response}
+                }
+              }
+            } else {
+              respondWithMediaType(`application/json`) {
+                complete {
+                  ExecutePowertrackRequest.runPowertrackAnalysis(batchSize, topTweets, topWords, termsInclude, termsExclude)
+                }
               }
             }
           }
@@ -144,6 +194,5 @@ trait MyService extends HttpService {
           }
         }
       }
-
     }
 }
