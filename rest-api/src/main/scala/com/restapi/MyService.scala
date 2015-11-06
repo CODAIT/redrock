@@ -67,11 +67,11 @@ trait MyService extends HttpService {
                       endDate.getOrElse(LoadConf.restConf.getString("searchParam.defaultEndDatetime")))
                       search map (x => HttpResponse(StatusCodes.OK, entity = x, headers = List(`Content-Type`(`application/json`))))
                     } else {
-                      Future(HttpResponse(StatusCodes.InternalServerError, s"""{"success":false, "message":"User $user is not authorized!"}"""))
+                      Future(HttpResponse(StatusCodes.OK, s"""{"success":false, "message":"User $user is not authorized!"}"""))
                     }
                   }
                   case _ => {
-                    Future(HttpResponse(StatusCodes.InternalServerError, s"""{"success":false, "message":"User $user is not authorized!"}"""))
+                    Future(HttpResponse(StatusCodes.OK, s"""{"success":false, "message":"User $user is not authorized!"}"""))
                   }
                 }
                 complete{response}
@@ -105,11 +105,11 @@ trait MyService extends HttpService {
                       val search = runSentimentAnalysis(termsInclude, termsExclude, top, startDatetime, endDatetime, sentiment)
                       Future(HttpResponse(StatusCodes.OK, entity = search, headers = List(`Content-Type`(`application/json`))))
                     } else {
-                      Future(HttpResponse(StatusCodes.InternalServerError, s"""{"success":false, "message":"User $user is not authorized!"}"""))
+                      Future(HttpResponse(StatusCodes.OK, s"""{"success":false, "message":"User $user is not authorized!"}"""))
                     }
                   }
                   case _ => {
-                    Future(HttpResponse(StatusCodes.InternalServerError, s"""{"success":false, "message":"User $user is not authorized!"}"""))
+                    Future(HttpResponse(StatusCodes.OK, s"""{"success":false, "message":"User $user is not authorized!"}"""))
                   }
                 }
                   complete{response}
@@ -141,11 +141,11 @@ trait MyService extends HttpService {
                       val search = ExecutePowertrackRequest.runPowertrackAnalysis(batchSize, topTweets, topWords, termsInclude, termsExclude)
                       search map (x => HttpResponse(StatusCodes.OK, entity = x, headers = List(`Content-Type`(`application/json`))))
                     } else {
-                      Future(HttpResponse(StatusCodes.InternalServerError, s"""{"success":false, "message":"User $user is not authorized!"}"""))
+                      Future(HttpResponse(StatusCodes.OK, s"""{"success":false, "message":"User $user is not authorized!"}"""))
                     }
                   }
                   case _ => {
-                    Future(HttpResponse(StatusCodes.InternalServerError, s"""{"success":false, "message":"User $user is not authorized!"}"""))
+                    Future(HttpResponse(StatusCodes.OK, s"""{"success":false, "message":"User $user is not authorized!"}"""))
                   }
                 }
                   complete{response}
@@ -175,11 +175,11 @@ trait MyService extends HttpService {
                     if (msg) {
                       Future{HttpResponse(StatusCodes.OK, s"""{"success":true, "message":"User $user signed in!"}""")}
                     } else {
-                      Future(HttpResponse(StatusCodes.InternalServerError, s"""{"success":false, "message":"User $user is not authorized!"}"""))
+                      Future(HttpResponse(StatusCodes.OK, s"""{"success":false, "message":"User $user is not authorized!"}"""))
                     }
                   }
                   case _ => {
-                    Future(HttpResponse(StatusCodes.InternalServerError, s"""{"success":false, "message":"User $user is not authorized!"}"""))
+                    Future(HttpResponse(StatusCodes.OK, s"""{"success":false, "message":"User $user is not authorized!"}"""))
                   }
                 }
                 complete{response}
