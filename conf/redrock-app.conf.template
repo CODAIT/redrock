@@ -93,5 +93,6 @@ redrock {
         timeout-interval = 60
         check-interval = 600
         enable = "off"
+        complementaryDeniedMessage = "Contact RR team at redrock@us.ibm.com"
     }
 }

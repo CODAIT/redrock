@@ -69,7 +69,7 @@ trait FileMd5Sum {
     val lines = try source.getLines().toList finally source.close()
     var newSessionTable = Map.empty[String, (String, DateTime)]
     for (line <- lines) {
-      newSessionTable += (line -> Pair("", DateTime(1979, 1, 1, 0, 0, 0)))
+      newSessionTable += (line.toLowerCase() -> Pair("", DateTime(1979, 1, 1, 0, 0, 0)))
     }
     if(newSessionTable.size == 0) logger.error("Session Table loaded from "+ LoadConf.accessConf.getString("access-list")+ "is empty!")
     newSessionTable

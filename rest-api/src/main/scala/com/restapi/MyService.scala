@@ -46,6 +46,7 @@ trait MyService extends HttpService {
   val signin = path("signin") & parameters('user)
   val signout = path("signout") & parameters('user)
   implicit val timeout = Timeout(2.second)
+  val complementaryDeniedMsg = LoadConf.accessConf.getString("complementaryDeniedMessage")
 
   val myRoute =
     home {
@@ -56,7 +57,7 @@ trait MyService extends HttpService {
               ip => {
                 ip.toOption.map(_.getHostAddress).getOrElse("unknown")
 
-                val f: Future[Any] = Application.sessionTable ? SessionCheckMsg(user, ip.toString(), DateTime.now)
+                val f: Future[Any] = Application.sessionTable ? SessionCheckMsg(user.toLowerCase(), ip.toString(), DateTime.now)
 
                 val response = f flatMap {
                   case SessionCheckResultMsg(msg) => {
@@ -67,11 +68,11 @@ trait MyService extends HttpService {
                       endDate.getOrElse(LoadConf.restConf.getString("searchParam.defaultEndDatetime")))
                       search map (x => HttpResponse(StatusCodes.OK, entity = x, headers = List(`Content-Type`(`application/json`))))
                     } else {
-                      Future(HttpResponse(StatusCodes.OK, s"""{"success":false, "message":"User $user is not authorized!"}"""))
+                      Future(HttpResponse(StatusCodes.OK, s"""{"success":false, "message":"User $user is not authorized. $complementaryDeniedMsg"}"""))
                     }
                   }
                   case _ => {
-                    Future(HttpResponse(StatusCodes.OK, s"""{"success":false, "message":"User $user is not authorized!"}"""))
+                    Future(HttpResponse(StatusCodes.OK, s"""{"success":false, "message":"User $user is not authorized. $complementaryDeniedMsg"}"""))
                   }
                 }
                 complete{response}
@@ -98,18 +99,18 @@ trait MyService extends HttpService {
                 ip => {
                   ip.toOption.map(_.getHostAddress).getOrElse("unknown")
 
-                  val f: Future[Any] = Application.sessionTable ? SessionCheckMsg(user, ip.toString(), DateTime.now)
+                  val f: Future[Any] = Application.sessionTable ? SessionCheckMsg(user.toLowerCase(), ip.toString(), DateTime.now)
                   val response = f flatMap {
                   case SessionCheckResultMsg(msg) => {
                     if (msg) {
                       val search = runSentimentAnalysis(termsInclude, termsExclude, top, startDatetime, endDatetime, sentiment)
                       Future(HttpResponse(StatusCodes.OK, entity = search, headers = List(`Content-Type`(`application/json`))))
                     } else {
-                      Future(HttpResponse(StatusCodes.OK, s"""{"success":false, "message":"User $user is not authorized!"}"""))
+                      Future(HttpResponse(StatusCodes.OK, s"""{"success":false, "message":"User $user is not authorized. $complementaryDeniedMsg"}"""))
                     }
                   }
                   case _ => {
-                    Future(HttpResponse(StatusCodes.OK, s"""{"success":false, "message":"User $user is not authorized!"}"""))
+                    Future(HttpResponse(StatusCodes.OK, s"""{"success":false, "message":"User $user is not authorized. $complementaryDeniedMsg"}"""))
                   }
                 }
                   complete{response}
@@ -134,18 +135,18 @@ trait MyService extends HttpService {
                 ip => {
                   ip.toOption.map(_.getHostAddress).getOrElse("unknown")
 
-                  val f: Future[Any] = Application.sessionTable ? SessionCheckMsg(user, ip.toString(), DateTime.now)
+                  val f: Future[Any] = Application.sessionTable ? SessionCheckMsg(user.toLowerCase(), ip.toString(), DateTime.now)
                   val response = f flatMap {
                   case SessionCheckResultMsg(msg) => {
                     if (msg) {
                       val search = ExecutePowertrackRequest.runPowertrackAnalysis(batchSize, topTweets, topWords, termsInclude, termsExclude)
                       search map (x => HttpResponse(StatusCodes.OK, entity = x, headers = List(`Content-Type`(`application/json`))))
                     } else {
-                      Future(HttpResponse(StatusCodes.OK, s"""{"success":false, "message":"User $user is not authorized!"}"""))
+                      Future(HttpResponse(StatusCodes.OK, s"""{"success":false, "message":"User $user is not authorized. $complementaryDeniedMsg"}"""))
                     }
                   }
                   case _ => {
-                    Future(HttpResponse(StatusCodes.OK, s"""{"success":false, "message":"User $user is not authorized!"}"""))
+                    Future(HttpResponse(StatusCodes.OK, s"""{"success":false, "message":"User $user is not authorized. $complementaryDeniedMsg"}"""))
                   }
                 }
                   complete{response}
@@ -168,18 +169,18 @@ trait MyService extends HttpService {
               ip => {
                 ip.toOption.map(_.getHostAddress).getOrElse("unknown")
 
-                val f: Future[Any] = Application.sessionTable ? SessionCheckMsg(user, ip.toString(), DateTime.now)
+                val f: Future[Any] = Application.sessionTable ? SessionCheckMsg(user.toLowerCase(), ip.toString(), DateTime.now)
 
                 val response = f flatMap {
                   case SessionCheckResultMsg(msg) => {
                     if (msg) {
                       Future{HttpResponse(StatusCodes.OK, s"""{"success":true, "message":"User $user signed in!"}""")}
                     } else {
-                      Future(HttpResponse(StatusCodes.OK, s"""{"success":false, "message":"User $user is not authorized!"}"""))
+                      Future(HttpResponse(StatusCodes.OK, s"""{"success":false, "message":"User $user is not authorized. $complementaryDeniedMsg"}"""))
                     }
                   }
                   case _ => {
-                    Future(HttpResponse(StatusCodes.OK, s"""{"success":false, "message":"User $user is not authorized!"}"""))
+                    Future(HttpResponse(StatusCodes.OK, s"""{"success":false, "message":"User $user is not authorized. $complementaryDeniedMsg"}"""))
                   }
                 }
                 complete{response}
@@ -189,7 +190,7 @@ trait MyService extends HttpService {
         }~
         signout { (user) =>
           get {
-            Application.sessionTable ! SignOutMsg(user)
+            Application.sessionTable ! SignOutMsg(user.toLowerCase())
             complete{HttpResponse(StatusCodes.OK, s"""{"success":true, "message":"User $user signed out!"}""")}
           }
         }
