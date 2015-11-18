@@ -97,7 +97,11 @@ curl -XPUT 'http://localhost:9200/redrock_powertrack/_mapping/processed_tweets' 
       },
       "user_id": {
         "type": "string",
-        "index": "not_analyzed"
+        "fields": {
+            "hash": {
+              "type": "murmur3"
+            }
+        }
       },
       "tweet_text_array_tokens" : {
         "type": "string",
