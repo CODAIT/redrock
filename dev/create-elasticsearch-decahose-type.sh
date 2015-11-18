@@ -90,7 +90,11 @@ curl -XPUT 'http://localhost:9200/redrock_decahose/_mapping/processed_tweets' -d
       },
       "user_id": {
         "type": "string",
-        "index": "not_analyzed"
+        "fields": {
+            "hash": {
+              "type": "murmur3"
+            }
+        }
       },
       "tweet_sentiment": {
         "type": "integer",
@@ -116,7 +120,7 @@ curl -XPUT 'http://localhost:9200/redrock_decahose/_mapping/processed_tweets' -d
       },
       "created_at_timestamp" : {
         "type": "date",
-        "format": "MM/dd HH",
+        "format": "dateOptionalTime",
         "index": "not_analyzed"
       },
       "tweet_text_array_tokens" : {
@@ -125,7 +129,7 @@ curl -XPUT 'http://localhost:9200/redrock_decahose/_mapping/processed_tweets' -d
       },
       "created_at_timestamp_day" : {
         "type": "date",
-        "format": "MM/dd",
+        "format": "dateOptionalTime",
         "index": "not_analyzed"
       }
     }

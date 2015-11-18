@@ -159,7 +159,6 @@ object AnalysisFunction
 		val date = sdf.parse(created_at)
 
 		val sdf_new:SimpleDateFormat = new SimpleDateFormat(format)
-		return sdf_new.format(date)
-		//Fri May 01 07:12:43 +0000 2015
+		return sdf.format(sdf_new.parse(sdf_new.format(date)))
 	}
 }

@@ -51,8 +51,8 @@ redrock {
 			twitterStreamingDataPath = "hdfs://localhost:9000/user/hadoop/decahose_streaming"
 			streamingBatchTime = 60
 			//Format to be used to group by timestamp for Sentiment and Location
-			timestampFormat = "MM/dd HH"
-			timestampFormatDay = "MM/dd"
+			timestampFormat = "yyyy-MM-dd HH"
+			timestampFormatDay = "yyyy-MM-dd"
 			tweetTimestampFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
 			totalCores = 2
 			sparkUIPort = "4040"
