@@ -59,6 +59,7 @@ redrock {
 			executorMemory = "2g"
 			fileExtension = ".json.gz"
 			fileExtensionAuxiliar = ".gson.gz"
+			deleteProcessedFiles = false
 		}
 		powertrack {
 			twitterStreamingDataPath = "hdfs://localhost:9000/user/hadoop/powertrack_streaming"
@@ -68,6 +69,7 @@ redrock {
 			sparkUIPort = "4041"
 			executorMemory = "2g"
 			fileExtension = ".txt"
+			deleteProcessedFiles= true
 		}
 		restapi {
 			totalCores = 1

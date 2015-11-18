@@ -138,9 +138,12 @@ object PrepareTweets
                         .options(Map("pushdown" -> "true", "es.nodes" -> LoadConf.esConf.getString("bindIP"), "es.port" -> LoadConf.esConf.getString("bindPort")))
                         .save(s"""${LoadConf.esConf.getString("decahoseIndexName")}/${LoadConf.esConf.getString("esType")}""")
 
-            //Delete file just if it was processed
-            logger.info("Deleting File(s):")
-            regExp.findAllMatchIn(rdd.toDebugString).foreach((name) => deleteFile(name.toString))
+            if (LoadConf.sparkConf.getBoolean("decahose.deleteProcessedFiles"))
+            {
+              //Delete file just if it was processed
+              logger.info("Deleting File(s):")
+              regExp.findAllMatchIn(rdd.toDebugString).foreach((name) => deleteFile(name.toString))
+            }
         }
         catch {
           case e: Exception => 

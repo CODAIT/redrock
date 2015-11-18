@@ -104,14 +104,17 @@ object PrepareTweets
               .format("org.elasticsearch.spark.sql")
               .options(Map("pushdown" -> "true", "es.nodes" -> LoadConf.esConf.getString("bindIP"), "es.port" -> LoadConf.esConf.getString("bindPort")))
               .save( s"""${LoadConf.esConf.getString("powertrackIndexName")}/${LoadConf.esConf.getString("esType")}""")
-
-            //Delete files if they where processed
-            logger.info("Deleting File(s):")
-            regExp.findAllMatchIn(rdd.toDebugString).foreach((name) => deleteFile(name.toString))
           }
           else
           {
             logger.warn("###### Empty File ######")
+          }
+
+          if (LoadConf.sparkConf.getBoolean("powertrack.deleteProcessedFiles"))
+          {
+            //Delete files if they where processed
+            logger.info("Deleting File(s):")
+            regExp.findAllMatchIn(rdd.toDebugString).foreach((name) => deleteFile(name.toString))
           }
         }
         catch {
