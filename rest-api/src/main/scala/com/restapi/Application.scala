@@ -37,6 +37,8 @@ object Application extends App {
     sessionTable ! InitSessionTable
     val sessionLoader = system.actorOf(Props(classOf[LoadSessionActor], sessionTable, LoadConf.accessConf.getInt("delay") seconds, LoadConf.accessConf.getInt("check-interval") seconds))
     sessionLoader ! InitFileMd5Sum
+    val schedTotalTweets = system.actorOf(Props(classOf[ExecuterTotalTweetsES], LoadConf.restConf.getInt("totalTweetsScheduler.delay") seconds, LoadConf.restConf.getInt("totalTweetsScheduler.reapeatEvery") seconds))
+    schedTotalTweets ! GetTotalTweetsScheduler
     implicit val timeout = Timeout(800.seconds)
     IO(Http) ? Http.Bind(service, interface = "0.0.0.0", port = LoadConf.restConf.getInt("port"))
 

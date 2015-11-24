@@ -41,6 +41,11 @@ redrock {
 			numTopics = 3
 			termsPerTopic = 5
 		}
+
+		totalTweetsScheduler {
+			delay = 10
+			reapeatEvery = 1800
+		}
 	}
 
 	spark {

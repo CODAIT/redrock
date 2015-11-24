@@ -104,8 +104,8 @@ object ExecuteSearchRequest
 	def formatTotalTweets(elasticsearchRequests: GetElasticsearchResponse): JsObject = 
 	{
 		try { 
-			val totalTweetsResponse = Json.parse(elasticsearchRequests.getTotalTweetsESResponse())
-			return Json.obj("totaltweets" -> (totalTweetsResponse \ "hits" \ "total"))
+			val totalTweetsResponse = CurrentTotalTweets.totalTweets
+			return Json.obj("totaltweets" -> totalTweetsResponse)
 		} catch {
 		  case e: Exception => logger.error("Format Total Tweets",e)
 		}
