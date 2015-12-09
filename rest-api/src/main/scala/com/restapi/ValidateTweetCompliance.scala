@@ -63,8 +63,8 @@ object ValidateTweetCompliance {
       val startTime = System.nanoTime()
       val httpClient = new DefaultHttpClient()
       val params = httpClient.getParams();
-      HttpConnectionParams.setConnectionTimeout(params, 3000);
-      HttpConnectionParams.setSoTimeout(params, 3000);
+      HttpConnectionParams.setConnectionTimeout(params, 2000);
+      HttpConnectionParams.setSoTimeout(params, 2000);
 
       val request = new HttpPost(LoadConf.restConf.getString("bluemixProduction.requestURLforMessagesCheck"))
 
