@@ -118,18 +118,117 @@ Both of the scripts can be executed with the directive **--delete**. It will del
 
 Make sure the URLs inside the scripts are point to the right instance of Elasticsearch. In this tutorial, we are running elasticsearch in localhost so the URL should be http://localhost:9200
 
-### Getting Twitter Data
+### Downloading Twitter Data
+
+To download the Twitter data you have to have access to Bluemix. Please, talk to the RedRock team to get the sensitive information you are going to need to have access to the data.
+
+#### Powertrack
+
+The Powertrack data is downloaded through the shell script file **REDROCK_HOME/dev/getPowerTrackData.sh**. 
+
+Open the file and comment out the following lines:
+    
+    read -p 'PowerTrack Username: ' user
+    read -sp 'PowerTrack Password: ' password
+    read -p 'Track ID: ' trackid
+    read -p 'hadoop folder: ' hdfolder
+    read -p 'backoff minutes: ' back_min
+    
+Insert the new lines:
+
+    user="XXXXXXXX" #Bluemix Dev user credential
+    password="XXXXXXXX" #Bluemix Dev password credential
+    trackid="XXXXXXXX" #powertrack Bluemix trackID
+    hdfolder=hdfs://localhost:9000/data/twitter/powertrack/streaming
+    back_min=2
+
+To execute the script use: **./getPowerTrackData.sh**. It will generate a log file in the same directory with a name like: 201510272251445912821.txt 
+
+### Decahose Historical
+
+The Decahose historical data is downloaded through the shell script file **REDROCK_HOME/dev/retrieve-decahose-data.sh**. The script is currently running only on Linux plataform. You can execute it on Linux and then transfer the data to your local machine. Feel free to reach out to the team in case you need just a sample file.
+
+Open the file and comment out the following lines:
+    
+    read -p 'wget Username: ' user
+    read -sp 'wget Password: ' password
+    
+Insert the new lines:
+
+    user="XXXXXXXX" #Bluemix Prod user credential
+    password="XXXXXXXX" #Bluemix Prod password credential
+
+To execute the script use: **./retrieve-decahose-data.sh 2015-05-01 00 00 2015-07-31 23 50 /opt/tmp-data-decahose/ hdfs://localhost:9000/data/twitter/decahose/historical/**. It will generate a log file in the same directory with a name based on the start date, like: 2015-05-01_1447882385.txt 
+
+The script usage: ./retrieve-decahose-data.sh start-date start-hh start-mm end-date end-hh end-mm dest-folder/ hadoop-folder/
+The minutes should be multiple of 10.
+        
+### Decahose Streaming
+
+To be written
 
 ### Running RedRock
 
-To start RedRock run **./start.sh**
+RedRock code is divided into 3 main applications: Rest-api, Twitter-Powertrack and Twitter-Decahose.
 
-All the historical data will be processed and written to Elasticsearch at redrock/processed_tweets, as well as all the new data coming from streaming.
+To start all the applications at once, use the script **REDROCK_HOME/bin/start-all.sh**
 
-The REST API will be started.
+To stop all the applications at once, use the script **REDROCK_HOME/bin/stop-all.sh**
+
+Each application can be started and stoped individually. Use the start and stop scripts in **REDROCK_HOME/bin/**
+
+The log file for each application file will be at:
+
+1. Decahose: **REDROCK_HOME/twitter-decahose/nohup-decahose.out**
+2. Powertrack: **REDROCK_HOME/twitter-decahose/nohup-powertrack.out**
+3. Restapi: **REDROCK_HOME/rest-api/nohup-restpi.out**
+
+For each application start script, please configure the parameter **--driver-memory 2g**.
+The sum of the values defined should be equal to the amount at the Spark configuration SPARK_DRIVER_MEMORY.
+
+**Don't forget to put the files to be analysed into the HDFS directories we defined before.**
 
 ### Making requests
 
-URL: http://localhost:16666/ss/search?user=Barbara&termsInclude=RT&termsExclude=&top=100
+To send a request to the REST API just open a browser and use one of the URLs specified below.
 
-Specified include and exclude terms separated by comma.
+#### Live Portion (Powertrack)
+
+Sample URL: <http://localhost:16666/ss/powertrack/wordcount?termsInclude=#SparkInsight&batchSize=60&topTweets=100&user=bmgomes@us.ibm.com&termsExclude=&topWords=10/>
+
+Parameters:
+
+1. **termsInclude**: terms to be included in the search
+2. **bachSize**: How many minutes ago you would like to retrieve information. For exemple, 60 means that we are getting tweets between now and one hour ago.
+3. **topTweets**: How many tweets to be retrieved
+4. **user**: user email
+5. **topWords**: How many words to be displayed at the word count visualization
+
+#### Decahose
+
+Sample URL: <http://localhost:16666/ss/search?termsInclude=love&user=bmgomes@us.ibm.com&termsExclude=&top=100/>
+
+Parameters:
+
+1. **termsInclude**: terms to be included in the search separated by comma
+2. **termsExclude**: terms to be excluded in the search separated by comma
+3. **user**: user email
+4. **top**: How many tweets to be retrieved
+
+#### Sentiment Analysis
+
+Sample URL: <http://localhost:16666/ss/sentiment/analysis?endDatetime=2015-08-14T00:00:00.000Z&user=bmgomes@us.ibm.com&termsInclude=love&termsExclude=&startDatetime=2015-08-13T00:00:00.000Z&top=100&sentiment=1/>
+
+Parameters:
+
+1. **termsInclude**: terms to be included in the search separated by comma
+2. **termsExclude**: terms to be excluded in the search separated by comma
+3. **user**: user email
+4. **startDatetime**: start date to be used to filter the tweets
+5. **endDatetime**: end date to be used to filter the tweets
+6. **sentiment**: Sentiment of the tweets: 1 for positive and -1 for negative
+
+
+### Explaining RedRock Configuration File
+
+To be written
