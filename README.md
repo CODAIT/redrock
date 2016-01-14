@@ -142,6 +142,8 @@ Insert the new lines:
     hdfolder=hdfs://localhost:9000/data/twitter/powertrack/streaming
     back_min=2
 
+In some machines you don't need to sudo access hadoop before executing a hadoop command. In that case, search for **su - hadoop -c** in the script and delete it, executing only the following command between quotes.
+
 To execute the script use: **./getPowerTrackData.sh**. It will generate a log file in the same directory with a name like: 201510272251445912821.txt 
 
 ### Decahose Historical
@@ -157,6 +159,8 @@ Insert the new lines:
 
     user="XXXXXXXX" #Bluemix Prod user credential
     password="XXXXXXXX" #Bluemix Prod password credential
+    
+In some machines you don't need to sudo access hadoop before executing a hadoop command. In that case, search for **su - hadoop -c** in the script and delete it, executing only the following command between quotes.
 
 To execute the script use: **./retrieve-decahose-data.sh 2015-05-01 00 00 2015-07-31 23 50 /opt/tmp-data-decahose/ hdfs://localhost:9000/data/twitter/decahose/historical/**. It will generate a log file in the same directory with a name based on the start date, like: 2015-05-01_1447882385.txt 
 
@@ -165,7 +169,24 @@ The minutes should be multiple of 10.
         
 ### Decahose Streaming
 
-To be written
+The Decahose streaming data is downloaded through the shell script file **REDROCK_HOME/dev/pollDecahoseData.sh**. The script is currently running only on Linux plataform. Every 10 minutes the scripts downloads a new file from Bluemix archieve.
+
+Open the file and comment out the following lines:
+    
+    read -p 'wget Username: ' user
+    read -sp 'wget Password: ' password
+    
+Insert the new lines:
+
+    user="XXXXXXXX" #Bluemix Prod user credential
+    password="XXXXXXXX" #Bluemix Prod password credential
+
+In some machines you don't need to sudo access hadoop before executing a hadoop command. In that case, search for **su - hadoop -c** in the script and delete it, executing only the following command between quotes.
+
+To execute the script use: **./pollDecahoseData.sh 2016-01-13 14 00 /opt/tmp-data-decahose/ hdfs://localhost:9000/data/twitter/decahose/streaming/**. It will generate a log file in the same directory with a name based on the start date, like: 2016-01-13_1452725819.txt
+
+The script usage: ./pollDecahoseData.sh start-date start-hh start-mm dest-folder/ hadoop-folder/
+The minutes should be multiple of 10.
 
 ### Running RedRock
 
@@ -231,4 +252,136 @@ Parameters:
 
 ### Explaining RedRock Configuration File
 
-To be written
+The RedRock configuration file is located at **REDROCK_HOME/conf/redrock-app.conf.template**.
+All the configurations should be located inside the root redrock key. Following an explanation of each key-value pair.
+
+<table width=100% >
+	<tr width=100%>
+		<td width=20% colspan=4 align=center> <b> redrock </b> </td>
+	</tr>
+	<tr width=100%>
+		<td width=20% colspan=4> <b> Module </b> </td>
+	</tr>
+	<tr style="background-color:#f5f5f5" width=100%>
+		<td width=15% rowspan=40> <b> rest-api </b> </td>
+		<td width=20% > <b> Key </b> </td>
+		<td width=40% > <b> Meanning </b> </td>
+		<td width=20% > <b> Default </b> </td>
+	</tr>
+	<tr>
+		<td > name </td>
+		<td > Application name </td>
+		<td > redrock-restapi </td>
+	</tr>
+	<tr>
+		<td> actor </td>
+		<td> REST API Actor System name </td>
+		<td> redrock-actor </td>
+	</tr>
+	<tr>
+		<td> port </td>
+		<td> REST API bind port </td>
+		<td> 16666 </td>
+	</tr>
+	<tr>
+		<td > validateTweetsBeforeDisplaying </td>
+		<td> Defines if the tweets that are going to be displayed need to be validate on Bluemix </td>
+		<td> true </td>
+	</tr>
+	<tr>
+		<td > groupByESField </td>
+		<td > Which field of ES is going to be used for Sentiment and Location aggregation query. It can be grouped by day: <b>created_at_timestamp_day</b> or by hour: <b>created_at_timestamp</b> </td>
+		<td > created_at_timestamp_day </td>
+	</tr>
+	<tr style="background-color:#f5f5f5" >
+		<th > bluemixProduction </th>
+		<td colspan=2> Credentials to connect to Bluemix Production Server </td>
+	</tr>
+	<tr>
+		<td> user </td>
+		<td> Bluemix user </td>
+		<td>  </td>
+	</tr>
+	<tr>
+		<td> password </td>
+		<td> Bluemix password </td>
+		<td> 16666 </td>
+	</tr>
+	<tr>
+		<td> requestURLforMessagesCheck </td>
+		<td> Bluemix request URL to validate tweets </td>
+		<td> </td>
+	</tr>
+	<tr style="background-color:#f5f5f5" >
+		<th > python-code </th>
+		<td colspan=2> Used to execute Cluster and Distance algorithm </td>
+	</tr>
+	<tr>
+		<td> classPath </td>
+		<td> Class path to the main python file </td>
+		<td> ${redrock.homePath}"/rest-api/python/main.py" </td>
+	</tr>
+	<tr>
+		<td> pythonVersion </td>
+		<td> Python version </td>
+		<td> python2.7 </td>
+	</tr>
+	<tr style="background-color:#f5f5f5" >
+		<th > searchParam </th>
+		<td colspan=2> Parameters to be used when performing searches</td>
+	</tr>
+	<tr>
+		<td> defaultTopTweets </td>
+		<td> Default number of tweets to be returned in the search if not specifyed in the request </td>
+		<td> 100 </td>
+	</tr>
+	<tr>
+		<td> tweetsLanguage </td>
+		<td> Language of the tweets that is going to be returned in the search </td>
+		<td> en </td>
+	</tr>
+	<tr>
+		<td> topWordsToVec </td>
+		<td> Number of words to be returned by the Cluster and Distance algorithm </td>
+		<td> 20 </td>
+	</tr>
+	<tr>
+		<td> defaulStartDatetime </td>
+		<td> Start date to be used in the search range if not specifyed in the request </td>
+		<td> 1900-01-01T00:00:00.000Z </td>
+	</tr>
+	<tr>
+		<td> defaultEndDatetime </td>
+		<td> End date to be used in the search range if not specifyed in the request </td>
+		<td> 2050-12-31T23:59:59.999Z </td>
+	</tr>
+	<tr style="background-color:#f5f5f5" >
+		<th > sentimentAnalysis </th>
+		<td colspan=2> Configure the online ML algorithm for the sentiment drill down </td>
+	</tr>
+	<tr>
+		<td> numTopics </td>
+		<td> Number of topics to be displayed </td>
+		<td> 3 </td>
+	</tr>
+	<tr>
+		<td> termsPerTopic </td>
+		<td> Number of terms per topic </td>
+		<td> 5 </td>
+	</tr>
+	<tr style="background-color:#f5f5f5" >
+		<th > totalTweetsScheduler </th>
+		<td colspan=2> Configure the scheduled task that count the amount of tweets in ES decahose index </td>
+	</tr>
+	<tr>
+		<td> delay </td>
+		<td> Defines how many seconds after the application have started will the task begin to be executed </td>
+		<td> 10 </td>
+	</tr>
+	<tr>
+		<td> reapeatEvery </td>
+		<td> Time interval in seconds that the task will be executed </td>
+		<td> 1800 </td>
+	</tr>
+
+</table>
