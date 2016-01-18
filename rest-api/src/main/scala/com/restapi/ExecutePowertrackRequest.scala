@@ -34,29 +34,39 @@ object ExecutePowertrackRequest {
 
   val logger = LoggerFactory.getLogger(this.getClass)
 
-  def runPowertrackAnalysis(batchTime: Int, topTweets: Int, topWords: Int, termsInclude: String, termsExclude: String): Future[String] =
+  def runPowertrackAnalysis(batchTime: Int, topTweets: Int, topWords: Int, termsInclude: String, termsExclude: String, user: String): Future[String] =
   {
-    Future {
+    val (startDate, endDate) = getStartAndEndDateAccordingBatchTime(batchTime)
+    logger.info(s"UTC start date: $startDate")
+    logger.info(s"UTC end date: $endDate")
+    /* Temporary fix to search for #SparkSummitEU when searching for #SparkSummit*/
+    val tempIncludeTerms = if (termsInclude.toLowerCase().trim() == "#sparksummit") s"$termsInclude,#sparksummiteu" else termsInclude
+    logger.info(s"User: $user")
+    logger.info(s"Included terms: $tempIncludeTerms")
+    logger.info(s"Excluded terms: $termsExclude")
 
-      val (startDate, endDate) = getStartAndEndDateAccordingBatchTime(batchTime)
-      logger.info(s"UTC start date: $startDate")
-      logger.info(s"UTC end date: $endDate")
-      /* Temporary fix to search for #SparkSummitEU when searching for #SparkSummit*/
-      val tempIncludeTerms = if (termsInclude.toLowerCase().trim() == "#sparksummit") s"$termsInclude,#sparksummiteu" else termsInclude
-      logger.info(s"Included terms: $tempIncludeTerms")
-      logger.info(s"Excluded terms: $termsExclude")
+    executeAsynchronous(batchTime,topTweets,topWords, tempIncludeTerms, termsExclude, startDate, endDate) map { js =>
+      Json.stringify(js)
+    }
+  }
 
-      val elasticsearchResponse = new GetElasticsearchResponse(topTweets, tempIncludeTerms.toLowerCase().trim().split(","), termsExclude.toLowerCase().trim().split(","), startDate,  endDate, LoadConf.esConf.getString("powertrackIndexName"))
-      val wordCountJson = getTweetsAndWordCount(elasticsearchResponse, topWords)
-      val totalUserAndTweetsJson = getUsersAndTweets(elasticsearchResponse)
-      val totalRetweetsJson = getRetweetsCount(elasticsearchResponse)
+  def executeAsynchronous(batchTime: Int, topTweets: Int, topWords: Int, termsInclude: String, termsExclude: String, startDate: String, endDate:String): Future[JsValue] =
+  {
+    val elasticsearchResponse = new GetElasticsearchResponse(topTweets, termsInclude.toLowerCase().trim().split(","), termsExclude.toLowerCase().trim().split(","), startDate,  endDate, LoadConf.esConf.getString("powertrackIndexName"))
 
-      Json.stringify((Json.obj("success" -> true) ++ totalUserAndTweetsJson ++ totalRetweetsJson ++ wordCountJson).as[JsValue])
+    val wordCountJson: Future[JsObject] = future { getTweetsAndWordCount(elasticsearchResponse, topWords) }
+    val totalUserAndTweetsJson: Future[JsObject] = future { getUsersAndTweets(elasticsearchResponse) }
+    val totalRetweetsJson: Future[JsObject] = future { getRetweetsCount(elasticsearchResponse) }
 
-    }.recover {
+    val tasks: Seq[Future[JsObject]] = Seq(wordCountJson, totalUserAndTweetsJson, totalRetweetsJson)
+    val aggregated: Future[Seq[JsObject]] = Future.sequence(tasks)
+
+    val result = aggregated.map(jsonResults => jsonResults(0) ++ jsonResults(1) ++ jsonResults(2))
+
+    result.recover {
       case e: Exception =>
         logger.error("Execute Powertrack Word Count", e)
-        Json.stringify(Json.obj("toptweets" -> Json.obj("tweets" -> JsNull), "wordCount" -> JsNull,"totalfilteredtweets" -> JsNull, "totalusers" -> JsNull, "totalretweets" -> JsNull, "success" -> true))
+        Json.obj("toptweets" -> Json.obj("tweets" -> JsNull), "wordCount" -> JsNull,"totalfilteredtweets" -> JsNull, "totalusers" -> JsNull, "totalretweets" -> JsNull, "success" -> true)
     }
   }
 
