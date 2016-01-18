@@ -65,7 +65,8 @@ trait MyService extends HttpService {
                     val search = ExecuteSearchRequest.runSearchAnalysis(includeTerms, excludeTerms,
                       top.getOrElse(LoadConf.restConf.getInt("searchParam.defaultTopTweets")),
                       startDate.getOrElse(LoadConf.restConf.getString("searchParam.defaulStartDatetime")),
-                      endDate.getOrElse(LoadConf.restConf.getString("searchParam.defaultEndDatetime")))
+                      endDate.getOrElse(LoadConf.restConf.getString("searchParam.defaultEndDatetime")),
+                      user)
                       search map (x => HttpResponse(StatusCodes.OK, entity = x, headers = List(`Content-Type`(`application/json`))))
                     } else {
                       Future(HttpResponse(StatusCodes.OK, s"""{"success":false, "message":"User $user is not authorized. $complementaryDeniedMsg"}"""))
@@ -85,7 +86,8 @@ trait MyService extends HttpService {
                 ExecuteSearchRequest.runSearchAnalysis(includeTerms, excludeTerms,
                   top.getOrElse(LoadConf.restConf.getInt("searchParam.defaultTopTweets")),
                   startDate.getOrElse(LoadConf.restConf.getString("searchParam.defaulStartDatetime")),
-                  endDate.getOrElse(LoadConf.restConf.getString("searchParam.defaultEndDatetime")))
+                  endDate.getOrElse(LoadConf.restConf.getString("searchParam.defaultEndDatetime")),
+                  user)
               }
             }
           }
@@ -103,7 +105,7 @@ trait MyService extends HttpService {
                   val response = f flatMap {
                   case SessionCheckResultMsg(msg) => {
                     if (msg) {
-                      val search = runSentimentAnalysis(termsInclude, termsExclude, top, startDatetime, endDatetime, sentiment)
+                      val search = runSentimentAnalysis(termsInclude, termsExclude, top, startDatetime, endDatetime, sentiment, user)
                       Future(HttpResponse(StatusCodes.OK, entity = search, headers = List(`Content-Type`(`application/json`))))
                     } else {
                       Future(HttpResponse(StatusCodes.OK, s"""{"success":false, "message":"User $user is not authorized. $complementaryDeniedMsg"}"""))
@@ -120,7 +122,7 @@ trait MyService extends HttpService {
             } else {
               respondWithMediaType(`application/json`) {
                 complete {
-                  runSentimentAnalysis(termsInclude, termsExclude, top, startDatetime, endDatetime, sentiment)
+                  runSentimentAnalysis(termsInclude, termsExclude, top, startDatetime, endDatetime, sentiment, user)
                 }
               }
             }
@@ -139,7 +141,7 @@ trait MyService extends HttpService {
                   val response = f flatMap {
                   case SessionCheckResultMsg(msg) => {
                     if (msg) {
-                      val search = ExecutePowertrackRequest.runPowertrackAnalysis(batchSize, topTweets, topWords, termsInclude, termsExclude)
+                      val search = ExecutePowertrackRequest.runPowertrackAnalysis(batchSize, topTweets, topWords, termsInclude, termsExclude, user)
                       search map (x => HttpResponse(StatusCodes.OK, entity = x, headers = List(`Content-Type`(`application/json`))))
                     } else {
                       Future(HttpResponse(StatusCodes.OK, s"""{"success":false, "message":"User $user is not authorized. $complementaryDeniedMsg"}"""))
@@ -155,7 +157,7 @@ trait MyService extends HttpService {
             } else {
               respondWithMediaType(`application/json`) {
                 complete {
-                  ExecutePowertrackRequest.runPowertrackAnalysis(batchSize, topTweets, topWords, termsInclude, termsExclude)
+                  ExecutePowertrackRequest.runPowertrackAnalysis(batchSize, topTweets, topWords, termsInclude, termsExclude, user)
                 }
               }
             }

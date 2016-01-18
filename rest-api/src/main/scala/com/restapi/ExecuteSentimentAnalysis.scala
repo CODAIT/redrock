@@ -67,10 +67,11 @@ object ExecuteSentimentAnalysis
 
 	val logger = LoggerFactory.getLogger(this.getClass)
 
-	def runSentimentAnalysis(includeTerms: String, excludeTerms: String, top: Int, startDatetime: String, endDatetime: String, sentiment: Int): String=
+	def runSentimentAnalysis(includeTerms: String, excludeTerms: String, top: Int, startDatetime: String, endDatetime: String, sentiment: Int, user: String): String=
 	{	
 
 			logger.info("Processing sentiment Analysis:")
+			logger.info(s"User: $user")
 			logger.info("Include: " + includeTerms)
 			logger.info("Exclude: " + excludeTerms)
 			logger.info(s"Date Range: $startDatetime -> $endDatetime")

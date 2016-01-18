@@ -27,9 +27,10 @@ object ExecuteSearchRequest
 {
 	val logger = LoggerFactory.getLogger(this.getClass)
 
-	def runSearchAnalysis(includeTerms: String, excludeTerms: String, top: Int, startDate: String, endDate: String): Future[String]= 
+	def runSearchAnalysis(includeTerms: String, excludeTerms: String, top: Int, startDate: String, endDate: String, user: String): Future[String]=
 	{
 		logger.info("Processing search:")
+		logger.info(s"User: $user")
 		logger.info("Include: " + includeTerms)
 		logger.info("Exclude: " + excludeTerms)
 			
