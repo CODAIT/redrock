@@ -19,7 +19,7 @@ Configure environment variable REDROCK_HOME at your shell initialization file wi
 
 Install hadoop 2.6+
 
-For information about how to configure and execute hadoop on standalone (for mac) mode see: <http://amodernstory.com/2014/09/23/installing-hadoop-on-mac-osx-yosemite/>
+Follow this guide to configure and execute hadoop on standalone (for mac) mode: <http://amodernstory.com/2014/09/23/installing-hadoop-on-mac-osx-yosemite/>
 
 Create hdfs directory that will be used by RedRock
 
@@ -31,7 +31,7 @@ Use command **hadoop fs -mkdir -p directory_path** to create a hdfs directory
  
 #### Elasticsearch
 
-Download Elasticsearch 1.7.1 (<https://www.elastic.co/downloads/elasticsearch>) and decompress it.
+Download Elasticsearch 1.7.3 (<https://www.elastic.co/downloads/past-releases/elasticsearch-1-7-3>) and decompress it.
 
 Install Marvel in order to easily use Elasticsearch (<https://www.elastic.co/downloads/marvel>)
 #### Spark 1.5.1
@@ -263,7 +263,7 @@ All the configurations should be located inside the root redrock key. Following 
 		<td width=20% colspan=4> <b> Module </b> </td>
 	</tr>
 	<tr style="background-color:#f5f5f5" width=100%>
-		<td width=15% rowspan=40> <b> rest-api </b> </td>
+		<td width=15% rowspan=25> <b> rest-api </b> </td>
 		<td width=20% > <b> Key </b> </td>
 		<td width=40% > <b> Meanning </b> </td>
 		<td width=20% > <b> Default </b> </td>
@@ -383,5 +383,79 @@ All the configurations should be located inside the root redrock key. Following 
 		<td> Time interval in seconds that the task will be executed </td>
 		<td> 1800 </td>
 	</tr>
-
+	<tr style="background-color:#f5f5f5" width=100%>
+		<td width=15% rowspan=25> <b> spark </b> </td>
+		<td width=20% > <b> Key </b> </td>
+		<td width=40% > <b> Meanning </b> </td>
+		<td width=20% > <b> Default </b> </td>
+	</tr>
+	<tr >
+		<td> partitionNumber </td>
+		<td> Number of Spark partitions </td>
+		<td> 5 </td>
+	</tr>
+	<tr style="background-color:#f5f5f5" >
+		<th > decahose </th>
+		<td colspan=2> Configure Spark for the Decahose application </td>
+	</tr>
+	<tr>
+		<td> loadHistoricalData </td>
+		<td> Process historical data before starting streaming </td>
+		<td> true </td>
+	</tr>
+	<tr>
+		<td> twitterHistoricalDataPath </td>
+		<td> Data path for the historical data </td>
+		<td>  </td>
+	</tr>
+	<tr>
+		<td> twitterStreamingDataPath </td>
+		<td> Data path for the streaming data </td>
+		<td>  </td>
+	</tr>
+	<tr>
+		<td> streamingBatchTime </td>
+		<td> Time interval in seconds to process streaming data </td>
+		<td> 720 </td>
+	</tr>
+	<tr>
+		<td> timestampFormat </td>
+		<td> Timestamp format for ES field. (Hourly) </td>
+		<td> yyyy-MM-dd HH </td>
+	</tr>
+	<tr>
+		<td> timestampFormatDay </td>
+		<td> Timestamp format for ES field. (Daily) </td>
+		<td> yyyy-MM-dd </td>
+	</tr>
+	<tr>
+		<td> tweetTimestampFormat </td>
+		<td> Timestamp format on the twitter raw data </td>
+		<td> yyyy-MM-dd'T'HH:mm:ss.SSS'Z' </td>
+	</tr>
+	<tr>
+		<td> sparkUIPort </td>
+		<td> Port to bind the Decahose UI Spark application </td>
+		<td> 4040 </td>
+	</tr>
+	<tr>
+		<td> executorMemory </td>
+		<td> Amount of executor memory to be used by the Decahose Spark Application </td>
+		<td>  </td>
+	</tr>
+	<tr>
+		<td> fileExtension </td>
+		<td> File extension to be processed by spark </td>
+		<td> .json.gz </td>
+	</tr>
+	<tr>
+		<td> fileExtensionAuxiliar </td>
+		<td> File extension to be processed by spark </td>
+		<td> .gson.gz </td>
+	</tr>
+	<tr>
+		<td> deleteProcessedFiles </td>
+		<td> Delete file after it has been processed by spark </td>
+		<td> false </td>
+	</tr>
 </table>
