@@ -73,7 +73,7 @@ Install sbt plugin. More information at <http://www.scala-sbt.org/0.13/tutorial/
 #### Python
 1. Install _Python 2.7_ (<http://docs.python-guide.org/en/latest/starting/install/osx/>). The latest version of Mac OS X, El Capitan, comes with Python 2.7 out of the box.
 2. Install _numpy_ extension package.
-   * ```
+```
 sudo easy_install pip
 pip install numpy
 ```
