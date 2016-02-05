@@ -11,7 +11,7 @@ Clone the RedRock Backend code at: <https://github.com/SparkTC/redrock/>
 
 In case you can't access the repo, please contact Luciano Resende for authorization.
 
-Configure environment variable REDROCK_HOME at your shell initialization file with the path to your RedRock directory. For example: at your **/home/.profile** add the line: **export REDROCK_HOME=/Users/barbaragomes/Projects/redrock**  
+Configure environment variable REDROCK_HOME at your shell initialization file with the path to your RedRock directory. For example: at your **/home/.profile** add the line: **export REDROCK_HOME=/Users/YOURUSERNAME/Projects/redrock**  
 
 ### Environment Setup
 
@@ -23,54 +23,60 @@ Follow this guide to configure and execute hadoop on standalone (for mac) mode: 
 
 Create hdfs directory that will be used by RedRock
 
-- /data/twitter/decahose/historical
-- /data/twitter/decahose/streaming
-- /data/twitter/powertrack/streaming
+```
+hadoop fs -mkdir -p /data/twitter/decahose/historical
+hadoop fs -mkdir -p /data/twitter/decahose/streaming
+hadoop fs -mkdir -p /data/twitter/powertrack/streaming
+```
 
-Use command **hadoop fs -mkdir -p directory_path** to create a hdfs directory
- 
 #### Elasticsearch
 
 Download Elasticsearch 1.7.3 (<https://www.elastic.co/downloads/past-releases/elasticsearch-1-7-3>) and decompress it.
 
-Install Marvel in order to easily use Elasticsearch (<https://www.elastic.co/downloads/marvel>)
+Install Marvel in order to easily use Elasticsearch. Be sure to install version 1.3 as it is compatible with ES 1.7.3  (<https://www.elastic.co/downloads/marvel>)
+
 #### Spark 1.5.1
 
-Download pre-built Spark 1.5.1 for Hadoop 2.6 and later and decompress it (<http://spark.apache.org/downloads.html/>).
+Download **pre-built Spark 1.5.1 for Hadoop 2.6 and later** and decompress it (<http://spark.apache.org/downloads.html>).
 
 ###### Configuring Spark standalone mode
 
 1. Configure environment variable SPARK_HOME at your shell initialization file with the path to your Spark directory
-    * For example: at your **/home/.profile** add the line **export SPARK_HOME=/Users/barbaragomes/Spark/spark-1.5.1-bin-hadoop2.6**  
-2. Save file conf/slaves.template as conf/slaves
-3. Edit file conf/spark-env.sh.template and add the following lines (Save it as conf/spark-env.sh):  
+    * For example: at your **/home/.profile** add the line **export SPARK_HOME=/Users/YOURUSERNAME/Spark/spark-1.5.1-bin-hadoop2.6**  
+2. Save file _conf/slaves.template_ as _conf/slaves_
+3. Save file _conf/spark-env.sh.template_ as _conf/spark-env.sh_ and add the following lines:  
     * **HADOOP_CONF_DIR**=/usr/local/Cellar/hadoop/2.7.0/libexec/etc/hadoop/ 
        * Hadoop home path where you can find the configuration files like hdfs-site.xml  and  core-site.xml
-    * **SPARK_WORKER_DIR**=/Users/barbaragomes/opt/SparkData 
+    * **SPARK_WORKER_DIR**=/Users/YOURUSERNAME/opt/SparkData 
        * Create a local directory to save Spark logs
+    * **SPARK_WORKER_CORES**=1
+       * Define the amount of cores to be used for each worker instance. Keep in mind the number of logical cores your machine has. 
     * **SPARK_WORKER_INSTANCES**=5
-       * Define it based on how many cores your machine has.
+       * Define it based on how many logical cores your machine has. Keep in mind that each worker instance is going to use the amount of worker cores you defined. In this current setup, we are using 5 cores at total, which means 5 (workers) * 1 core (worker-cores)
     * **SPARK_WORKER_MEMORY**=2g
        * Define it based on how much memory RAM your machine has. Keep in mind that each worker instance is going to use the amount of worker memory you defined. In this current setup, we are allocating 10g of memory, which means 5 (workers) * 2g (worker-memory)
     * **SPARK_DRIVER_MEMORY**=4g
        * Define it based on how much memory RAM your machine has. In this current setup our total memory RAM is 16g and we have already allocated 10g for workers.
-    * **SPARK_WORKER_CORES**=1
-       * Define the amount of cores to be used for each worker instance. Keep in mind the number of cores your machine has. 
+    
 
-4. Edit file conf/log4j.properties.template and change log4j.rootCategory=WARN. Save it as  conf/log4j.properties
+4. Save file _conf/log4j.properties.template_ as _conf/log4j.properties_ **log4j.rootCategory=WARN**. Save it as  
 
 Obs: The current spark setup is considering a machine with at least:
 
 1. 16gb of memory RAM
-2. 8 cores
+2. 4 cores (8 logical cores)
 
 #### SBT plugin
 
 Install sbt plugin. More information at <http://www.scala-sbt.org/0.13/tutorial/Installing-sbt-on-Mac.html>
 
 #### Python
-
-Install Pyhton 2.7 and NumPy extension package.
+1. Install _Python 2.7_ (<http://docs.python-guide.org/en/latest/starting/install/osx/>). The latest version of Mac OS X, El Capitan, comes with Python 2.7 out of the box.
+2. Install _numpy_ extension package.
+   * ```
+sudo easy_install pip
+pip install numpy
+```
 
 ### Starting applications
 
@@ -84,7 +90,7 @@ Before running **RedRock** you must start all the following applications:
 
 All the configurations for RedRock are at: **REDROCK_HOME/conf/redrock-app.conf.template**. Copy this file and save at the same location without the .template extension.
 
-Inside the file, change the following configurations (All the configurations are considering that you followed all the steps above and you haven't changed any configuration for Spark. In case you have a different setup, please take a look at the section **Explaining RedRock Configuration File**):
+Inside the file, change the following configurations (All the configurations are considering that you followed all the steps above and you haven't changed any configuration for Spark. In case you have a different setup, please take a look at the section **[Explaining RedRock Configuration File](#rrconfig)**):
 
 1. **redrock.homepath**: RedRock home path. The same path you used for the environment variable REDROCK_HOME
 2. **spark.partitionNumber**: 5
@@ -97,6 +103,8 @@ Inside the file, change the following configurations (All the configurations are
 9. **spark.powetrack.executorMemory**: 1g
 10. **spark.restapi.totalcores**: 2
 11. **spark.restapi.executorMemory**: 2g
+
+Unzip the file **REDROCK_HOME/rest-api/python/distance/freq_may1_may19_june1_june11.npy.gz**
 
     
 ### Understanding Data Directories
@@ -122,6 +130,12 @@ Make sure the URLs inside the scripts are point to the right instance of Elastic
 
 To download the Twitter data you have to have access to Bluemix. Please, talk to the RedRock team to get the sensitive information you are going to need to have access to the data.
 
+These scripts are intented to run on Linux, although they can be run on OSX with some minor changes:
+   
+   * ``` brew install wget ```
+   * ``` brew install coreutils ```
+   * replace _/bin/date_ with the output of _which gdate_ eg. _/usr/local/bin/gdate_
+
 #### Powertrack
 
 The Powertrack data is downloaded through the shell script file **REDROCK_HOME/dev/getPowerTrackData.sh**. 
@@ -142,13 +156,13 @@ Insert the new lines:
     hdfolder=hdfs://localhost:9000/data/twitter/powertrack/streaming
     back_min=2
 
-In some machines you don't need to sudo access hadoop before executing a hadoop command. In that case, search for **su - hadoop -c** in the script and delete it, executing only the following command between quotes.
+In some machines you don't need to sudo access hadoop before executing a hadoop command. In that case, search for **su - hadoop -c** in the script and delete it, executing only the following command between quotes (be sure to remove the quotes).
 
 To execute the script use: **./getPowerTrackData.sh**. It will generate a log file in the same directory with a name like: 201510272251445912821.txt 
 
 ### Decahose Historical
 
-The Decahose historical data is downloaded through the shell script file **REDROCK_HOME/dev/retrieve-decahose-data.sh**. The script is currently running only on Linux plataform. You can execute it on Linux and then transfer the data to your local machine. Feel free to reach out to the team in case you need just a sample file.
+The Decahose historical data is downloaded through the shell script file **REDROCK_HOME/dev/retrieve-decahose-data.sh**. 
 
 Open the file and comment out the following lines:
     
@@ -160,7 +174,7 @@ Insert the new lines:
     user="XXXXXXXX" #Bluemix Prod user credential
     password="XXXXXXXX" #Bluemix Prod password credential
     
-In some machines you don't need to sudo access hadoop before executing a hadoop command. In that case, search for **su - hadoop -c** in the script and delete it, executing only the following command between quotes.
+In some machines you don't need to sudo access hadoop before executing a hadoop command. In that case, search for **su - hadoop -c** in the script and delete it, executing only the following command between quotes (be sure to remove the quotes).
 
 To execute the script use: **./retrieve-decahose-data.sh 2015-05-01 00 00 2015-07-31 23 50 /opt/tmp-data-decahose/ hdfs://localhost:9000/data/twitter/decahose/historical/**. It will generate a log file in the same directory with a name based on the start date, like: 2015-05-01_1447882385.txt 
 
@@ -169,7 +183,7 @@ The minutes should be multiple of 10.
         
 ### Decahose Streaming
 
-The Decahose streaming data is downloaded through the shell script file **REDROCK_HOME/dev/pollDecahoseData.sh**. The script is currently running only on Linux plataform. Every 10 minutes the scripts downloads a new file from Bluemix archieve.
+The Decahose streaming data is downloaded through the shell script file **REDROCK_HOME/dev/pollDecahoseData.sh**. Every 10 minutes the scripts downloads a new file from Bluemix archieve.
 
 Open the file and comment out the following lines:
     
@@ -181,7 +195,7 @@ Insert the new lines:
     user="XXXXXXXX" #Bluemix Prod user credential
     password="XXXXXXXX" #Bluemix Prod password credential
 
-In some machines you don't need to sudo access hadoop before executing a hadoop command. In that case, search for **su - hadoop -c** in the script and delete it, executing only the following command between quotes.
+In some machines you don't need to sudo access hadoop before executing a hadoop command. In that case, search for **su - hadoop -c** in the script and delete it, executing only the following command between quotes (be sure to remove the quotes).
 
 To execute the script use: **./pollDecahoseData.sh 2016-01-13 14 00 /opt/tmp-data-decahose/ hdfs://localhost:9000/data/twitter/decahose/streaming/**. It will generate a log file in the same directory with a name based on the start date, like: 2016-01-13_1452725819.txt
 
@@ -206,6 +220,8 @@ The log file for each application file will be at:
 
 For each application start script, please configure the parameter **--driver-memory 2g**.
 The sum of the values defined should be equal to the amount at the Spark configuration SPARK_DRIVER_MEMORY.
+
+For example, we defined SPARK_DRIVER_MEMORY = 4g, so you could give decahose 1g, powertrack 1g, and rest-api 2g.
 
 **Don't forget to put the files to be analysed into the HDFS directories we defined before.**
 
@@ -250,7 +266,7 @@ Parameters:
 6. **sentiment**: Sentiment of the tweets: 1 for positive and -1 for negative
 
 
-### Explaining RedRock Configuration File
+### <a name="rrconfig"></a> Explaining RedRock Configuration File
 
 The RedRock configuration file is located at **REDROCK_HOME/conf/redrock-app.conf.template**.
 All the configurations should be located inside the root redrock key. Following an explanation of each key-value pair.
