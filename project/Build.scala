@@ -88,7 +88,7 @@ object Resolvers {
 
 object Dependency {
   object Version {
-    val Spark        = "1.5.1"
+    val Spark        = "1.6.0"
     val akkaV = "2.3.9"
     val sprayV = "1.3.3"
     val ElasticsearchVersion = "1.7.2"
@@ -135,6 +135,12 @@ object Dependency {
   val akkaStream     = "com.typesafe.akka" %% "akka-stream-experimental" % "1.0-RC2"
   val akkaHttpCore   = "com.typesafe.akka" %% "akka-http-core-experimental" % "1.0-RC2" 
   val scalcHttp      = "org.scalaj" %% "scalaj-http" % "1.1.5"
+
+  //Sentiment drill down
+  //val blast = "com.github.fommil.netlib" % "all" % "1.1.2"  % "provided"
+  //val breeze = "org.scalanlp" %% "breeze" % "0.11.2"
+  //val breezeNative = "org.scalanlp" %% "breeze-natives" % "0.11.2"
+  //val breezeviz = "org.scalanlp" %% "breeze-viz" % "0.11.2"
 }
 
 object Dependencies {
@@ -145,7 +151,8 @@ object Dependencies {
 
   val restAPIDependecies = Seq(playJson, sprayCan, sprayRouting, akkaActor, 
                                specs2Core, elasticSearch, httpClient, slf4j, log4jbind, configLib,
-                               sparkMlLib, sparkCore, sparkSQL)
+                               sparkMlLib, sparkCore, sparkSQL, sparkHive/*, blast,breeze, breezeNative, breezeviz*/)
+
   val webSocketsDependencies = Seq(akkaStream, akkaHttpCore, playJson, scalcHttp, slf4j, log4jbind)
 }
 

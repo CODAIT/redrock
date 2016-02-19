@@ -41,22 +41,8 @@ import org.apache.spark.sql._
 
 object ExecuteSentimentAnalysis 
 {
-	val conf = new SparkConf()
-    conf.setAppName(LoadConf.globalConf.getString("appName") + " - REST API")
-    conf.set("spark.scheduler.mode", "FAIR")
-
-    //Spark resources configuration
-    conf.set("spark.executor.memory",s"""${LoadConf.globalConf.getString("spark.restapi.executorMemory")}""")
-    conf.set("spark.ui.port",s"""${LoadConf.globalConf.getString("spark.restapi.sparkUIPort")}""")
-    conf.set("spark.cores.max",s"""${LoadConf.globalConf.getInt("spark.restapi.totalCores")}""")
-    
-    val sc = new SparkContext(conf)
-    val sqlContext = new SQLContext(sc)
-	/* config sqlContext */
-    sqlContext.setConf("spark.sql.shuffle.partitions", s"""${LoadConf.globalConf.getInt("spark.partitionNumber")}""")
-    
-    // ============== ML ======================
-    // Tune this parameters if needed
+	// ============== ML ======================
+	// Tune this parameters if needed
 	val numTopics: Int = LoadConf.restConf.getInt("sentimentAnalysis.numTopics")
 	val termsPerTopic: Int = LoadConf.restConf.getInt("sentimentAnalysis.termsPerTopic") 
 	// large ( >= 10) -> more accurate but slower
@@ -87,10 +73,10 @@ object ExecuteSentimentAnalysis
 			/* Based on source code in: https://gist.github.com/feynmanliang/3b6555758a27adcb527d
 	   			Modified by: Jorge Castanon, October 2015 
 	   		*/
-			import sqlContext.implicits._ 
+			import ApplicationContext.sqlContext.implicits._
 
 			// Load the raw text docs, assign docIDs, and convert to DataFrame
-			val rawTextRDD = sc.makeRDD(getTweetsText(includeTerms, excludeTerms, top, startDatetime, endDatetime, sentiment))
+			val rawTextRDD = ApplicationContext.sparkContext.makeRDD(getTweetsText(includeTerms, excludeTerms, top, startDatetime, endDatetime, sentiment))
 			//Return empty response if no data was found
 			if (rawTextRDD.isEmpty())
 			{	
