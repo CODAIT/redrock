@@ -87,3 +87,6 @@ nohup*.out
 
 #do not commit local conf
 conf/redrock-app.conf
+
+#do not commit scripts updated
+dev/*.sh.updated
