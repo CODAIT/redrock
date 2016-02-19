@@ -7,7 +7,7 @@ How to configure local environment and **RedRock** code to run in standalone mod
 
 ### Download RedRock code
 
-Clone the RedRock Backend code at: <https://github.com/SparkTC/redrock/>
+Clone the RedRock Backend code at: <https://github.com/SparkTC/redrock>
 
 In case you can't access the repo, please contact Luciano Resende for authorization.
 
@@ -19,7 +19,7 @@ Configure environment variable REDROCK_HOME at your shell initialization file wi
 
 Install hadoop 2.6+
 
-Follow this guide to configure and execute hadoop on standalone (for mac) mode: <http://amodernstory.com/2014/09/23/installing-hadoop-on-mac-osx-yosemite/>
+Follow this guide to configure and execute hadoop on standalone (for mac) mode: <http://amodernstory.com/2014/09/23/installing-hadoop-on-mac-osx-yosemite>
 
 Create hdfs directory that will be used by RedRock
 
@@ -71,7 +71,7 @@ Obs: The current spark setup is considering a machine with at least:
 Install sbt plugin. More information at <http://www.scala-sbt.org/0.13/tutorial/Installing-sbt-on-Mac.html>
 
 #### Python
-1. Install _Python 2.7_ (<http://docs.python-guide.org/en/latest/starting/install/osx/>). The latest version of Mac OS X, El Capitan, comes with Python 2.7 out of the box.
+1. Install _Python 2.7_ (<http://docs.python-guide.org/en/latest/starting/install/osx>). The latest version of Mac OS X, El Capitan, comes with Python 2.7 out of the box.
 2. Install _numpy_ extension package.
 ```
 sudo easy_install pip
@@ -83,7 +83,7 @@ pip install numpy
 Before running **RedRock** you must start all the following applications:
 
 1. **Hadoop**: Use command **hstart** (in case you followed the installation instruction at the Hadoop section)
-2. **Elasticsearch**: Inside elasticsearch home path use command **nohup ./bin/elasticsearch & tail -f nohup.out&** (In case you download the .zip for Elaslicsearch)
+2. **Elasticsearch**: Inside elasticsearch home path use command **nohup ./bin/elasticsearch & tail -f nohup.out** (In case you download the .zip for Elaslicsearch)
 3. **Spark**: Inside Spark home path use command **./sbin/start-all.sh**
 
 ### Configuring RedRock
@@ -231,7 +231,7 @@ To send a request to the REST API just open a browser and use one of the URLs sp
 
 #### Live Portion (Powertrack)
 
-Sample URL: <http://localhost:16666/ss/powertrack/wordcount?termsInclude=#SparkInsight&batchSize=60&topTweets=100&user=bmgomes@us.ibm.com&termsExclude=&topWords=10/>
+Sample URL: <http://localhost:16666/ss/powertrack/wordcount?termsInclude=#SparkInsight&batchSize=60&topTweets=100&user=bmgomes@us.ibm.com&termsExclude=&topWords=10>
 
 Parameters:
 
@@ -243,7 +243,7 @@ Parameters:
 
 #### Decahose
 
-Sample URL: <http://localhost:16666/ss/search?termsInclude=love&user=bmgomes@us.ibm.com&termsExclude=&top=100/>
+Sample URL: <http://localhost:16666/ss/search?termsInclude=love&user=bmgomes@us.ibm.com&termsExclude=&top=100>
 
 Parameters:
 
@@ -254,7 +254,7 @@ Parameters:
 
 #### Sentiment Analysis
 
-Sample URL: <http://localhost:16666/ss/sentiment/analysis?endDatetime=2015-08-14T00:00:00.000Z&user=bmgomes@us.ibm.com&termsInclude=love&termsExclude=&startDatetime=2015-08-13T00:00:00.000Z&top=100&sentiment=1/>
+Sample URL: <http://localhost:16666/ss/sentiment/analysis?endDatetime=2015-08-14T00:00:00.000Z&user=bmgomes@us.ibm.com&termsInclude=love&termsExclude=&startDatetime=2015-08-13T00:00:00.000Z&top=100&sentiment=1>
 
 Parameters:
 
