@@ -35,6 +35,7 @@ case object GetTotalTweetsScheduler
 
 object CurrentTotalTweets
 {
+  @volatile
   var totalTweets:Long = 0
 }
 
