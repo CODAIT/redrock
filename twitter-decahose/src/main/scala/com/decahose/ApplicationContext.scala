@@ -45,6 +45,12 @@ object ApplicationContext
     sparkConf.set("spark.ui.port",s"""${LoadConf.sparkConf.getString("decahose.sparkUIPort")}""")
     sparkConf.set("spark.cores.max",s"""${LoadConf.sparkConf.getInt("decahose.totalCores")}""")
 
+    //Wait for Elasticsearch response
+    sparkConf.set("spark.akka.heartbeat.interval", "10000s")
+    sparkConf.set("spark.akka.heartbeat.pauses", "60000s")
+    sparkConf.set("spark.akka.threads", "8")
+    sparkConf.set("spark.akka.timeout", "1000s")
+
     //Do not allow infer schema. Schema must be defined at ES before start the app
     sparkConf.set("es.index.auto.create", "false")
     sparkConf.set("es.batch.size.bytes", "300000000")
