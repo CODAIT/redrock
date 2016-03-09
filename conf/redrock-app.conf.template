@@ -1,7 +1,7 @@
 redrock {
 	appName = "RedRock"
 	appVersion = "2.0"
-	homePath = "/Users/barbaragomes/Projects/redrock" 
+	homePath = "/Users/username/workspace/redrock"
 
 	rest-api {
 		name = "redrock-restapi"
@@ -52,8 +52,8 @@ redrock {
 		partitionNumber = 5
 		decahose {
 			loadHistoricalData = true
-			twitterHistoricalDataPath = "hdfs://localhost:9000/user/hadoop/decahose_historical"
-			twitterStreamingDataPath = "hdfs://localhost:9000/user/hadoop/decahose_streaming"
+			twitterHistoricalDataPath = "hdfs://localhost:9000/data/twitter/decahose/historical"
+			twitterStreamingDataPath = "hdfs://localhost:9000/data/twitter/decahose/streaming"
 			streamingBatchTime = 60
 			//Format to be used to group by timestamp for Sentiment and Location
 			timestampFormat = "yyyy-MM-dd HH"
@@ -61,25 +61,25 @@ redrock {
 			tweetTimestampFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
 			totalCores = 2
 			sparkUIPort = "4040"
-			executorMemory = "2g"
+			executorMemory = "1g"
 			fileExtension = ".json.gz"
 			fileExtensionAuxiliar = ".gson.gz"
 			deleteProcessedFiles = false
 		}
 		powertrack {
-			twitterStreamingDataPath = "hdfs://localhost:9000/user/hadoop/powertrack_streaming"
+			twitterStreamingDataPath = "hdfs://localhost:9000/data/twitter/powertrack/streaming"
 			tweetTimestampFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
 			streamingBatchTime = 60
-			totalCores = 2
+			totalCores = 1
 			sparkUIPort = "4041"
-			executorMemory = "2g"
+			executorMemory = "1g"
 			fileExtension = ".txt"
 			deleteProcessedFiles= true
 		}
 		restapi {
-			totalCores = 1
+			totalCores = 2
 			sparkUIPort = "4042"
-			executorMemory = "1g"
+			executorMemory = "2g"
 		}
 	}
 

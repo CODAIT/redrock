@@ -31,7 +31,7 @@ cd $REDROCK_HOME/rest-api
 
 echo "============ Starting REST API =============="
 HOSTNAME="$(/bin/hostname -f)"
-nohup $SPARK_HOME/bin/spark-submit --driver-java-options "-Dlog4j.configuration=file://$REDROCK_HOME/conf/log4j.properties" --driver-memory 3g --executor-cores 1 --num-executors 2 --master spark://$HOSTNAME:7077 --class com.restapi.Application $REDROCK_HOME/rest-api/target/scala-2.10/redrock-rest-api.jar > $REDROCK_HOME/rest-api/nohup-restapi.out&
+nohup $SPARK_HOME/bin/spark-submit --driver-java-options "-Dlog4j.configuration=file://$REDROCK_HOME/conf/log4j.properties" --driver-memory 2g --executor-cores 1 --num-executors 2 --master spark://$HOSTNAME:7077 --class com.restapi.Application $REDROCK_HOME/rest-api/target/scala-2.10/redrock-rest-api.jar > $REDROCK_HOME/rest-api/nohup-restapi.out&
 
 echo "========== REST API Started - Check nodup_restapi.out ================="
 
