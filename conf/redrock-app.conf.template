@@ -65,6 +65,7 @@ redrock {
 			fileExtension = ".json.gz"
 			fileExtensionAuxiliar = ".gson.gz"
 			deleteProcessedFiles = false
+			loadFromArchive=false
 		}
 		powertrack {
 			twitterStreamingDataPath = "hdfs://localhost:9000/data/twitter/powertrack/streaming"

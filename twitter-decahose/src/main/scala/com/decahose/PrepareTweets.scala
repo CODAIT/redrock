@@ -18,9 +18,6 @@ package com.decahose
 
 import org.apache.hadoop.io.{Text, LongWritable}
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat
-import org.apache.spark.SparkContext
-import org.apache.spark.SparkContext._
-import org.apache.spark.SparkConf
 import org.apache.spark.sql.{SQLContext, DataFrame, SaveMode}
 import org.apache.spark.streaming._
 import org.apache.spark.streaming.StreamingContext._
@@ -30,8 +27,8 @@ import scala.util.matching.Regex
 import scala.concurrent.{Future,future, Await}
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.apache.spark.rdd.RDD
+import play.api.libs.json._
 import java.io._
-//import com.datastax.spark.connector._
 import org.apache.spark.sql.Row
 import org.elasticsearch.spark._ 
 import org.elasticsearch.spark.sql._
@@ -111,11 +108,19 @@ object PrepareTweets
         }
     }
 
-    def loadJSONExtractInfoWriteToDatabase(rdd: RDD[String]) = 
+    def loadJSONExtractInfoWriteToDatabase(rdd: RDD[String]) =
     {
         try
         {
-            ApplicationContext.sqlContext.read.json(rdd)
+            var rddToBeProcessed = rdd
+            /* Twitter files that are provided by Bluemix Search API need to be parsed and mapped in order to get one
+             * tweet per line
+             */
+            if(TweetField.jsonPrefix != null){
+              rddToBeProcessed = rdd.flatMap(file => (Json.parse(file) \ TweetField.jsonPrefix).as[List[JsObject]]).map(tweet => Json.stringify(tweet))
+            }
+
+            ApplicationContext.sqlContext.read.json(rddToBeProcessed)
                         .filter(s"${TweetField.verb} = 'post' OR ${TweetField.verb} = 'share'")
                         .selectExpr(s"${TweetField.tweet_id} as tweet_id",
                         s"${TweetField.tweet_created_at} AS created_at",
