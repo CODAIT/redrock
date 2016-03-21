@@ -64,7 +64,7 @@ object LoadLocationData {
   val cities_keys = cities.keys.toArray.sortBy(key => -key.length)
 
   def loadCities(): Map[String, (String, Double)] = {
-    val citiesPath = LoadConf.globalConf.getString("homePath") +
+    val citiesPath = ApplicationContext.Config.appConf.getString("homePath") +
       "/twitter-decahose/src/main/resources/Location/worldcitiespop.txt.gz"
     val citiesStream = new GZIPInputStream(new FileInputStream(citiesPath))
     val citiesMap = fromInputStream(citiesStream)("ISO-8859-1")
@@ -95,7 +95,7 @@ object LoadLocationData {
   }
 
   def loadCountryMapping(): Map[String, String] = {
-    val countryPath = LoadConf.globalConf.getString("homePath") +
+    val countryPath = ApplicationContext.Config.appConf.getString("homePath") +
       "/twitter-decahose/src/main/resources/Location/country_mapping.csv"
     val countryMap = fromFile(countryPath)("utf-8")
       .getLines.map(line => proccessCountryLine(line))

@@ -26,7 +26,7 @@ object ProfessionInfo {
   val professions = loadProfessionsTable()
 
   def loadProfessionsTable(): Array[(Regex, String)] = {
-    val professionsPath = LoadConf.globalConf.getString("homePath") +
+    val professionsPath = ApplicationContext.Config.appConf.getString("homePath") +
       "/twitter-decahose/src/main/resources/Profession/professions.csv"
 
     val professionsList = fromFile(professionsPath)("ISO-8859-1")

@@ -140,7 +140,7 @@ object AnalysisFunction {
   def convertCreatedAtFormat(created_at: String, format: String): String = {
     // Date Format 2014-01-16T01:49:50.000Z
     val sdf: SimpleDateFormat =
-      new SimpleDateFormat(LoadConf.sparkConf.getString("decahose.tweetTimestampFormat"))
+      new SimpleDateFormat(ApplicationContext.Config.sparkConf.getString("decahose.tweetTimestampFormat")) // scalastyle:ignore
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
     val date = sdf.parse(created_at)
 

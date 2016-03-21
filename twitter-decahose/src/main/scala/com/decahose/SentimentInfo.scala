@@ -22,9 +22,9 @@ import scala.io.Source._
 
 object SentimentInfo {
   val logger = LoggerFactory.getLogger(this.getClass)
-  val positivePath = LoadConf.globalConf.getString("homePath") +
+  val positivePath = ApplicationContext.Config.appConf.getString("homePath") +
     "/twitter-decahose/src/main/resources/Sentiment/positive.txt"
-  val negativePath = LoadConf.globalConf.getString("homePath") +
+  val negativePath = ApplicationContext.Config.appConf.getString("homePath") +
     "/twitter-decahose/src/main/resources/Sentiment/negative.txt"
 
   val positiveWords = fromFile(positivePath)("ISO-8859-1")

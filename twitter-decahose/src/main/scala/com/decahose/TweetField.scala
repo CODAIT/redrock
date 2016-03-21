@@ -17,10 +17,9 @@
 package com.decahose
 
 /* Mapping tweet fields */
-object TweetField
-{
+object TweetField {
 	// Defines if the Twitter data is using archive format
-	val fromArchive = LoadConf.sparkConf.getBoolean("decahose.loadFromArchive")
+	val fromArchive = ApplicationContext.Config.sparkConf.getBoolean("decahose.loadFromArchive")
 
 	val jsonPrefix = if (fromArchive) null else "tweets"
 	// unique id of the tweet as string format

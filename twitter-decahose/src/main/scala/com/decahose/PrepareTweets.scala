@@ -36,8 +36,8 @@ object PrepareTweets {
   }
 
   def startTweetsStreaming(): Unit = {
-    logger.info(s"""Starting Streaming at: ${LoadConf.sparkConf.getString("decahose.twitterStreamingDataPath")}""") // scalastyle:ignore
-    logger.info(s"""Partition number: ${LoadConf.sparkConf.getInt("partitionNumber")}""")
+    logger.info(s"""Starting Streaming at: ${ApplicationContext.Config.sparkConf.getString("decahose.twitterStreamingDataPath")}""") // scalastyle:ignore
+    logger.info(s"""Partition number: ${ApplicationContext.Config.sparkConf.getInt("partitionNumber")}""") // scalastyle:ignore
 
     val ssc = createContext()
     logger.info("Starting Streaming")
@@ -49,13 +49,13 @@ object PrepareTweets {
 
     logger.info("Creating streaming new context")
     // Create the context with a 1 second batch size
-    val ssc = new StreamingContext(ApplicationContext.sparkContext, Seconds(LoadConf.sparkConf.getInt("decahose.streamingBatchTime")))
+    val ssc = new StreamingContext(ApplicationContext.sparkContext, Seconds(ApplicationContext.Config.sparkConf.getInt("decahose.streamingBatchTime")))
 
     // Filtering file's path in order to avoid _copying files
-    val tweetsStreaming = ssc.fileStream[LongWritable, Text, TextInputFormat](LoadConf.sparkConf.getString("decahose.twitterStreamingDataPath"),
+    val tweetsStreaming = ssc.fileStream[LongWritable, Text, TextInputFormat](ApplicationContext.Config.sparkConf.getString("decahose.twitterStreamingDataPath"),
       (p: Path) => {
-        if (p.getName().toLowerCase().endsWith(LoadConf.sparkConf.getString("decahose.fileExtension"))) true // scalastyle:ignore
-        else if ((p.getName().toLowerCase().endsWith(LoadConf.sparkConf.getString("decahose.fileExtensionAuxiliar")))) true // scalastyle:ignore
+        if (p.getName().toLowerCase().endsWith(ApplicationContext.Config.sparkConf.getString("decahose.fileExtension"))) true // scalastyle:ignore
+        else if ((p.getName().toLowerCase().endsWith(ApplicationContext.Config.sparkConf.getString("decahose.fileExtensionAuxiliar")))) true // scalastyle:ignore
         else false
       }, true).map(_._2.toString)
 
@@ -72,9 +72,9 @@ object PrepareTweets {
   }
 
   def loadHistoricalData(): Unit = {
-    if (LoadConf.sparkConf.getBoolean("decahose.loadHistoricalData")) {
-      logger.info(s"""Loading historical data from: ${LoadConf.sparkConf.getString("decahose.twitterHistoricalDataPath")}""") // scalastyle:ignore
-      val jsonRDDs = ApplicationContext.sparkContext.textFile(LoadConf.sparkConf.getString("decahose.twitterHistoricalDataPath"), LoadConf.sparkConf.getInt("partitionNumber")) // scalastyle:ignore
+    if (ApplicationContext.Config.sparkConf.getBoolean("decahose.loadHistoricalData")) {
+      logger.info(s"""Loading historical data from: ${ApplicationContext.Config.sparkConf.getString("decahose.twitterHistoricalDataPath")}""") // scalastyle:ignore
+      val jsonRDDs = ApplicationContext.sparkContext.textFile(ApplicationContext.Config.sparkConf.getString("decahose.twitterHistoricalDataPath"), ApplicationContext.Config.sparkConf.getInt("partitionNumber")) // scalastyle:ignore
       if (!jsonRDDs.partitions.isEmpty) {
         loadJSONExtractInfoWriteToDatabase(jsonRDDs)
       }
@@ -110,16 +110,16 @@ object PrepareTweets {
           s"${TweetField.user_id} AS user_id",
           s"${TweetField.user_profileImgURL} AS user_image_url",
           s"${TweetField.user_name} user_name",
-          s"convertCreatedAtFormat(${TweetField.tweet_created_at}, '${LoadConf.sparkConf.getString("decahose.timestampFormat")}') AS created_at_timestamp", // scalastyle:ignore
+          s"convertCreatedAtFormat(${TweetField.tweet_created_at}, '${ApplicationContext.Config.sparkConf.getString("decahose.timestampFormat")}') AS created_at_timestamp", // scalastyle:ignore
           s"stringTokenizerArray(${TweetField.tweet_text}) as tweet_text_array_tokens",
-          s"convertCreatedAtFormat(${TweetField.tweet_created_at}, '${LoadConf.sparkConf.getString("decahose.timestampFormatDay")}') AS created_at_timestamp_day") // scalastyle:ignore
+          s"convertCreatedAtFormat(${TweetField.tweet_created_at}, '${ApplicationContext.Config.sparkConf.getString("decahose.timestampFormatDay")}') AS created_at_timestamp_day") // scalastyle:ignore
         // .filter(s"created_at IS NOT NULL AND tweet_text IS NOT NULL")
         .write.mode(SaveMode.Append)
         .format("org.elasticsearch.spark.sql")
-        .options(Map("pushdown" -> "true", "es.nodes" -> LoadConf.esConf.getString("bindIP"), "es.port" -> LoadConf.esConf.getString("bindPort"))) // scalastyle:ignore
-        .save(s"""${LoadConf.esConf.getString("decahoseIndexName")}/${LoadConf.esConf.getString("esType")}""")
+        .options(Map("pushdown" -> "true", "es.nodes" -> ApplicationContext.Config.esConf.getString("bindIP"), "es.port" -> ApplicationContext.Config.esConf.getString("bindPort"))) // scalastyle:ignore
+        .save(s"""${ApplicationContext.Config.esConf.getString("decahoseIndexName")}/${ApplicationContext.Config.esConf.getString("esType")}""")
 
-      if (LoadConf.sparkConf.getBoolean("decahose.deleteProcessedFiles")) {
+      if (ApplicationContext.Config.sparkConf.getBoolean("decahose.deleteProcessedFiles")) {
         // Delete file just if it was processed
         logger.info("Deleting File(s):")
         regExp.findAllMatchIn(rdd.toDebugString).foreach((name) => deleteFile(name.toString))
