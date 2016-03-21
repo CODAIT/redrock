@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corp. 2015, 2015
+ * (C) Copyright IBM Corp. 2015, 2016
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,17 +31,17 @@ object TweetField
 	val tweet_created_at = if (fromArchive) "postedTime" else "message.postedTime"
 	// user description as string format
 	val user_description = if (fromArchive) "actor.summary" else "message.actor.summary"
-	//user profile image URL as string format
+	// user profile image URL as string format
 	val user_profileImgURL = if (fromArchive) "actor.image" else "message.actor.image"
-	//user followers count as long format
+	// user followers count as long format
 	val user_followers_count = if (fromArchive) "actor.followersCount" else "message.actor.followersCount"
 	// user name as string format
 	val user_name = if (fromArchive) "actor.displayName" else "message.actor.displayName"
 	// user handle as string format
-	val user_handle =  if (fromArchive) "actor.preferredUsername" else "message.actor.preferredUsername"
-	//user id as long format
+	val user_handle = if (fromArchive) "actor.preferredUsername" else "message.actor.preferredUsername"
+	// user id as long format
 	val user_id = if (fromArchive) "actor.id" else "message.actor.id"
-	//user language as string format
+	// user language as string format
 	val language = if (fromArchive) "actor.languages" else "message.actor.languages"
 	// defines the type of the tweet obj
 	val verb = if (fromArchive) "verb" else "message.verb"
