@@ -456,7 +456,7 @@ If you still don't have an Bluemix account, follow this steps to sing up for a t
 
 4. Check out the email you use to sign up, look for IBM Bluemix email and click on **Confirm your account**.
     
-   ![bluemix-create](https://www.evernote.com/shard/s709/sh/c90bf74c-a69f-43f6-ab18-af75e9b33594/1e577986fed16e0f/res/83c30331-8512-4dad-8ac0-82193b9c9e92/skitch.png?resizeSmall&width=832 =100x100)       ![bluemix-email](https://www.evernote.com/shard/s709/sh/17cc9c86-b7b0-42e2-8764-4a4bcbb86cbb/1552ee3a236a23d3/res/00feece8-464a-471f-b9ed-920f94663e9e/skitch.png?resizeSmall&width832 =300x100)
+     ![bluemix-email](https://www.evernote.com/shard/s709/sh/17cc9c86-b7b0-42e2-8764-4a4bcbb86cbb/1552ee3a236a23d3/res/00feece8-464a-471f-b9ed-920f94663e9e/skitch.png?resizeSmall&width832 =300x100)
    
 5. Log In to Bluemix with the credentials you just created.
 6. Click on **Catalog** at the top left of your screen
