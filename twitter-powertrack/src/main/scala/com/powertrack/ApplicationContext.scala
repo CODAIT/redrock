@@ -23,7 +23,7 @@ import org.apache.spark.sql.hive._
 import org.apache.spark.streaming._
 import org.apache.spark.streaming.StreamingContext._
 import org.apache.spark.streaming.dstream.DStream
-import org.elasticsearch.spark._ 
+import org.elasticsearch.spark._
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileInputStream
@@ -33,25 +33,24 @@ import org.apache.hadoop.fs._
 import java.net.URI
 
 
-object ApplicationContext
-{
-    val sparkConf = new SparkConf()
-    sparkConf.setAppName(LoadConf.globalConf.getString("appName") + " - Powertrack")
-    sparkConf.set("spark.scheduler.mode", "FAIR")
-    sparkConf.set("es.index.auto.create", "false")
+object ApplicationContext {
+  val sparkConf = new SparkConf()
+  sparkConf.setAppName(LoadConf.globalConf.getString("appName") + " - Powertrack")
+  sparkConf.set("spark.scheduler.mode", "FAIR")
+  sparkConf.set("es.index.auto.create", "false")
 
-    //Spark master resources
-    sparkConf.set("spark.executor.memory",s"""${LoadConf.sparkConf.getString("powertrack.executorMemory")}""")
-    sparkConf.set("spark.ui.port",s"""${LoadConf.sparkConf.getString("powertrack.sparkUIPort")}""")
-    sparkConf.set("spark.cores.max",s"""${LoadConf.sparkConf.getInt("powertrack.totalCores")}""")
+  // Spark master resources
+  sparkConf.set("spark.executor.memory", s"""${LoadConf.sparkConf.getString("powertrack.executorMemory")}""") // scalastyle:ignore
+  sparkConf.set("spark.ui.port", s"""${LoadConf.sparkConf.getString("powertrack.sparkUIPort")}""")
+  sparkConf.set("spark.cores.max", s"""${LoadConf.sparkConf.getInt("powertrack.totalCores")}""")
 
-    val sparkContext = new SparkContext(sparkConf)
-    val sqlContext = new HiveContext(sparkContext)
+  val sparkContext = new SparkContext(sparkConf)
+  val sqlContext = new HiveContext(sparkContext)
 
-    /* config sqlContext */
-    sqlContext.setConf("spark.sql.shuffle.partitions", s"""${LoadConf.sparkConf.getInt("partitionNumber")}""")
-    sqlContext.setConf("spark.sql.codegen", "true")
+  /* config sqlContext */
+  sqlContext.setConf("spark.sql.shuffle.partitions", s"""${LoadConf.sparkConf.getInt("partitionNumber")}""")  // scalastyle:ignore
+  sqlContext.setConf("spark.sql.codegen", "true")
 
-    /* delete HDFS processed files */
-    val hadoopFS :FileSystem = FileSystem.get(sparkContext.hadoopConfiguration)
+  /* delete HDFS processed files */
+  val hadoopFS: FileSystem = FileSystem.get(sparkContext.hadoopConfiguration)
 }

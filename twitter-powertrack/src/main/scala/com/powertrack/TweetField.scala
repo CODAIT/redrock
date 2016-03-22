@@ -17,29 +17,29 @@
 package com.powertrack
 
 /* Mapping tweet fields */
-object TweetField
-{
-	val jsonPrefix = "tweets"
-	// unique id of the tweet as string format
-	val tweet_id = "message.id"
-	// tweet text as string format
-	val tweet_text = "message.body"
-	// tweet created date as string format
-	val tweet_created_at = "message.postedTime"
-	// user description as string format
-		val user_description = "message.actor.summary"
-	//user profile image URL as string format
-	val user_profileImgURL = "message.actor.image"
-	//user followers count as long format
-	val user_followers_count = "message.actor.followersCount"
-	// user name as string format
-	val user_name = "message.actor.displayName"
-	// user handle as string format
-	val user_handle =  "message.actor.preferredUsername"
-	//user id as long format
-	val user_id = "message.actor.id"
-	//user language as string format
-	val language = "message.actor.languages" //array, get first ?
-	// defines the type of the tweet obj
-	val verb = "message.verb"
+object TweetField {
+  val jsonPrefix = "tweets"
+  // unique id of the tweet as string format
+  val tweet_id = "message.id"
+  // tweet text as string format
+  val tweet_text = "message.body"
+  // tweet created date as string format
+  val tweet_created_at = "message.postedTime"
+  // user description as string format
+  val user_description = "message.actor.summary"
+  // user profile image URL as string format
+  val user_profileImgURL = "message.actor.image"
+  // user followers count as long format
+  val user_followers_count = "message.actor.followersCount"
+  // user name as string format
+  val user_name = "message.actor.displayName"
+  // user handle as string format
+  val user_handle = "message.actor.preferredUsername"
+  // user id as long format
+  val user_id = "message.actor.id"
+  // user language as string format
+  val language = "message.actor.languages"
+  // array, get first ?
+  // defines the type of the tweet obj
+  val verb = "message.verb"
 }

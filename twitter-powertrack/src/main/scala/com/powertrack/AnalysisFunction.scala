@@ -21,15 +21,13 @@ import org.apache.spark.SparkContext._
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.{SQLContext, DataFrame}
 
-object AnalysisFunction
-{
-	def registerAnalysisFunctions() = 
-	{
-		ApplicationContext.sqlContext.udf.register("stringTokenizer", (text: String) => stringTokenizer(text))
-	}
+object AnalysisFunction {
+  def registerAnalysisFunctions(): Unit = {
+    ApplicationContext.sqlContext.udf.register("stringTokenizer", (text: String)
+    => stringTokenizer(text))
+  }
 
-	def stringTokenizer(text: String): Array[String] = 
-	{
-		return Twokenize.tokenize(text.toLowerCase().trim()).toArray
-	}
+  def stringTokenizer(text: String): Array[String] = {
+    return Twokenize.tokenize(text.toLowerCase().trim()).toArray
+  }
 }
