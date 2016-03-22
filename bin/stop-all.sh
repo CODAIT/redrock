@@ -29,7 +29,3 @@ $REDROCK_HOME/bin/stop-decahose.sh
 echo "========= Stopping REST API =========="
 
 $REDROCK_HOME/bin/stop-restapi.sh
-
-#echo "========= Stopping Websockets =========="
-
-#$REDROCK_HOME/bin/stop-websockets.sh

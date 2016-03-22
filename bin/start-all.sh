@@ -29,7 +29,3 @@ $REDROCK_HOME/bin/start-powertrack.sh
 echo "========= Starting REST API =========="
 
 $REDROCK_HOME/bin/start-restapi.sh
-
-#echo "========= Starting Websockets =========="
-
-#$REDROCK_HOME/bin/start-websockets.sh
