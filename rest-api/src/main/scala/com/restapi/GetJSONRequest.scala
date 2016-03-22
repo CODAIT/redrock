@@ -16,10 +16,9 @@
  */
 package com.restapi
 
-object GetJSONRequest
-{
-  def getLocationJSONRequest(includeTerms:String, excludeTerms:String, startDatetime: String, endDatetime: String): String =
-  {
+object GetJSONRequest {
+  def getLocationJSONRequest(includeTerms: String, excludeTerms: String,
+                             startDatetime: String, endDatetime: String): String = {
     s"""
     {
        "query": {
@@ -67,8 +66,8 @@ object GetJSONRequest
 
   /* Don't need to sort the field tweet_sentiment beucase the transformation is using a map
   since the result not always returns all fields */
-  def getSentimentJSONRequest(includeTerms:String, excludeTerms:String, startDatetime: String, endDatetime: String): String =
-  {
+  def getSentimentJSONRequest(includeTerms: String, excludeTerms: String,
+                              startDatetime: String, endDatetime: String): String = {
     s"""
     {
       "query": {
@@ -111,8 +110,8 @@ object GetJSONRequest
     """
   }
 
-  def getProfessionJSONRequest(includeTerms:String, excludeTerms:String, startDatetime: String, endDatetime: String): String =
-  {
+  def getProfessionJSONRequest(includeTerms: String, excludeTerms: String,
+                               startDatetime: String, endDatetime: String): String = {
     s"""
     {
       "query": {
@@ -161,8 +160,7 @@ object GetJSONRequest
     """
   }
 
-  def getTotalTweetsJSONRequest(startDatetime: String, endDatetime: String): String =
-  {
+  def getTotalTweetsJSONRequest(startDatetime: String, endDatetime: String): String = {
     s"""
     {
         "query" : {
@@ -181,8 +179,9 @@ object GetJSONRequest
     """
   }
 
-  def getTotalFilteredTweetsAndTotalUserJSONRequest(includeTerms:String, excludeTerms:String, startDatetime: String, endDatetime: String): String =
-  {
+  def getTotalFilteredTweetsAndTotalUserJSONRequest(includeTerms: String, excludeTerms: String,
+                                                    startDatetime: String,
+                                                    endDatetime: String): String = {
     s"""
     {
       "query": {
@@ -215,8 +214,8 @@ object GetJSONRequest
     """
   }
 
-  def getTopTweetsJSONRequest(includeTerms:String, excludeTerms:String, top: Int, startDatetime: String, endDatetime: String): String =
-  {
+  def getTopTweetsJSONRequest(includeTerms: String, excludeTerms: String, top: Int,
+                              startDatetime: String, endDatetime: String): String = {
     s"""
     {
       "query": {
@@ -251,8 +250,9 @@ object GetJSONRequest
     """
   }
 
-  def getTweetsTextBySentimentAndDate(includeTerms:String, excludeTerms:String, startDatetime: String, endDatetime: String, sentiment: Int) =
-  {
+  def getTweetsTextBySentimentAndDate(includeTerms: String, excludeTerms: String,
+                                      startDatetime: String, endDatetime: String,
+                                      sentiment: Int): String = {
     s"""{
         "query": {
             "filtered": {
@@ -277,10 +277,11 @@ object GetJSONRequest
                                     "language": "en"
                                 }
                             },
-                            {"terms": {"tweet_text_array_tokens" : [$includeTerms], "execution" : "and"}}
+                            {"terms": {"tweet_text_array_tokens" :
+                            [$includeTerms], "execution" : "and"}}
                         ],
-                        "must_not":
-       										{"terms": {"tweet_text_array_tokens" : [$excludeTerms], "execution" : "or"}}
+                        "must_not": {"terms": {"tweet_text_array_tokens" :
+                        [$excludeTerms], "execution" : "or"}}
                     }
                 }
             }
@@ -292,8 +293,9 @@ object GetJSONRequest
     }"""
   }
 
-  def getPowertrackWordCountAndTweets(includeTerms:String, excludeTerms:String, statDate:String, endDate:String, topTweets:Int, topWords:Int): String =
-  {
+  def getPowertrackWordCountAndTweets(includeTerms: String, excludeTerms: String,
+                                      statDate: String, endDate: String,
+                                      topTweets: Int, topWords: Int): String = {
     /* Created by: Nakul Jindal
     * Modified by: Barbara Gomes
     * include terms for powertrack will use OR condition because of SparkSummit and SparkSummitEU
@@ -313,9 +315,11 @@ object GetJSONRequest
                                     }
                                 }
                             },
-                            {"terms": {"tweet_text_array_tokens" : [$includeTerms], "execution" : "or"}}
+                            {"terms": {"tweet_text_array_tokens" :
+                            [$includeTerms], "execution" : "or"}}
                         ],
-                        "must_not": {"terms": { "tweet_text_array_tokens": [$excludeTerms],"execution": "or"}}
+                        "must_not": {"terms": { "tweet_text_array_tokens":
+                        [$excludeTerms],"execution": "or"}}
                     }
                 }
             }
@@ -338,9 +342,10 @@ object GetJSONRequest
     }"""
   }
 
-  /* used just for powertrack, if decahose will use it, the execution for includeterms must be "and" */
-  def getTotalRetweets(includeTerms:String, excludeTerms:String, startDatetime: String, endDatetime: String): String =
-  {
+  /* used just for powertrack, if decahose will use it,
+   * the execution for includeterms must be "and" */
+  def getTotalRetweets(includeTerms: String, excludeTerms: String,
+                       startDatetime: String, endDatetime: String): String = {
     s"""
     {
       "query": {
@@ -367,8 +372,9 @@ object GetJSONRequest
     """
   }
 
-  def getTotalFilteredTweets(includeTerms:String, excludeTerms:String, startDatetime: String, endDatetime: String, includeCondition: String): String =
-  {
+  def getTotalFilteredTweets(includeTerms: String, excludeTerms: String,
+                             startDatetime: String, endDatetime: String,
+                             includeCondition: String): String = {
     s"""
     {
       "query": {
@@ -382,7 +388,8 @@ object GetJSONRequest
                       "to" : "$endDatetime"
                     }
                 }},
-                {"terms": {"tweet_text_array_tokens" : [$includeTerms], "execution" : "$includeCondition"}}
+                {"terms": {"tweet_text_array_tokens" : [$includeTerms],
+                "execution" : "$includeCondition"}}
               ],
               "must_not":
                 { "terms" : {"tweet_text_array_tokens" : [$excludeTerms], "execution" : "or"}}

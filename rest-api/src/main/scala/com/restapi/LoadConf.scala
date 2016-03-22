@@ -19,12 +19,12 @@ package com.restapi
 import com.typesafe.config._
 
 object LoadConf {
-	// Loading application.conf
-	val globalConf:Config = ConfigFactory.load("redrock-app").getConfig("redrock")
-    //Loading rest config
-    val restConf:Config = globalConf.getConfig("rest-api")
-    // Loading elasticsearch config
-    val esConf:Config = globalConf.getConfig("elasticsearch")
-    // Loading access control config
-    val accessConf:Config = globalConf.getConfig("access-control")
+  // Loading application.conf
+  val globalConf: Config = ConfigFactory.load("redrock-app").getConfig("redrock")
+  // Loading rest config
+  val restConf: Config = globalConf.getConfig("rest-api")
+  // Loading elasticsearch config
+  val esConf: Config = globalConf.getConfig("elasticsearch")
+  // Loading access control config
+  val accessConf: Config = globalConf.getConfig("access-control")
 }

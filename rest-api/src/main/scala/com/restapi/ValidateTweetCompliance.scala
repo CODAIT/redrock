@@ -35,7 +35,7 @@ object ValidateTweetCompliance {
 
   val logger = LoggerFactory.getLogger(this.getClass)
 
-  def getNonCompliantTweets(jsonMessageRequest:String):List[String] =
+  def getNonCompliantTweets(jsonMessageRequest: String): List[String] =
   {
     val response = performBluemixCheck(jsonMessageRequest)
     try{
@@ -49,15 +49,15 @@ object ValidateTweetCompliance {
         return List[String]()
       }
     }
-    catch{
+    catch {
       case e: Exception => {
-        logger.error("Could not validate tweets list: Error on transforming response",e)
+        logger.error("Could not validate tweets list: Error on transforming response", e)
         return List[String]()
       }
     }
   }
 
-  def performBluemixCheck(jsonMessageRequest:String): String = {
+  def performBluemixCheck(jsonMessageRequest: String): String = {
     try
     {
       val startTime = System.nanoTime()
@@ -66,9 +66,9 @@ object ValidateTweetCompliance {
       HttpConnectionParams.setConnectionTimeout(params, 2000);
       HttpConnectionParams.setSoTimeout(params, 2000);
 
-      val request = new HttpPost(LoadConf.restConf.getString("bluemixProduction.requestURLforMessagesCheck"))
+      val request = new HttpPost(LoadConf.restConf.getString("bluemixProduction.requestURLforMessagesCheck")) // scalastyle:ignore
 
-      val JSONentity:StringEntity = new StringEntity(jsonMessageRequest, "UTF-8")
+      val JSONentity: StringEntity = new StringEntity(jsonMessageRequest, "UTF-8")
       JSONentity.setContentType("application/json")
       request.setEntity(JSONentity)
 
@@ -85,9 +85,9 @@ object ValidateTweetCompliance {
       logger.info(s"Response for bluemix check tweets (sec): $elapsed")
 
       return jsonResponse
-    }catch{
+    } catch {
       case e: Exception => {
-        logger.error("Could not validate tweets list",e)
+        logger.error("Could not validate tweets list", e)
         return "{}"
       }
     }

@@ -33,13 +33,12 @@ import scala.io.Source
 
 case object GetTotalTweetsScheduler
 
-object CurrentTotalTweets
-{
+object CurrentTotalTweets {
   @volatile
-  var totalTweets:Long = 0
+  var totalTweets: Long = 0
 }
 
-class ExecuterTotalTweetsES (delay: FiniteDuration, interval: FiniteDuration) extends Actor {
+class ExecuterTotalTweetsES(delay: FiniteDuration, interval: FiniteDuration) extends Actor {
   context.system.scheduler.schedule(delay, interval) {
     getTotalTweetsES
   }
@@ -53,11 +52,11 @@ class ExecuterTotalTweetsES (delay: FiniteDuration, interval: FiniteDuration) ex
     case _ => // just ignore any messages
   }
 
-  def getTotalTweetsES = {
+  def getTotalTweetsES: Unit = {
     val elasticsearchRequests = new GetElasticsearchResponse(0, Array[String](), Array[String](),
-                                LoadConf.restConf.getString("searchParam.defaulStartDatetime"),
-                                LoadConf.restConf.getString("searchParam.defaultEndDatetime"),
-                                LoadConf.esConf.getString("decahoseIndexName"))
+      LoadConf.restConf.getString("searchParam.defaulStartDatetime"),
+      LoadConf.restConf.getString("searchParam.defaultEndDatetime"),
+      LoadConf.esConf.getString("decahoseIndexName"))
     val totalTweetsResponse = Json.parse(elasticsearchRequests.getTotalTweetsESResponse())
     logger.info(s"Getting Total of Tweets. Current: ${CurrentTotalTweets.totalTweets}")
     CurrentTotalTweets.totalTweets = (totalTweetsResponse \ "hits" \ "total").as[Long]

@@ -23,7 +23,7 @@ import org.apache.commons.lang.time.DateUtils
 import org.slf4j.LoggerFactory
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Future,future, Await}
+import scala.concurrent.{Future, future, Await}
 import play.api.libs.json._
 
 
@@ -34,29 +34,45 @@ object ExecutePowertrackRequest {
 
   val logger = LoggerFactory.getLogger(this.getClass)
 
-  def runPowertrackAnalysis(batchTime: Int, topTweets: Int, topWords: Int, termsInclude: String, termsExclude: String, user: String): Future[String] =
-  {
+  def runPowertrackAnalysis(batchTime: Int, topTweets: Int, topWords: Int,
+                            termsInclude: String, termsExclude: String,
+                            user: String): Future[String] = {
     val (startDate, endDate) = getStartAndEndDateAccordingBatchTime(batchTime)
     logger.info(s"UTC start date: $startDate")
     logger.info(s"UTC end date: $endDate")
-    /* Temporary fix to search for #SparkSummitEU when searching for #SparkSummit*/
-    val tempIncludeTerms = if (termsInclude.toLowerCase().trim() == "#sparksummit") s"$termsInclude,#sparksummiteu" else termsInclude
+    /* Temporary fix to search for #SparkSummitEU when searching for #SparkSummit */
+    val tempIncludeTerms = if (termsInclude.toLowerCase().trim() == "#sparksummit") {
+      s"$termsInclude,#sparksummiteu"
+    }
+    else {
+      termsInclude
+    }
     logger.info(s"User: $user")
     logger.info(s"Included terms: $tempIncludeTerms")
     logger.info(s"Excluded terms: $termsExclude")
 
-    executeAsynchronous(batchTime,topTweets,topWords, tempIncludeTerms, termsExclude, startDate, endDate) map { js =>
+    executeAsynchronous(batchTime, topTweets, topWords, tempIncludeTerms,
+                        termsExclude, startDate, endDate) map { js =>
       Json.stringify(js)
     }
   }
 
-  def executeAsynchronous(batchTime: Int, topTweets: Int, topWords: Int, termsInclude: String, termsExclude: String, startDate: String, endDate:String): Future[JsValue] =
-  {
-    val elasticsearchResponse = new GetElasticsearchResponse(topTweets, termsInclude.toLowerCase().trim().split(","), termsExclude.toLowerCase().trim().split(","), startDate,  endDate, LoadConf.esConf.getString("powertrackIndexName"))
+  def executeAsynchronous(batchTime: Int, topTweets: Int, topWords: Int,
+                          termsInclude: String, termsExclude: String,
+                          startDate: String, endDate: String): Future[JsValue] = {
+    val elasticsearchResponse = new GetElasticsearchResponse(topTweets,
+      termsInclude.toLowerCase().trim().split(","), termsExclude.toLowerCase().trim().split(","),
+      startDate, endDate, LoadConf.esConf.getString("powertrackIndexName"))
 
-    val wordCountJson: Future[JsObject] = future { getTweetsAndWordCount(elasticsearchResponse, topWords) }
-    val totalUserAndTweetsJson: Future[JsObject] = future { getUsersAndTweets(elasticsearchResponse) }
-    val totalRetweetsJson: Future[JsObject] = future { getRetweetsCount(elasticsearchResponse) }
+    val wordCountJson: Future[JsObject] = future {
+      getTweetsAndWordCount(elasticsearchResponse, topWords)
+    }
+    val totalUserAndTweetsJson: Future[JsObject] = future {
+      getUsersAndTweets(elasticsearchResponse)
+    }
+    val totalRetweetsJson: Future[JsObject] = future {
+      getRetweetsCount(elasticsearchResponse)
+    }
 
     val tasks: Seq[Future[JsObject]] = Seq(wordCountJson, totalUserAndTweetsJson, totalRetweetsJson)
     val aggregated: Future[Seq[JsObject]] = Future.sequence(tasks)
@@ -66,12 +82,13 @@ object ExecutePowertrackRequest {
     result.recover {
       case e: Exception =>
         logger.error("Execute Powertrack Word Count", e)
-        Json.obj("toptweets" -> Json.obj("tweets" -> JsNull), "wordCount" -> JsNull,"totalfilteredtweets" -> JsNull, "totalusers" -> JsNull, "totalretweets" -> JsNull, "success" -> true)
+        Json.obj("toptweets" -> Json.obj("tweets" -> JsNull), "wordCount" -> JsNull,
+          "totalfilteredtweets" -> JsNull, "totalusers" -> JsNull,
+          "totalretweets" -> JsNull, "success" -> true)
     }
   }
 
-  def getRetweetsCount(elasticsearchResponse: GetElasticsearchResponse): JsObject =
-  {
+  def getRetweetsCount(elasticsearchResponse: GetElasticsearchResponse): JsObject = {
     try {
       val countResponse = Json.parse(elasticsearchResponse.getTotalRetweets())
       return Json.obj("totalretweets" -> (countResponse \ "hits" \ "total"))
@@ -83,40 +100,40 @@ object ExecutePowertrackRequest {
     }
   }
 
-  def getUsersAndTweets(elasticsearchResponse: GetElasticsearchResponse): JsObject =
-  {
+  def getUsersAndTweets(elasticsearchResponse: GetElasticsearchResponse): JsObject = {
     try {
 
       val countResponse = Json.parse(elasticsearchResponse.getTotalFilteredTweets("or"))
-      val totalFiltredTweets:Long =  (countResponse \ "hits" \ "total").as[Long]
-      val totalUsers = Math.round(totalFiltredTweets*0.6)
-      return  (Json.obj( "totalfilteredtweets" -> totalFiltredTweets)  ++
-        Json.obj( "totalusers" -> totalUsers))
+      val totalFiltredTweets: Long = (countResponse \ "hits" \ "total").as[Long]
+      val totalUsers = Math.round(totalFiltredTweets * 0.6)
+      return (Json.obj("totalfilteredtweets" -> totalFiltredTweets) ++
+        Json.obj("totalusers" -> totalUsers))
 
-      //Use this when we have the field user_id hash at index time
-      /*val countResponse = Json.parse(elasticsearchResponse.getTotalFilteredTweetsAndTotalUserResponse())
+      // Use this when we have the field user_id hash at index time
+      /* val countResponse =
+      Json.parse(elasticsearchResponse.getTotalFilteredTweetsAndTotalUserResponse())
       return (Json.obj("totalfilteredtweets" -> (countResponse \ "hits" \ "total")) ++
-        Json.obj("totalusers" -> (countResponse \ "aggregations" \ "distinct_users_by_id" \ "value")))*/
+      Json.obj("totalusers" ->
+      (countResponse \ "aggregations" \ "distinct_users_by_id" \ "value"))) */
     }
     catch {
       case e: Exception =>
-        logger.error("Powertrack user and tweets count",e)
+        logger.error("Powertrack user and tweets count", e)
         Json.obj("totalfilteredtweets" -> JsNull, "totalusers" -> JsNull)
     }
   }
 
-  def getTweetsAndWordCount(elasticsearchResponse: GetElasticsearchResponse, topWords: Int): JsObject =
-  {
-    try
-    {
+  def getTweetsAndWordCount(elasticsearchResponse: GetElasticsearchResponse,
+                            topWords: Int): JsObject = {
+    try {
       val response = Json.parse(elasticsearchResponse.getPowertrackTweetsAndWordCount(topWords))
       var tweets = ((response \ "hits" \ "hits").as[List[JsObject]])
 
       if (LoadConf.restConf.getBoolean("validateTweetsBeforeDisplaying")) {
         val tweetsID = Json.obj("messages" -> tweets.map(tweet => (tweet \ "_source" \ "tweet_id")))
-        val nonCompliantTweets = ValidateTweetCompliance.getNonCompliantTweets(Json.stringify(tweetsID))
+        val nonCompliantTweets = ValidateTweetCompliance.getNonCompliantTweets(Json.stringify(tweetsID)) // scalastyle:ignore
         if (!nonCompliantTweets.isEmpty) {
-          tweets = tweets.filter(tweet => !nonCompliantTweets.contains((tweet \ "_source" \ "tweet_id").as[String]))
+          tweets = tweets.filter(tweet => !nonCompliantTweets.contains((tweet \ "_source" \ "tweet_id").as[String])) // scalastyle:ignore
         }
       }
 
@@ -134,27 +151,27 @@ object ExecutePowertrackRequest {
       }
       )
 
-      val words =  ((response \ "aggregations" \ "top_words" \ "buckets").as[List[JsObject]]).map( wordCount =>{
+      val words = ((response \ "aggregations" \ "top_words" \ "buckets").as[List[JsObject]]).map(wordCount => { // scalastyle:ignore
         Json.arr((wordCount \ "key"), (wordCount \ "doc_count"))
       })
 
       Json.obj("toptweets" -> Json.obj("tweets" -> validatedTweets), "wordCount" -> words)
     }
     catch {
-        case e: Exception =>
-          logger.error("Powertrack word count", e)
-          Json.obj("toptweets" -> Json.obj("tweets" -> JsNull), "wordCount" -> JsNull)
-      }
+      case e: Exception =>
+        logger.error("Powertrack word count", e)
+        Json.obj("toptweets" -> Json.obj("tweets" -> JsNull), "wordCount" -> JsNull)
+    }
   }
 
   def getStartAndEndDateAccordingBatchTime(batchTime: Int): (String, String) = {
-    //end date should be the current date
+    // end date should be the current date
     val endDate = Calendar.getInstance().getTime()
     val startDate = DateUtils.addMinutes(endDate, -batchTime)
 
-    //Powertrack datetime timezine: UTC
+    // Powertrack datetime timezine: UTC
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
-    val sdf: SimpleDateFormat = new SimpleDateFormat(LoadConf.globalConf.getString("spark.powertrack.tweetTimestampFormat"))
+    val sdf: SimpleDateFormat = new SimpleDateFormat(LoadConf.globalConf.getString("spark.powertrack.tweetTimestampFormat")) // scalastyle:ignore
     (sdf.format(startDate), sdf.format(endDate))
   }
 }

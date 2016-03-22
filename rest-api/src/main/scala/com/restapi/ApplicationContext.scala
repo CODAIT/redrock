@@ -22,23 +22,23 @@ import org.apache.spark.SparkContext._
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.hive._
 
-object ApplicationContext
-{
+object ApplicationContext {
   private val sparkConf = new SparkConf()
-  //sparkConf.setMaster(masterNode)
+  // sparkConf.setMaster(masterNode)
   sparkConf.setAppName(LoadConf.globalConf.getString("appName") + " - REST API")
   sparkConf.set("spark.scheduler.mode", "FAIR")
 
-  //Spark master resources
-  sparkConf.set("spark.executor.memory",s"""${LoadConf.globalConf.getString("spark.restapi.executorMemory")}""")
-  sparkConf.set("spark.ui.port",s"""${LoadConf.globalConf.getString("spark.restapi.sparkUIPort")}""")
-  sparkConf.set("spark.cores.max",s"""${LoadConf.globalConf.getInt("spark.restapi.totalCores")}""")
+  // Spark master resources
+  sparkConf.set("spark.executor.memory", s"""${LoadConf.globalConf.getString("spark.restapi.executorMemory")}""") // scalastyle:ignore
+  sparkConf.set("spark.ui.port", s"""${LoadConf.globalConf.getString("spark.restapi.sparkUIPort")}""") // scalastyle:ignore
+  sparkConf.set("spark.cores.max", s"""${LoadConf.globalConf.getInt("spark.restapi.totalCores")}""")
+  // scalastyle:ignore
 
   val sparkContext = new SparkContext(sparkConf)
   val sqlContext = new HiveContext(sparkContext)
 
   /* config sqlContext */
-  sqlContext.setConf("spark.sql.shuffle.partitions", s"""${LoadConf.globalConf.getInt("spark.partitionNumber")}""")
+  sqlContext.setConf("spark.sql.shuffle.partitions", s"""${LoadConf.globalConf.getInt("spark.partitionNumber")}""") // scalastyle:ignore
   sqlContext.setConf("spark.sql.codegen", "true")
 
 }
