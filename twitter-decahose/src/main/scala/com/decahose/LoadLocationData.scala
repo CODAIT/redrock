@@ -32,7 +32,6 @@ object LoadLocationData {
     "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA",
     "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY")
 
-
   val countryCode = Map(("af", "Afghanistan"), ("ax", "Aland Islands"), ("al", "Albania"), ("dz", "Algeria"), ("as", "American Samoa"), ("ad", "Andorra"), ("ao", "Angola"), // scalastyle:ignore
     ("ai", "Anguilla"), ("aq", "Antarctica"), ("ag", "Antigua and Barbuda"), ("ar", "Argentina"), ("am", "Armenia"), ("aw", "Aruba"), ("au", "Australia"), // scalastyle:ignore
     ("at", "Austria"), ("az", "Azerbaijan"), ("bs", "Bahamas"), ("bh", "Bahrain"), ("bd", "Bangladesh"), ("bb", "Barbados"), ("by", "Belarus"), ("be", "Belgium"), // scalastyle:ignore
@@ -60,7 +59,7 @@ object LoadLocationData {
     ("wf", "Wallis and Futuna"), ("eh", "Western Sahara"), ("ye", "Yemen"), ("zm", "Zambia"), ("zw", "Zimbabwe")) // scalastyle:ignore
 
   val cities = loadCities()
-  val countries = loadCountryMapping()
+  val countries = loadCountries()
   val cities_keys = cities.keys.toArray.sortBy(key => -key.length)
 
   def loadCities(): Map[String, (String, Double)] = {
@@ -94,7 +93,7 @@ object LoadLocationData {
     return false
   }
 
-  def loadCountryMapping(): Map[String, String] = {
+  def loadCountries(): Map[String, String] = {
     val countryPath = ApplicationContext.Config.appConf.getString("homePath") +
       "/twitter-decahose/src/main/resources/Location/country_mapping.csv"
     val countryMap = fromFile(countryPath)("utf-8")

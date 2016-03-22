@@ -20,9 +20,9 @@ import org.slf4j.LoggerFactory
 
 object Application extends App {
   val logger = LoggerFactory.getLogger(this.getClass)
-  logger.info("Registering analysis function")
+  logger.info("Registering analytical functions")
   AnalysisFunction.registerAnalysisFunctions()
 
   /* Load historical data and start tweets streaming */
-  PrepareTweets.loadHistoricalDataAndStartStreaming()
+  TweetProcessor.loadHistoricalDataAndStartStreaming()
 }

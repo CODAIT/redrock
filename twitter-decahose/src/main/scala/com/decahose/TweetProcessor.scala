@@ -25,7 +25,7 @@ import org.apache.spark.streaming._
 import org.slf4j.LoggerFactory
 import play.api.libs.json._
 
-object PrepareTweets {
+object TweetProcessor {
   // Extract file names
   val regExp = "\\b(hdfs:|file:)\\S+".r
   val logger = LoggerFactory.getLogger(this.getClass)
