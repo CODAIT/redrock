@@ -448,31 +448,31 @@ If you still don't have an Bluemix account, follow this steps to sing up for a t
  
 2. Click on **Get Started Free**.
 
-   ![bluemix-01][bluemix-home-page]
+   ![bluemix-home-page](https://www.evernote.com/shard/s709/sh/f8a08eb9-a246-4340-95ae-31a49fe612af/ad4602c6a05068ec/res/db1d6c2b-6cc7-4cd3-851c-d9ada2edea70/skitch.png?resizeSmall&width=832 =600x150)
 
 3. Fill up the registration form and click on **Create Account**.
 	
-   ![bluemix-02][bluemix-form]
+   ![bluemix-form](https://www.evernote.com/shard/s709/sh/6683326c-b47d-4737-80e9-c689e22a7d67/deb1d4135dd83c95/res/8b37ed82-cbe9-4474-bfd9-f605a46c8e89/skitch.png?resizeSmall&width=832 =600x350)
 
 4. Check out the email you use to sign up, look for IBM Bluemix email and click on **Confirm your account**.
     
-   ![bluemix-03][bluemix-create] ![bluemix-04][bluemix-email]
+   ![bluemix-create](https://www.evernote.com/shard/s709/sh/c90bf74c-a69f-43f6-ab18-af75e9b33594/1e577986fed16e0f/res/83c30331-8512-4dad-8ac0-82193b9c9e92/skitch.png?resizeSmall&width=832 =200x150)       ![bluemix-email](https://www.evernote.com/shard/s709/sh/17cc9c86-b7b0-42e2-8764-4a4bcbb86cbb/1552ee3a236a23d3/res/00feece8-464a-471f-b9ed-920f94663e9e/skitch.png?resizeSmall&width832 =400x150)
    
 5. Log In to Bluemix with the credentials you just created.
 6. Click on **Catalog** at the top left of your screen
 7. Search for **Twitter** and click on **View More**
 
-   ![bluemix-05][bluemix-twitter]
+   ![bluemix-twitter](https://www.evernote.com/shard/s709/sh/0c47004d-d5d9-4641-a285-3b01801a9430/b6d79dae573d26b6/res/1c2d8e6c-61d8-491d-8f13-bd9340e0ff9c/skitch.png?resizeSmall&width=832 =600x300)
    
 8. On the right side of the page fill in the service name and the credential name. They must be populated but the contents do not matter for this tutorial. Click on **Create**.
    
    **Notes**: Make sure the _Free Plan_ is selected.  
    
-   ![bluemix-06][bluemix-tt-service]
+   ![bluemix-tt-service](https://www.evernote.com/shard/s709/sh/7bc9d809-e547-477e-a013-3167258d8173/0da1737fdbed779a/res/c22136c1-2ab3-4d04-9b2d-fb2b2c92a3d8/skitch.png?resizeSmall&width=832 =600x250)
    
 9. <a name="bluemix-credential"></a> You can find your credentials by clicking on the service at the **Dashboard** and then clicking on **Service Credentials**'
 
-   ![bluemix-06][bluemix-tt-credentials]
+   ![bluemix-tt-credentials](https://www.evernote.com/shard/s709/sh/13f88f83-bb6d-45fd-ae29-661cb35fef5a/ffa747f0ddbbf13f/res/797c7c68-bf62-4adc-a0fe-2e429540c677/skitch.png?resizeSmall&width=832 =600x250)
    
 ### <a name="bluemix-api"></a> Accesing Bluemix Twitter API
 
@@ -484,21 +484,4 @@ Browse _IBM Insights for Twitter API_ documentation and try the APIs before you 
 
    **Note**: Powertrack API is not available on _Free Plan_
   
-   ![bluemix-06][bluemix-tt-API]
-
-
-[bluemix-home-page]: https://www.evernote.com/shard/s709/sh/f8a08eb9-a246-4340-95ae-31a49fe612af/ad4602c6a05068ec/res/db1d6c2b-6cc7-4cd3-851c-d9ada2edea70/skitch.png?resizeSmall&width=832 =600x150
-
-[bluemix-form]: https://www.evernote.com/shard/s709/sh/6683326c-b47d-4737-80e9-c689e22a7d67/deb1d4135dd83c95/res/8b37ed82-cbe9-4474-bfd9-f605a46c8e89/skitch.png?resizeSmall&width=832 =600x350
-
-[bluemix-create]: https://www.evernote.com/shard/s709/sh/c90bf74c-a69f-43f6-ab18-af75e9b33594/1e577986fed16e0f/res/83c30331-8512-4dad-8ac0-82193b9c9e92/skitch.png?resizeSmall&width=832 =200x150
-
-[bluemix-email]: https://www.evernote.com/shard/s709/sh/17cc9c86-b7b0-42e2-8764-4a4bcbb86cbb/1552ee3a236a23d3/res/00feece8-464a-471f-b9ed-920f94663e9e/skitch.png?resizeSmall&width832 =400x150
-
-[bluemix-twitter]: https://www.evernote.com/shard/s709/sh/0c47004d-d5d9-4641-a285-3b01801a9430/b6d79dae573d26b6/res/1c2d8e6c-61d8-491d-8f13-bd9340e0ff9c/skitch.png?resizeSmall&width=832 =600x300
-
-[bluemix-tt-service]: https://www.evernote.com/shard/s709/sh/7bc9d809-e547-477e-a013-3167258d8173/0da1737fdbed779a/res/c22136c1-2ab3-4d04-9b2d-fb2b2c92a3d8/skitch.png?resizeSmall&width=832 =600x250
-
-[bluemix-tt-credentials]: https://www.evernote.com/shard/s709/sh/13f88f83-bb6d-45fd-ae29-661cb35fef5a/ffa747f0ddbbf13f/res/797c7c68-bf62-4adc-a0fe-2e429540c677/skitch.png?resizeSmall&width=832 =600x250
-
-[bluemix-tt-API]: https://www.evernote.com/shard/s709/sh/e818c8e5-ffc3-4d4e-a6b4-a69307683396/2780cb0f7a6f542c/res/46ab0653-c3d5-49e3-857a-876b9dc99bae/skitch.png?resizeSmall&width=832 =600x300
+   ![bluemix-tt-API](https://www.evernote.com/shard/s709/sh/e818c8e5-ffc3-4d4e-a6b4-a69307683396/2780cb0f7a6f542c/res/46ab0653-c3d5-49e3-857a-876b9dc99bae/skitch.png?resizeSmall&width=832 =600x300)
