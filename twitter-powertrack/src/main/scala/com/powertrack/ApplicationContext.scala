@@ -34,20 +34,20 @@ object ApplicationContext {
   }
 
   val sparkConf = new SparkConf()
-  sparkConf.setAppName(LoadConf.globalConf.getString("appName") + " - Powertrack")
+  sparkConf.setAppName(Config.appConf.getString("appName") + " - Powertrack")
   sparkConf.set("spark.scheduler.mode", "FAIR")
   sparkConf.set("es.index.auto.create", "false")
 
   // Spark master resources
-  sparkConf.set("spark.executor.memory", s"""${LoadConf.sparkConf.getString("powertrack.executorMemory")}""") // scalastyle:ignore
-  sparkConf.set("spark.ui.port", s"""${LoadConf.sparkConf.getString("powertrack.sparkUIPort")}""")
-  sparkConf.set("spark.cores.max", s"""${LoadConf.sparkConf.getInt("powertrack.totalCores")}""")
+  sparkConf.set("spark.executor.memory", s"""${Config.sparkConf.getString("powertrack.executorMemory")}""") // scalastyle:ignore
+  sparkConf.set("spark.ui.port", s"""${Config.sparkConf.getString("powertrack.sparkUIPort")}""")
+  sparkConf.set("spark.cores.max", s"""${Config.sparkConf.getInt("powertrack.totalCores")}""")
 
   val sparkContext = new SparkContext(sparkConf)
   val sqlContext = new HiveContext(sparkContext)
 
   /* config sqlContext */
-  sqlContext.setConf("spark.sql.shuffle.partitions", s"""${LoadConf.sparkConf.getInt("partitionNumber")}""") // scalastyle:ignore
+  sqlContext.setConf("spark.sql.shuffle.partitions", s"""${Config.sparkConf.getInt("partitionNumber")}""") // scalastyle:ignore
   sqlContext.setConf("spark.sql.codegen", "true")
 
   /* delete HDFS processed files */
