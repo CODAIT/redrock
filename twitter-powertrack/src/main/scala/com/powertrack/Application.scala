@@ -24,5 +24,5 @@ object Application extends App {
   logger.info("Registering analysis function")
   AnalysisFunction.registerAnalysisFunctions()
 
-  PrepareTweets.startTweetsStreaming()
+  TweetProcessor.startTweetsStreaming()
 }
