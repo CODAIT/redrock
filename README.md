@@ -122,62 +122,47 @@ Make sure the URLs inside the scripts are point to the right instance of Elastic
 
 ### Downloading Twitter Data
 
-To download the Twitter data you have to have access to Bluemix. In order to get access to Bluemix, follow the instruction in the section **Getting Access to Bluemix**
+To download the Twitter data you have to have access to Bluemix. In order to get access to Bluemix, follow the instruction in the section **[Getting Access to Bluemix](#bluemix)**
 
-These scripts are intented to run on Linux, although they can be run on OSX with some minor changes (OSX uses bash 3 by default, but these scripts require bash 4):
-   
-   * ``` brew install bash ```
-   * ``` brew install wget ```
-   * ``` brew install coreutils ```
-   * replace _/bin/bash_ with the path of the brew installed bash eg. _/usr/local/bin/bash_
-   * replace _/bin/date_ with the output of _which gdate_ eg. _/usr/local/bin/gdate_
+You can play around with the **[IBM Insights for Twitter API](#bluemix-api)** and download a sample of tweets to use as input on RedRock. However, RedRock offers a script that downloads a sample of tweets for you, you just have to pass in your Bluemix **[credentials](#credential)**. Check **[Sample Tweets](#getsample)** to see how you can use RedRock script to download sample data.
 
+#### <a name="getsample"></a> Samples Tweets
+
+To download sample tweets direct from **[IBM Insights for Twitter API](#bluemix-api)** use the script **REDROCK_HOME/dev/retrieve-decahose-sample-bluemix**.
+
+Pass in three arguments when executing the script:
+
+1. **User**: User defined by your Bluemix Twitter Service **[credentials](#credential)**
+2. **Password**: Password defined by your Bluemix Twitter Service **[credentials](#credential)**
+3. **Destination Folder**: Local destination folder to store the sample tweets
+
+**The script usage**: ./retrieve-decahose-sample-bluemix user password dest-folder
 
 #### Powertrack
 
-We apoligize but Powertrack data is currently only available with a developers Bluemix account
+We apoligize but Powertrack data is currently only available for free with a developers Bluemix account.
 
-### Decahose Historical
+#### Decahose Historical
 
-The Decahose historical data is downloaded through the shell script file **REDROCK_HOME/dev/retrieve-decahose-data.sh**. 
+Make sure your downloaded historical data is inside the hadoop Decahose historical folder (_/data/twitter/decahose/historical_).
 
-Open the file and comment out the following lines:
-    
-    read -p 'wget Username: ' user
-    read -sp 'wget Password: ' password
-    
-Insert the new lines:
+If you ran the RedRock script to download **[sample tweets](#getsample)**, make sure you moved the downloaded historical files to the hadoop folder:
 
-    user="XXXXXXXX" #Bluemix Prod user credential
-    password="XXXXXXXX" #Bluemix Prod password credential
-    
-In some machines you don't need to sudo access hadoop before executing a hadoop command. In that case, search for **su - hadoop -c** in the script and delete it, executing only the following command between quotes (be sure to remove the quotes).
-
-To execute the script use: **./retrieve-decahose-data.sh 2015-05-01 00 00 2015-07-31 23 50 ~/opt/tmp-data-decahose/ hdfs://localhost:9000/data/twitter/decahose/historical/**. It will generate a log file in the same directory with a name based on the start date, like: 2015-05-01_1447882385.txt
-
-The script usage: ./retrieve-decahose-data.sh start-date start-hh start-mm end-date end-hh end-mm dest-folder/ hadoop-folder/
-The minutes should be multiple of 10.
+```
+hadoop fs -put DEST_FOLDER/historical*.json.gz /data/twitter/decahose/historical
+``` 
         
-### Decahose Streaming
+#### Decahose Streaming
 
-The Decahose streaming data is downloaded through the shell script file **REDROCK_HOME/dev/pollDecahoseData.sh**. Every 10 minutes the scripts downloads a new file from Bluemix archieve.
+See **[Simulating Streaming](#simStreaming)** to learn how you can simulate streaming data.
 
-Open the file and comment out the following lines:
-    
-    read -p 'wget Username: ' user
-    read -sp 'wget Password: ' password
-    
-Insert the new lines:
+#### <a name="simStreaming"></a> Simulating Streaming
 
-    user="XXXXXXXX" #Bluemix Prod user credential
-    password="XXXXXXXX" #Bluemix Prod password credential
+RedRock Streaming uses _Spark Streaming_ application, which monitors an HDFS directory for new files.
 
-In some machines you don't need to sudo access hadoop before executing a hadoop command. In that case, search for **su - hadoop -c** in the script and delete it, executing only the following command between quotes (be sure to remove the quotes).
+You can simulate a streaming processing by pasting a file on the streaming directory being monitored while the streaming application is running. The file should be processed on the next streaming bach.
 
-To execute the script use: **./pollDecahoseData.sh 2016-01-13 14 00 ~/opt/tmp-data-decahose/ hdfs://localhost:9000/data/twitter/decahose/streaming/**. It will generate a log file in the same directory with a name based on the start date, like: 2016-01-13_1452725819.txt
-
-The script usage: ./pollDecahoseData.sh start-date start-hh start-mm dest-folder/ hadoop-folder/
-The minutes should be multiple of 10.
+If you ran the RedRock script to download **[sample tweets](#getsample)**, you will find some files for you to play around. Files name start with _streaming_2016_
 
 ### Running RedRock
 
@@ -241,7 +226,6 @@ Parameters:
 4. **startDatetime**: start date to be used to filter the tweets
 5. **endDatetime**: end date to be used to filter the tweets
 6. **sentiment**: Sentiment of the tweets: 1 for positive and -1 for negative
-
 
 ### <a name="rrconfig"></a> Explaining RedRock Configuration File
 
@@ -452,3 +436,69 @@ All the configurations should be located inside the root redrock key. Following 
 		<td> false </td>
 	</tr>
 </table>
+
+## <a name="bluemix"></a> Getting Access to Bluemix
+
+How to create a free trial account on IBM Bluemix and download sample tweets.
+
+### Sign Up for IBM Bluemix
+If you still don't have an Bluemix account, follow this steps to sing up for a trial one. 
+
+1. Access IBM Bluemix website on <https://console.ng.bluemix.net>
+ 
+2. Click on **Get Started Free**.
+
+   ![bluemix-01][bluemix-home-page]
+
+3. Fill up the registration form and click on **Create Account**.
+	
+   ![bluemix-02][bluemix-form]
+
+4. Check out the email you use to sign up, look for IBM Bluemix email and click on **Confirm your account**.
+    
+   ![bluemix-03][bluemix-create] ![bluemix-04][bluemix-email]
+   
+5. Log In to Bluemix with the credentials you just created.
+6. Click on **Catalog** at the top left of your screen
+7. Search for **Twitter** and click on **View More**
+
+   ![bluemix-05][bluemix-twitter]
+   
+8. On the right side of the page fill in the service name and the credential name. They must be populated but the contents do not matter for this tutorial. Click on **Create**.
+   
+   **Notes**: Make sure the _Free Plan_ is selected.  
+   
+   ![bluemix-06][bluemix-tt-service]
+   
+9. <a name="bluemix-credential"></a> You can find your credentials by clicking on the service at the **Dashboard** and then clicking on **Service Credentials**'
+
+   ![bluemix-06][bluemix-tt-credentials]
+   
+### <a name="bluemix-api"></a> Accesing Bluemix Twitter API
+
+Browse _IBM Insights for Twitter API_ documentation and try the APIs before you use them. 
+
+1. You can learn about the IBM Bluemix Twitter Service at: <https://console.ng.bluemix.net/docs/services/Twitter/index.html#twitter>
+
+2. Try the APIs at: <https://cdeservice.mybluemix.net/rest-api>
+
+   **Note**: Powertrack API is not available on _Free Plan_
+  
+   ![bluemix-06][bluemix-tt-API]
+
+
+[bluemix-home-page]: https://www.evernote.com/shard/s709/sh/f8a08eb9-a246-4340-95ae-31a49fe612af/ad4602c6a05068ec/res/db1d6c2b-6cc7-4cd3-851c-d9ada2edea70/skitch.png?resizeSmall&width=832 =600x150
+
+[bluemix-form]: https://www.evernote.com/shard/s709/sh/6683326c-b47d-4737-80e9-c689e22a7d67/deb1d4135dd83c95/res/8b37ed82-cbe9-4474-bfd9-f605a46c8e89/skitch.png?resizeSmall&width=832 =600x350
+
+[bluemix-create]: https://www.evernote.com/shard/s709/sh/c90bf74c-a69f-43f6-ab18-af75e9b33594/1e577986fed16e0f/res/83c30331-8512-4dad-8ac0-82193b9c9e92/skitch.png?resizeSmall&width=832 =200x150
+
+[bluemix-email]: https://www.evernote.com/shard/s709/sh/17cc9c86-b7b0-42e2-8764-4a4bcbb86cbb/1552ee3a236a23d3/res/00feece8-464a-471f-b9ed-920f94663e9e/skitch.png?resizeSmall&width832 =400x150
+
+[bluemix-twitter]: https://www.evernote.com/shard/s709/sh/0c47004d-d5d9-4641-a285-3b01801a9430/b6d79dae573d26b6/res/1c2d8e6c-61d8-491d-8f13-bd9340e0ff9c/skitch.png?resizeSmall&width=832 =600x300
+
+[bluemix-tt-service]: https://www.evernote.com/shard/s709/sh/7bc9d809-e547-477e-a013-3167258d8173/0da1737fdbed779a/res/c22136c1-2ab3-4d04-9b2d-fb2b2c92a3d8/skitch.png?resizeSmall&width=832 =600x250
+
+[bluemix-tt-credentials]: https://www.evernote.com/shard/s709/sh/13f88f83-bb6d-45fd-ae29-661cb35fef5a/ffa747f0ddbbf13f/res/797c7c68-bf62-4adc-a0fe-2e429540c677/skitch.png?resizeSmall&width=832 =600x250
+
+[bluemix-tt-API]: https://www.evernote.com/shard/s709/sh/e818c8e5-ffc3-4d4e-a6b4-a69307683396/2780cb0f7a6f542c/res/46ab0653-c3d5-49e3-857a-876b9dc99bae/skitch.png?resizeSmall&width=832 =600x300
