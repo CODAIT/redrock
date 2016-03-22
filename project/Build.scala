@@ -16,6 +16,7 @@
  */
 import sbt._
 import sbt.Keys._
+import org.scalastyle.sbt.ScalastylePlugin._
 
 object BuildSettings {
 
@@ -129,10 +130,10 @@ object Dependencies {
 
   val restAPIDependecies = Seq(playJson, sprayCan, sprayRouting, akkaActor, 
                                specs2Core, elasticSearch, httpClient, slf4j, log4jbind, configLib,
-                               sparkMlLib, sparkCore, sparkSQL, sparkHive/*, blast,breeze, breezeNative, breezeviz*/)
+                               sparkMlLib, sparkCore, sparkSQL, sparkHive)
 }
 
-object RedRockBuild extends Build {
+object RedRockBuild extends Build{
   import Resolvers._
   import Dependencies._
   import BuildSettings._
@@ -142,7 +143,8 @@ object RedRockBuild extends Build {
     base = file("."),
     aggregate = Seq(restapi, decahose, powertrack),
     settings = rootbuildSettings ++ Seq(
-      aggregate in update := false
+      aggregate in update := false,
+      scalastyleConfig in Compile :=  file(".") / "project" / "scalastyle-config.xml"
     )
   )
 
@@ -158,7 +160,8 @@ object RedRockBuild extends Build {
       unmanagedResourceDirectories in Compile += file(".") / "conf",
       mainClass := Some("com.restapi.Application"),
       fork := true,
-      connectInput in run := true
+      connectInput in run := true,
+      scalastyleConfig in Compile :=  file(".") / "project" / "scalastyle-config.xml"
     ))
 
   lazy val decahose = Project(
@@ -173,7 +176,8 @@ object RedRockBuild extends Build {
       unmanagedResourceDirectories in Compile += file(".") / "conf",
       mainClass := Some("com.decahose.Application"),
       fork := true,
-      connectInput in run := true
+      connectInput in run := true,
+      scalastyleConfig in Compile :=  file(".") / "project" / "scalastyle-config.xml"
     ))
 
   lazy val powertrack = Project(
@@ -188,6 +192,7 @@ object RedRockBuild extends Build {
       unmanagedResourceDirectories in Compile += file(".") / "conf",
       mainClass := Some("com.powertrack.Application"),
       fork := true,
-      connectInput in run := true
+      connectInput in run := true,
+      scalastyleConfig in Compile :=  file(".") / "project" / "scalastyle-config.xml"
     ))
 }
