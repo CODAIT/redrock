@@ -19,6 +19,7 @@ package com.decahose
 import java.text.SimpleDateFormat
 import java.util.TimeZone
 
+// TODO: Add Javadoc --> explain the class and each available udf function
 object AnalysisFunction {
   // Location Data
   val states: Array[String] = Array("AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
@@ -69,6 +70,7 @@ object AnalysisFunction {
     return true
   }
 
+  // TODO: Add Javadoc
   def extractSentimentFromText(text: String): Int = {
     val textToken = text.toLowerCase().split(" ")
 
@@ -89,6 +91,7 @@ object AnalysisFunction {
     }
   }
 
+  // TODO: Add Javadoc
   def extractProfession(description: String): Array[(String, String)] = {
     // (Profession, keyword)
     if (description != null && description.trim() != "") {
@@ -102,10 +105,12 @@ object AnalysisFunction {
     return Array[(String, String)]()
   }
 
+  // TODO: Add Javadoc
   def stringTokenizerArray(text: String): Array[String] = {
     return Twokenize.tokenize(text.toLowerCase().trim()).toArray
   }
 
+  // TODO: Add Javadoc
   def extractLocation(text: String): String = {
     val tokens = text.toLowerCase().trim()
 
@@ -130,6 +135,7 @@ object AnalysisFunction {
     }
   }
 
+  // TODO: Add Javadoc
   def getTimeStamp(text: String): String = {
     if (text != null && text.trim() != "") {
       return text.substring(4, 13)
@@ -137,6 +143,7 @@ object AnalysisFunction {
     return null
   }
 
+  // TODO: Add Javadoc
   def convertCreatedAtFormat(created_at: String, format: String): String = {
     // Date Format 2014-01-16T01:49:50.000Z
     val sdf: SimpleDateFormat =
