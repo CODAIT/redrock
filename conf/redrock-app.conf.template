@@ -61,7 +61,7 @@ redrock {
 			tweetTimestampFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
 			totalCores = 2
 			sparkUIPort = "4040"
-			executorMemory = "1g"
+			executorMemory = "2g"
 			fileExtension = ".json.gz"
 			fileExtensionAuxiliar = ".gson.gz"
 			deleteProcessedFiles = false
@@ -73,7 +73,7 @@ redrock {
 			streamingBatchTime = 60
 			totalCores = 1
 			sparkUIPort = "4041"
-			executorMemory = "1g"
+			executorMemory = "2g"
 			fileExtension = ".txt"
 			deleteProcessedFiles= true
 		}

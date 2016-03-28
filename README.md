@@ -7,6 +7,14 @@ How to configure local environment and **RedRock** code to run in standalone mod
 
 In this guide it is assumed you are using a mac, but it can easily translate to any linux distribution
 
+## Algorithms
+
+Some of the extraction algorithms in RedRock are not using machine learning. For example, sentiment, location, and profession extraction are done in a very simplistic way due to time constraints. 
+
+Machine learning algorithms are used to generate word clusters and closely related words. First, models are created using a time rage of Twitter data. Then, RedRock uses these models to do the final analysis. The algorithms used to generate the models can be found here: <https://github.com/castanan/w2v>.
+
+## Running RedRock
+
 ### Download RedRock code
 
 Clone the RedRock Backend code at: <https://github.com/SparkTC/redrock>
@@ -190,10 +198,13 @@ For example, we defined SPARK_DRIVER_MEMORY = 4g, so you could give decahose 1g,
 ### Making requests
 
 To send a request to the REST API just open a browser and use one of the URLs specified below.
+Please, make sure you have the right [access control](#rraccess) configurations.
 
 #### Live Portion (Powertrack)
 
-Sample URL: <http://localhost:16666/ss/powertrack/wordcount?termsInclude=#SparkInsight&batchSize=60&topTweets=100&user=bmgomes@us.ibm.com&termsExclude=&topWords=10>
+**Note:** We apoligize but Powertrack data is currently only available for free with a developers Bluemix account.
+
+Sample URL: <http://localhost:16666/ss/powertrack/wordcount?termsInclude=#SparkInsight&batchSize=60&topTweets=100&user=testuser&termsExclude=&topWords=10>
 
 Parameters:
 
@@ -203,9 +214,46 @@ Parameters:
 4. **user**: user email
 5. **topWords**: How many words to be displayed at the word count visualization
 
+
+#### Response
+
+The powertrack request retrieves analysis on tweets tweeted in the past X minutes as specified on the request. The response is in JSON format.
+
+```
+{
+  "toptweets": {
+    "tweets": [
+      {
+        "created_at": "2016-03-29T23:19:45.000Z",
+        "text": "@ProSearchOne CIOs seek cybersecurity solutions, and precision decisions #ibminsight",
+        "user": {
+          "name": "CIO",
+          "screen_name": "cio_ebooks",
+          "followers_count": 4244,
+          "id": "id:twitter.com:4210798444",
+          "profile_image_url": "https://pbs.twimg.com/profile_images/666668712888430593/lkO-1548_normal.png"
+        }
+      },
+      // Top N Tweets that matched your search sorted by date (most recents)
+    ]
+  },
+  "wordCount": [
+    [
+      "#ibminsight",
+      1
+    ],
+    ... // Top most frequent words in the tweets that mached your search
+  ],
+  "totalfilteredtweets": 1, // Total number of tweets that mached your search
+  "totalusers": 1, // Total number of unique users within tweets that mached your search 
+  "totalretweets": 0 // Total number of retweets that mached your search
+}
+```
+
+
 #### Decahose
 
-Sample URL: <http://localhost:16666/ss/search?termsInclude=love&user=bmgomes@us.ibm.com&termsExclude=&top=100>
+Sample URL: <http://localhost:16666/ss/search?termsInclude=love&user=testuser&termsExclude=&top=100>
 
 Parameters:
 
@@ -214,9 +262,111 @@ Parameters:
 3. **user**: user email
 4. **top**: How many tweets to be retrieved
 
+##### Response
+
+From the decahose request you can get 8 different analysis over the data in the data range you specifyed. The response is in JSON format. 
+
+```
+{
+  "success": true,
+  "status": 0,
+  "toptweets": {
+    "tweets": [
+		{
+          "created_at": "2016-03-12T02:44:57.000Z",
+          "text": "I love my merch",
+          "user": {
+            "name": "Justin Bieber",
+            "screen_name": "justinbieber",
+            "followers_count": 76926141,
+            "id": "id:twitter.com:27260086",
+            "profile_image_url": "https://pbs.twimg.com/profile_images/652596362073272320/Zv6K-clv_normal.jpg"
+          }
+        },
+    	... // Top N Tweets that matched your search sorted by most influent user (followers count)
+    ]
+  },
+  "totaltweets": 9899748737, // Total number of tweets in the database that matched your date range
+  "totalfilteredtweets": 125483793, // Total number of tweets that mached your search
+  "totalusers": 112935414, // Total number of unique users within tweets that mached your search within the date range
+  "sentiment": {
+    "fields": [
+      "Date",
+      "Positive",
+      "Negative",
+      "Neutral"
+    ],
+    "sentiment": [
+      [
+        "2015-06-30T00:00:00.000Z",
+        9,
+        0,
+        1
+      ],
+      ... // Sentiment count grouped by timestamp of the tweets that matched your search
+    ]
+  },
+  "profession": {
+    "profession": [
+      {
+        "name": "Media",
+        "children": [
+          {
+            "name": "writer",
+            "value": 921074
+          },
+          {
+            "name": "author",
+            "value": 530185
+          },
+          {
+            "name": "blogger",
+            "value": 442360
+          }
+        ]
+      },
+      ... // Number of users grouped according to professions. The tag name represents the profession group, 
+      // and the tag children represents the count for each keyword used to map to the respective profession
+  },
+  "location": {
+    "fields": [
+      "Date",
+      "Country",
+      "Count"
+    ],
+    "location": [
+      [
+        "2015-07-01T00:00:00.000Z",
+        "United States",
+        73575
+      ],
+      ... // Number of tweets tweeted from a specific location grouped by timestamp
+    ]
+  },
+  "cluster": [
+    [
+      "love!!", // word
+      0.58366052610142194, // word distance from your search term
+      89, // cluster number
+      "92" // count
+    ],
+    ... // Top 20 most related words to your search
+  ],
+  "distance": [
+    [
+      "love!!", // word
+      0.58366052610142194, // word distance from your search term
+      "92" // count
+    ],
+    ... // Top 20 most related words to your search
+  ]
+}
+```
+
+
 #### Sentiment Analysis
 
-Sample URL: <http://localhost:16666/ss/sentiment/analysis?endDatetime=2015-08-14T00:00:00.000Z&user=bmgomes@us.ibm.com&termsInclude=love&termsExclude=&startDatetime=2015-08-13T00:00:00.000Z&top=100&sentiment=1>
+Sample URL: <http://localhost:16666/ss/sentiment/analysis?endDatetime=2015-08-14T00:00:00.000Z&user=testuser&termsInclude=love&termsExclude=&startDatetime=2015-08-13T00:00:00.000Z&top=100&sentiment=1>
 
 Parameters:
 
@@ -227,215 +377,127 @@ Parameters:
 5. **endDatetime**: end date to be used to filter the tweets
 6. **sentiment**: Sentiment of the tweets: 1 for positive and -1 for negative
 
+##### Response
+
+The sentiment analysis request, run an online machine learning algorithm on Spark in order to find out the top most common words in that specific day for that specific tweet sentiment. The response is in JSON format.
+
+```
+{
+  "success": true,
+  "topics": [
+    [
+      "rt", // word
+      0, // cluster number
+      0.034659953722610465 // frequency
+    ],
+    [
+      "love,",
+      0,
+      0.024001207447202123
+    ]
+  ]
+}
+```
+
+
+### <a name="rraccess"></a> User Access Control
+
+RedRock implements an _Access Control_ functionality. To enable this feature change the configuration on the _redrock-app.conf_ file as explained on [access-control](#accessControl) item.
+
+To allow an user ID to access the application, please add the user ID to the file located at **REDROCK_HOME/rest-api/src/main/resources/access-list.txt**. Each line represents one user ID
+
 ### <a name="rrconfig"></a> Explaining RedRock Configuration File
 
 The RedRock configuration file is located at **REDROCK_HOME/conf/redrock-app.conf.template**.
 All the configurations should be located inside the root redrock key. Following an explanation of each key-value pair.
 
-<table width=100% >
-	<tr width=100%>
-		<td width=20% colspan=4 align=center> <b> redrock </b> </td>
-	</tr>
-	<tr width=100%>
-		<td width=20% colspan=4> <b> Module </b> </td>
-	</tr>
-	<tr style="background-color:#f5f5f5" width=100%>
-		<td width=15% rowspan=25> <b> rest-api </b> </td>
-		<td width=20% > <b> Key </b> </td>
-		<td width=40% > <b> Meanning </b> </td>
-		<td width=20% > <b> Default </b> </td>
-	</tr>
-	<tr>
-		<td > name </td>
-		<td > Application name </td>
-		<td > redrock-restapi </td>
-	</tr>
-	<tr>
-		<td> actor </td>
-		<td> REST API Actor System name </td>
-		<td> redrock-actor </td>
-	</tr>
-	<tr>
-		<td> port </td>
-		<td> REST API bind port </td>
-		<td> 16666 </td>
-	</tr>
-	<tr>
-		<td > validateTweetsBeforeDisplaying </td>
-		<td> Defines if the tweets that are going to be displayed need to be validate on Bluemix </td>
-		<td> true </td>
-	</tr>
-	<tr>
-		<td > groupByESField </td>
-		<td > Which field of ES is going to be used for Sentiment and Location aggregation query. It can be grouped by day: <b>created_at_timestamp_day</b> or by hour: <b>created_at_timestamp</b> </td>
-		<td > created_at_timestamp_day </td>
-	</tr>
-	<tr style="background-color:#f5f5f5" >
-		<th > bluemixProduction </th>
-		<td colspan=2> Credentials to connect to Bluemix Production Server </td>
-	</tr>
-	<tr>
-		<td> user </td>
-		<td> Bluemix user </td>
-		<td>  </td>
-	</tr>
-	<tr>
-		<td> password </td>
-		<td> Bluemix password </td>
-		<td> 16666 </td>
-	</tr>
-	<tr>
-		<td> requestURLforMessagesCheck </td>
-		<td> Bluemix request URL to validate tweets </td>
-		<td> </td>
-	</tr>
-	<tr style="background-color:#f5f5f5" >
-		<th > python-code </th>
-		<td colspan=2> Used to execute Cluster and Distance algorithm </td>
-	</tr>
-	<tr>
-		<td> classPath </td>
-		<td> Class path to the main python file </td>
-		<td> ${redrock.homePath}"/rest-api/python/main.py" </td>
-	</tr>
-	<tr>
-		<td> pythonVersion </td>
-		<td> Python version </td>
-		<td> python2.7 </td>
-	</tr>
-	<tr style="background-color:#f5f5f5" >
-		<th > searchParam </th>
-		<td colspan=2> Parameters to be used when performing searches</td>
-	</tr>
-	<tr>
-		<td> defaultTopTweets </td>
-		<td> Default number of tweets to be returned in the search if not specifyed in the request </td>
-		<td> 100 </td>
-	</tr>
-	<tr>
-		<td> tweetsLanguage </td>
-		<td> Language of the tweets that is going to be returned in the search </td>
-		<td> en </td>
-	</tr>
-	<tr>
-		<td> topWordsToVec </td>
-		<td> Number of words to be returned by the Cluster and Distance algorithm </td>
-		<td> 20 </td>
-	</tr>
-	<tr>
-		<td> defaulStartDatetime </td>
-		<td> Start date to be used in the search range if not specifyed in the request </td>
-		<td> 1900-01-01T00:00:00.000Z </td>
-	</tr>
-	<tr>
-		<td> defaultEndDatetime </td>
-		<td> End date to be used in the search range if not specifyed in the request </td>
-		<td> 2050-12-31T23:59:59.999Z </td>
-	</tr>
-	<tr style="background-color:#f5f5f5" >
-		<th > sentimentAnalysis </th>
-		<td colspan=2> Configure the online ML algorithm for the sentiment drill down </td>
-	</tr>
-	<tr>
-		<td> numTopics </td>
-		<td> Number of topics to be displayed </td>
-		<td> 3 </td>
-	</tr>
-	<tr>
-		<td> termsPerTopic </td>
-		<td> Number of terms per topic </td>
-		<td> 5 </td>
-	</tr>
-	<tr style="background-color:#f5f5f5" >
-		<th > totalTweetsScheduler </th>
-		<td colspan=2> Configure the scheduled task that count the amount of tweets in ES decahose index </td>
-	</tr>
-	<tr>
-		<td> delay </td>
-		<td> Defines how many seconds after the application have started will the task begin to be executed </td>
-		<td> 10 </td>
-	</tr>
-	<tr>
-		<td> reapeatEvery </td>
-		<td> Time interval in seconds that the task will be executed </td>
-		<td> 1800 </td>
-	</tr>
-	<tr style="background-color:#f5f5f5" width=100%>
-		<td width=15% rowspan=25> <b> spark </b> </td>
-		<td width=20% > <b> Key </b> </td>
-		<td width=40% > <b> Meanning </b> </td>
-		<td width=20% > <b> Default </b> </td>
-	</tr>
-	<tr >
-		<td> partitionNumber </td>
-		<td> Number of Spark partitions </td>
-		<td> 5 </td>
-	</tr>
-	<tr style="background-color:#f5f5f5" >
-		<th > decahose </th>
-		<td colspan=2> Configure Spark for the Decahose application </td>
-	</tr>
-	<tr>
-		<td> loadHistoricalData </td>
-		<td> Process historical data before starting streaming </td>
-		<td> true </td>
-	</tr>
-	<tr>
-		<td> twitterHistoricalDataPath </td>
-		<td> Data path for the historical data </td>
-		<td>  </td>
-	</tr>
-	<tr>
-		<td> twitterStreamingDataPath </td>
-		<td> Data path for the streaming data </td>
-		<td>  </td>
-	</tr>
-	<tr>
-		<td> streamingBatchTime </td>
-		<td> Time interval in seconds to process streaming data </td>
-		<td> 720 </td>
-	</tr>
-	<tr>
-		<td> timestampFormat </td>
-		<td> Timestamp format for ES field. (Hourly) </td>
-		<td> yyyy-MM-dd HH </td>
-	</tr>
-	<tr>
-		<td> timestampFormatDay </td>
-		<td> Timestamp format for ES field. (Daily) </td>
-		<td> yyyy-MM-dd </td>
-	</tr>
-	<tr>
-		<td> tweetTimestampFormat </td>
-		<td> Timestamp format on the twitter raw data </td>
-		<td> yyyy-MM-dd'T'HH:mm:ss.SSS'Z' </td>
-	</tr>
-	<tr>
-		<td> sparkUIPort </td>
-		<td> Port to bind the Decahose UI Spark application </td>
-		<td> 4040 </td>
-	</tr>
-	<tr>
-		<td> executorMemory </td>
-		<td> Amount of executor memory to be used by the Decahose Spark Application </td>
-		<td>  </td>
-	</tr>
-	<tr>
-		<td> fileExtension </td>
-		<td> File extension to be processed by spark </td>
-		<td> .json.gz </td>
-	</tr>
-	<tr>
-		<td> fileExtensionAuxiliar </td>
-		<td> File extension to be processed by spark </td>
-		<td> .gson.gz </td>
-	</tr>
-	<tr>
-		<td> deleteProcessedFiles </td>
-		<td> Delete file after it has been processed by spark </td>
-		<td> false </td>
-	</tr>
-</table>
+1. **rest-api**  
+
+   | **Key**                       | **Meaning**           | **Default**  |
+   | ----------------------------- |-----------------------| -------------|
+   | name                          | Application name | redrock-restapi |
+   | actor                         | REST API Actor System name     |   redrock-actor |
+   | port                          | REST API bind port      |    16666 |
+   |validateTweetsBeforeDisplaying | Defines if the tweets that are going to be displayed need to be validate on Bluemix   |  true
+   | groupByESField                | Which field of ES is going to be used for Sentiment and Location aggregation query. It can be grouped by day: **created_at_timestamp_day** or by hour: **created_at_timestamp** | created_at_timestamp_day
+   | **bluemixProduction** | Credentials to connect to Bluemix Production Server |
+   | user	| Bluemix user  |  #####
+   | password |	Bluemix password  |	#####
+   | requestURLforMessagesCheck	Bluemix | request URL to validate tweets | "https://"${redrock.rest-api.bluemixProduction.user}":"${redrock.rest-api.bluemixProduction.password}"@cdeservice.mybluemix.net:443/api/v1/messages/check"
+   | **python-code** |	Used to execute Cluster and Distance algorithm
+   | classPath	| Class path to the main python file |	${redrock.homePath}"/rest-api/python/main.py"
+   | pythonVersion	| Python version	| python2.7
+   | **searchParam** |	Parameters to be used when performing searches
+   | defaultTopTweets	| Default number of tweets to be returned in the search if not specifyed in the request | 100
+   | tweetsLanguage |	Language of the tweets that is going to be returned in the search | en
+   | topWordsToVec	 | Number of words to be returned by the Cluster and Distance algorithm | 20
+   | defaulStartDatetime | Start date to be used in the search range if not specifyed in the request	| 1900-01-01T00:00:00.000Z
+   | defaultEndDatetime |	End date to be used in the search range if not specifyed in the request |	2050-12-31T23:59:59.999Z 
+   | **sentimentAnalysis** |	Configure the online ML algorithm for the sentiment drill down
+   | numTopics |	Number of topics to be displayed | 3
+   | termsPerTopic |	Number of terms per topic | 5
+   | **totalTweetsScheduler** | 	Configure the scheduled task that count the amount of tweets in ES decahose index
+   | delay |	Defines how many seconds after the application have started will the task begin to be executed	| 10
+   | reapeatEvery	| Time interval in seconds that the task will be executed | 1800
+   
+2. **spark**
+   
+   | **Key**                       | **Meaning**           | **Default**  |
+   | ----------------------------- |-----------------------| -------------|
+   | partitionNumber |	Number of Spark partitions | 5
+   | **decahose**	|  Configure Spark for the Decahose application
+   | loadHistoricalData | 	Process historical data before starting streaming | true
+   | twitterHistoricalData | Path	Data path for the historical data
+   | twitterStreamingDataPath | 	Data path for the streaming data
+   | streamingBatchTime	Time | Interval in seconds to process streaming data | 720
+   | timestampFormat |	Timestamp format for ES field. (Hourly) | yyyy-MM-dd HH
+   | timestampFormatDay	 | Timestamp format for ES field. (Daily) | yyyy-MM-dd
+   | tweetTimestampFormat | 	Timestamp format on the twitter raw data | yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+   | sparkUIPort | 	Port to bind the Decahose UI Spark application | 4040
+   | executorMemory | 	Amount of executor memory to be used by the Decahose Spark Application | 2g
+   | totalCores | Max cores to be used by Spark in the application | 2
+   | fileExtension |	File extension to be processed by spark | .json.gz
+   | fileExtensionAuxiliar |	File extension to be processed by spark | .gson.gz
+   | deleteProcessedFiles | 	Delete file after it has been processed by Spark | false
+   | **powertrack** | Configure Spark for the Powertrack application
+   | twitterStreamingDataPath | Data path for the streaming data | 
+   | tweetTimestampFormat | Timestamp format on the twitter raw data | "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+   | streamingBatchTime | Interval in seconds to process streaming data |  60
+   | totalCores | Max cores to be used by Spark in the application | 1
+   | sparkUIPort | Port to bind the Powertrack UI Spark application | 4041
+   | executorMemory | mount of executor memory to be used by the Powertrack Spark Application | "2g"
+   | fileExtension |  File extension to be processed by spark  | .txt
+   | deleteProcessedFiles |  Delete file after it has been processed by Spark  | true
+   | **restapi** | Configure Spark for the REST API application
+   | totalCores | Max cores to be used by Spark in the application | 2
+   | sparkUIPort  | Port to bind the REST API UI Spark application | 4042
+   | executorMemory | Amount of executor memory to be used by the REST API Spark Application | 2g
+
+3. **elasticsearch**
+
+   | **Key**                       | **Meaning**           | **Default**  |
+   | ----------------------------- |-----------------------| -------------|
+   | bindIP | Elasticsearch bind to IP | 127.0.0.1
+   | bindPort | Elasticsearch bind tp port | 9200 |
+   | bindAPIPort | Elasticsearch API bind to port | 9300
+   | decahoseIndexName | Index name for Decahose on ES | redrock_decahose
+   | powertrackIndexName | Index name for Powertrack on ES | redrock_powertrack
+   | esType | ES type where Decahose and Powertrack indexes are | processed_tweets
+
+4. **access-control** <a name="accessControl"></a>
+   
+   | **Key**                       | **Meaning**           | **Default**  |
+   | ----------------------------- |-----------------------| -------------|
+   | access-list | Path to file that contains authorized users |  ${redrock.homePath}"/rest-api/src/main/resources/access_list.txt"
+   | max-allowed-users | Maximum number of users that can be connected at the same time | 40
+   | session-timeout | User session timeout in seconds |  120
+   | delay | Delay before starting the access control scheduler in seconds | 10
+   | timeout-interval | Time interval to check for connected users in seconds | 60
+   | check-interval | Time interval to check for changes on the access-list file | 600
+   | enable | Enable or not user validation when using the REST-API. Possible values **ON** and **OFF** | OFF 
+   | complementaryDeniedMessage | Complementary message to be display in case the user trying to access the app is not authorized | Please, check if your user is authorized in the access_list.txt file |
+    
+		
 
 ## <a name="bluemix"></a> Getting Access to Bluemix
 
