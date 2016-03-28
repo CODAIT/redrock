@@ -52,6 +52,5 @@ object Application extends App {
   implicit val timeout = Timeout(800.seconds)
   IO(Http) ? Http.Bind(service, interface = "0.0.0.0", port = LoadConf.restConf.getInt("port"))
 
-  logger.info( s"""Application: ${LoadConf.globalConf.getString("appName")}
-       running version: ${LoadConf.globalConf.getString("appVersion")}""".stripMargin)
+  logger.info( s"""Application: ${LoadConf.globalConf.getString("appName")} running version: ${LoadConf.globalConf.getString("appVersion")}""".stripMargin)
 }

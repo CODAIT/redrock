@@ -104,32 +104,6 @@ object ExecuteSearchRequest {
     }
   }
 
-  /* Use this function if you dont want to send the queries assyncronous */
-  /* def executeElasticsearchQueries(elasticsearchRequests: GetElasticsearchResponse): JsValue =
-  {
-    try {
-
-      val totalTweets = formatTotalTweets(elasticsearchRequests)
-      val totalUsersAndFilteresTweets =
-        formatTotalFilteredTweetsAndTotalUsers(elasticsearchRequests)
-      val sentiment = formatSentiment(elasticsearchRequests)
-      val professions = formatProfession(elasticsearchRequests)
-      val location = formatLocation(elasticsearchRequests)
-      val topTweets = formatTopTweets(elasticsearchRequests)
-
-      val initialJson: JsObject = Json.obj("status" -> 0)
-      return (initialJson ++ totalTweets ++ totalUsersAndFilteresTweets ++
-      professions ++ location ++ sentiment ++ topTweets)
-    }
-    catch {
-      case e: Exception =>
-      {
-        Utils.printException(e, "Execute elasticsearch Asynchronous")
-        return emptyJSONResponseES()
-      }
-    }
-  } */
-
   def formatTotalTweets(elasticsearchRequests: GetElasticsearchResponse): JsObject = {
     try {
       val totalTweetsResponse = CurrentTotalTweets.totalTweets
@@ -143,19 +117,15 @@ object ExecuteSearchRequest {
 
   def formatTotalFilteredTweetsAndTotalUsers(elasticsearchRequests: GetElasticsearchResponse): JsObject = { // scalastyle:ignore
     try {
-
-      val countResponse = Json.parse(elasticsearchRequests.getTotalFilteredTweets("and"))
-      val totalFiltredTweets: Long = (countResponse \ "hits" \ "total").as[Long]
-      val totalUsers = Math.round(totalFiltredTweets * 0.9)
-      return (Json.obj("totalfilteredtweets" -> totalFiltredTweets) ++
-        Json.obj("totalusers" -> totalUsers))
-
-      // Use this when we have the field user_id hash at index time
-      /* val countResponse =
-      Json.parse(elasticsearchRequests.getTotalFilteredTweetsAndTotalUserResponse())
+      /* The Elasticsearch query used to calculate unique values executes a Cardinality Aggregation.
+       * This query requires the pre-compute of the field hash on indexing time.
+       * This is a really expensive query and you can experience slow performance on a big dataset.
+       * If you are using a big dataset, please make sure that your ES cluster reflects the size of the data.
+       */
+      val countResponse = Json.parse(elasticsearchRequests.getTotalFilteredTweetsAndTotalUserResponse())
       return ( Json.obj( "totalfilteredtweets" -> (countResponse \ "hits" \ "total")) ++
       Json.obj( "totalusers" ->
-      (countResponse \ "aggregations" \ "distinct_users_by_id" \ "value"))) */
+      (countResponse \ "aggregations" \ "distinct_users_by_id" \ "value")))
     } catch {
       case e: Exception => logger.error("Get Total Filtered Tweets And Total Users", e)
     }

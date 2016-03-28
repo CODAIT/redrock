@@ -102,19 +102,16 @@ object ExecutePowertrackRequest {
 
   def getUsersAndTweets(elasticsearchResponse: GetElasticsearchResponse): JsObject = {
     try {
-
-      val countResponse = Json.parse(elasticsearchResponse.getTotalFilteredTweets("or"))
-      val totalFiltredTweets: Long = (countResponse \ "hits" \ "total").as[Long]
-      val totalUsers = Math.round(totalFiltredTweets * 0.6)
-      return (Json.obj("totalfilteredtweets" -> totalFiltredTweets) ++
-        Json.obj("totalusers" -> totalUsers))
-
-      // Use this when we have the field user_id hash at index time
-      /* val countResponse =
+      /* The Elasticsearch query used to calculate unique values executes a Cardinality Aggregation.
+       * This query requires the pre-compute of the field hash on indexing time.
+       * This is a really expensive query and you can experience slow performance on a big dataset.
+       * If you are using a big dataset, please make sure that your ES cluster reflects the size of the data.
+       */
+      val countResponse =
       Json.parse(elasticsearchResponse.getTotalFilteredTweetsAndTotalUserResponse())
       return (Json.obj("totalfilteredtweets" -> (countResponse \ "hits" \ "total")) ++
       Json.obj("totalusers" ->
-      (countResponse \ "aggregations" \ "distinct_users_by_id" \ "value"))) */
+      (countResponse \ "aggregations" \ "distinct_users_by_id" \ "value")))
     }
     catch {
       case e: Exception =>

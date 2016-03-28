@@ -206,7 +206,8 @@ object GetJSONRequest {
       "aggs": {
         "distinct_users_by_id": {
           "cardinality": {
-            "field": "user_id.hash"
+            "field": "user_id.hash",
+            "rehash": false
           }
         }
       }
