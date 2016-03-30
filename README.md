@@ -1,6 +1,8 @@
 
 # RedRock Server
 
+RedRock is an application developed to facilitate big data analysis. It allows users to discover insights from Twitter about any term(s) they are interested in. RedRock can search through terabytes of data in seconds and transforms that data into an easy-to-digest JSON output that can be used to generate a set of visualizations. This functionality is accessible via a REST-API for easy access and consumption. RedRock is powered by Apache Spark and Elasticsearch.
+
 ## Overview
 
 How to configure local environment and **RedRock** code to run in standalone mode
