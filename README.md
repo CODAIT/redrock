@@ -48,13 +48,13 @@ Download Elasticsearch 1.7.3 (<https://www.elastic.co/downloads/past-releases/el
 
 Install Marvel in order to easily use Elasticsearch. Be sure to install version 1.3 as it is compatible with ES 1.7.3  (<https://www.elastic.co/downloads/marvel>)
 
-#### Spark
+#### Apache Spark
 
-Download **pre-built Spark 1.6.0 for Hadoop 2.6 and later** and decompress it (<http://spark.apache.org/downloads.html>).
+Download **pre-built Apache Spark 1.6.0 for Hadoop 2.6 and later** and decompress it (<http://spark.apache.org/downloads.html>).
 
-###### Configuring Spark standalone mode
+###### Configuring Apache Spark in standalone mode
 
-1. Configure environment variable SPARK_HOME at your shell initialization file with the path to your Spark directory
+1. Configure environment variable SPARK_HOME at your shell initialization file with the path to directory where your Apache Spark is installed
 
     * For example: at your **/home/.profile** add the line **export SPARK_HOME=/Users/YOURUSERNAME/Spark/spark-1.6.0-bin-hadoop2.6**
 2. Save file _conf/slaves.template_ as _conf/slaves_
@@ -75,7 +75,7 @@ Download **pre-built Spark 1.6.0 for Hadoop 2.6 and later** and decompress it (<
 
 4. Save file _conf/log4j.properties.template_ as _conf/log4j.properties_ **log4j.rootCategory=WARN**. Save it as  
 
-Note: The above spark setup is considering a machine with at least:
+Note: The above Apache Spark setup is considering a machine with at least:
 
 1. 16gb of memory RAM
 2. 4 cores (8 logical cores)
@@ -96,9 +96,9 @@ pip install numpy
 
 Before running **RedRock** you must start all the following applications:
 
-1. **Hadoop**: Use command **hstart** (in case you followed the installation instruction at the Hadoop section)
+1. **Apache Hadoop**: Use command **hstart** (in case you followed the installation instruction at the Hadoop section)
 2. **Elasticsearch**: Inside elasticsearch home path use command **nohup ./bin/elasticsearch & tail -f nohup.out** (In case you download the .zip for Elaslicsearch)
-3. **Spark**: Inside Spark home path use command **./sbin/start-all.sh**
+3. **Apache Spark**: Inside Apache Spark home path use command **./sbin/start-all.sh**
 
 ### Configuring RedRock
 
@@ -168,7 +168,7 @@ See **[Simulating Streaming](#simStreaming)** to learn how you can simulate stre
 
 #### <a name="simStreaming"></a> Simulating Streaming
 
-RedRock Streaming uses _Spark Streaming_ application, which monitors an HDFS directory for new files.
+RedRock Streaming uses _Apache Spark Streaming_ application, which monitors an HDFS directory for new files.
 
 You can simulate a streaming processing by pasting a file on the streaming directory being monitored while the streaming application is running. The file should be processed on the next streaming bach.
 
@@ -191,7 +191,7 @@ The log file for each application file will be at:
 3. Restapi: **REDROCK_HOME/rest-api/nohup-restapi.out**
 
 For each application start script, please configure the parameter **--driver-memory 2g**.
-The sum of the values defined should be equal to the amount at the Spark configuration SPARK_DRIVER_MEMORY.
+The sum of the values defined should be equal to the amount at the Apache Spark configuration SPARK_DRIVER_MEMORY.
 
 For example, we defined SPARK_DRIVER_MEMORY = 4g, so you could give decahose 1g, powertrack 1g, and rest-api 2g.
 
