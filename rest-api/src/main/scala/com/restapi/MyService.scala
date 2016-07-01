@@ -30,6 +30,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 import scala.concurrent.duration._
 import spray.http.DateTime
+import org.slf4j.LoggerFactory
 
 // we don't implement our route structure directly in the service actor because
 // we want to be able to test it independently, without having to spin up an actor
@@ -52,6 +53,7 @@ class MyServiceActor extends Actor with MyService {
 
 // create route for HTTP request
 trait MyService extends HttpService {
+  val logger = LoggerFactory.getLogger(this.getClass)
 
   val home = pathPrefix("ss")
   val search = path("search") & parameters('termsInclude, 'termsExclude,
@@ -72,6 +74,7 @@ trait MyService extends HttpService {
     home {
       search { (includeTerms, excludeTerms, top, user, startDate, endDate) =>
         get {
+          logger.info(s"""REST Server request: search by: $user""")
           if (LoadConf.accessConf.getString("enable") == "on") {
             clientIP {
               ip => {
@@ -123,6 +126,7 @@ trait MyService extends HttpService {
           sentimentAnalysis { (termsInclude, termsExclude, sentiment,
                                user, startDatetime, endDatetime, top) =>
             get {
+              logger.info(s"""REST Server request: sentiment/sentimentAnalysis by: $user""")
               if (LoadConf.accessConf.getString("enable") == "on") {
                 clientIP {
                   ip => {
@@ -165,6 +169,7 @@ trait MyService extends HttpService {
         powertrack {
           wordcount { (user, batchSize, topTweets, topWords, termsInclude, termsExclude) =>
             get {
+              logger.info(s"""REST Server request: powertrack/wordcount by: $user""")
               if (LoadConf.accessConf.getString("enable") == "on") {
                 clientIP {
                   ip => {
@@ -206,6 +211,7 @@ trait MyService extends HttpService {
         auth {
           signin { (user) =>
             get {
+              logger.info(s"""REST Server request: auth/signin by: $user""")
               clientIP {
                 ip => {
                   ip.toOption.map(_.getHostAddress).getOrElse("unknown")
@@ -238,6 +244,7 @@ trait MyService extends HttpService {
           } ~
             signout { (user) =>
               get {
+                logger.info(s"""REST Server request: auth/signout by: $user""")
                 Application.sessionTable ! SignOutMsg(user.toLowerCase())
                 complete {
                   HttpResponse(StatusCodes.OK,
