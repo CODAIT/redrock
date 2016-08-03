@@ -17,6 +17,8 @@ Machine learning algorithms are used to generate word clusters and closely relat
 
 ## Running RedRock
 
+Once the backend is setup, the frontend and setup instructions can be found here: <https://github.com/SparkTC/redrock-ios>
+
 ### Download RedRock code
 
 Clone the RedRock Backend code at: <https://github.com/SparkTC/redrock>
