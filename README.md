@@ -87,7 +87,7 @@ Note: The above Apache Spark setup is considering a machine with at least:
 Install sbt plugin. More information at <http://www.scala-sbt.org/0.13/tutorial/Installing-sbt-on-Mac.html>
 
 #### Python
-1. Install _Python 2.7_ (<http://docs.python-guide.org/en/latest/starting/install/osx>). The latest version of Mac OS X, El Capitan, comes with Python 2.7 out of the box.
+1. Install _Python 2.7_ (<https://docs.python-guide.org/starting/install/osx/>). The latest version of Mac OS X, El Capitan, comes with Python 2.7 out of the box.
 2. Install _numpy_ extension package.
 ```
 sudo easy_install pip
@@ -99,7 +99,7 @@ pip install numpy
 Before running **RedRock** you must start all the following applications:
 
 1. **Apache Hadoop**: Use command **hstart** (in case you followed the installation instruction at the Hadoop section)
-2. **Elasticsearch**: Inside elasticsearch home path use command **nohup ./bin/elasticsearch & tail -f nohup.out** (In case you download the .zip for Elaslicsearch)
+2. **Elasticsearch**: Inside elasticsearch home path use command **nohup ./bin/elasticsearch & tail -f nohup.out** (In case you download the .zip for Elasticsearch)
 3. **Apache Spark**: Inside Apache Spark home path use command **./sbin/start-all.sh**
 
 ### Configuring RedRock
@@ -152,7 +152,7 @@ Pass in three arguments when executing the script:
 
 #### Powertrack
 
-We apoligize but Powertrack data is currently only available for free with a developers Bluemix account.
+We apologize but Powertrack data is currently only available for free with a developers Bluemix account.
 
 #### Decahose Historical
 
@@ -206,14 +206,14 @@ Please, make sure you have the right [access control](#rraccess) configurations.
 
 #### Live Portion (Powertrack)
 
-**Note:** We apoligize but Powertrack data is currently only available for free with a developers Bluemix account.
+**Note:** We apologize but Powertrack data is currently only available for free with a developers Bluemix account.
 
 Sample URL: <http://localhost:16666/ss/powertrack/wordcount?termsInclude=#SparkInsight&batchSize=60&topTweets=100&user=testuser&termsExclude=&topWords=10>
 
 Parameters:
 
 1. **termsInclude**: terms to be included in the search
-2. **bachSize**: How many minutes ago you would like to retrieve information. For exemple, 60 means that we are getting tweets between now and one hour ago.
+2. **bachSize**: How many minutes ago you would like to retrieve information. For example, 60 means that we are getting tweets between now and one hour ago.
 3. **topTweets**: How many tweets to be retrieved
 4. **user**: user email
 5. **topWords**: How many words to be displayed at the word count visualization
